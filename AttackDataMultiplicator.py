@@ -1,18 +1,63 @@
-#from silk import *
+from silk import *
 import ipaddress
-
+import copy
 class AttackDataMultiplicator:       
     """
     Start the class with the silk file you to change with filePath
     The listtWithModifcationsClass incule a list of objet's of the InputToAttackDataMultiplicator
     each object in the list will create a new modified file
     """
-    def __init__(self, listtWithModifcationsClass, filePath):
-        self.filePath = filePath
-        self.numberOfDiffrentChanges =len(listtWithModifcationsClass)
     
+    
+    def __init__(self, listtWithModifcationsClass, filePath, attack):
+        self.filePath = filePath
+        #self.attack= attack
+        #self.numberOfOutputFiles=len(listtWithModifcationsClass)
+        #self.listtWithModifcationsClass = listtWithModifcationsClass
+        self.dicOfFileToModifcationsClass ={}
+        for x in range(0, len(listtWithModifcationsClass)):
+            self.dicOfFileToModifcationsClass["ModifiedAttackFiles/"+attack+str(x)]= [silkfile_open("ModifiedAttackFiles/"+attack+str(x), WRITE),listtWithModifcationsClass[x]]
+            #self.dicOfFileToModifcationsClass["ModifiedAttackFiles/"+attack+str(x)]= ["test open ModifiedAttackFiles/"+attack+str(x),listtWithModifcationsClass[x]]
+        self.modifyfile()
+    """
+    """
+    def modifyfile(self):
+        infile_r = silkfile_open(self.filePath, READ)
+        for rec in infile_r:   
+            #print (rec)
+            #for setFileModclass in self.dicOfFileToModifcationsClass.values():
+                #temprec=copy.deepcopy(rec)
+            #    temprec=rec #TODO Do I need a deep copy as I am chaning the 
+            #    temprec =self.modifySIPRecord(temprec,setFileModclass)
+            #    setFileModclass[0].write(temprec)
+            for nameofset in self.dicOfFileToModifcationsClass.keys():
+                #temprec=copy.deepcopy(rec)
+                temprec=rec #TODO Do I need a deep copy as I am chaning the 
+                temprec =self.modifySIPRecord(temprec,nameofset)
+                self.dicOfFileToModifcationsClass[nameofset][0].write(temprec)
+        self.closeAllFiles()
+        infile_r.close()
+        pass    
+    
+    def closeAllFiles(self):
+        for set in self.dicOfFileToModifcationsClass.values():
+            set[0].close()
 
+    def modifySIPRecord(self,rec,nameofset):
+        if self.dicOfFileToModifcationsClass[nameofset][1].botnetRotationAlgorithm =="standard":
+           rec=self.modifySIPRecordstander(rec,nameofset)
+        return rec
 
+    def modifySIPRecordstander(self,rec,nameofset):
+        index= self.dicOfFileToModifcationsClass[nameofset][1].indexOfBotnetsize
+        ip = self.dicOfFileToModifcationsClass[nameofset][1].src[index]
+        Botnetsize =self.dicOfFileToModifcationsClass[nameofset][1].botNetSize
+        rec.sip = IPAddr(ip)
+        index +=1
+        if Botnetsize <= index:
+            index =0
+        self.dicOfFileToModifcationsClass[nameofset][1].indexOfBotnetsize = index
+        return rec
 
 
 class InputToAttackDataMultiplicator:
@@ -30,6 +75,15 @@ class InputToAttackDataMultiplicator:
     def __init__(self, parmeters):
         self.addBotNetSize(parmeters)
         self.addSrc(parmeters)
+        self.addBotnetRotationAlgorithm(parmeters)
+        
+    def addBotnetRotationAlgorithm(self,parmeters):
+        try:
+            self.botnetRotationAlgorithm = parmeters["botnet_rotation_algorithm"]
+        except KeyError:
+            print("no botnet_rotation_algorithm, so set to standard")
+            self.botnetRotationAlgorithm= "standard"
+            
 
     def addBotNetSize(self,parmeters):
         try:
@@ -54,6 +108,7 @@ class InputToAttackDataMultiplicator:
         except KeyError:
             print("no src, so src is set to 192.168.56.11 -> (to botsize)")
             self.src = self.addCorrectNumberOfSrc(["192.168.56.11"])
+        self.indexOfBotnetsize=0
 
     def addCorrectNumberOfSrc(self,srcs):
         if len(srcs) > self.botNetSize:
@@ -112,14 +167,18 @@ listOfSrc=["192.168.56.11","192.168.56.12","192.168.56.13", "192.168.56.13"]
 listOfSrc=checkUniqeIP(listOfSrc)
 
 
-ia1 = InputToAttackDataMultiplicator({"botsize":8,"src":listOfSrc})
+#ia1 = InputToAttackDataMultiplicator({"botsize":8,"src":listOfSrc})
 #ia2 = InputToAttackDataMultiplicator({"botsize":1,"src":"192.168.56.11"})
-ia2 = InputToAttackDataMultiplicator({"botsize":2,"src":listOfSrc})
-a1=AttackDataMultiplicator([ia1,ia2],"pathtofile")
+#ia2 = InputToAttackDataMultiplicator({"botsize":2,"src":listOfSrc})
+#a1=AttackDataMultiplicator([ia1,ia2],"pathtofile","TCP_SYN_Flodd")
 
-print(ia1.src)
-print(ia1.botNetSize)
+#print(ia1.src)
+#print(ia1.botNetSize)
 
-print(ia2.src)
-print(ia2.botNetSize)
+#print(ia2.src)
+#print(ia2.botNetSize)
 
+
+ia1 = InputToAttackDataMultiplicator({"botsize":4,"src":["192.168.2.2"]})
+#ia2 = InputToAttackDataMultiplicator({"botsize":1,"src":["192.168.3.3"]})
+a1=AttackDataMultiplicator([ia1],"GenratedAttacks/ext2ext-S0_20240125.11","TCP_SYN_Flodd")
