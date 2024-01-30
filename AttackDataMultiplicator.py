@@ -1,6 +1,6 @@
 from silk import *
 import ipaddress
-import copy
+
 class AttackDataMultiplicator:       
     """
     Start the class with the silk file you to change with filePath
