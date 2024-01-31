@@ -1,5 +1,6 @@
-from silk import *
+#from silk import *
 import ipaddress
+import datetime
 
 class AttackDataMultiplicator:       
     """
@@ -7,9 +8,8 @@ class AttackDataMultiplicator:
     The listtWithModifcationsClass incule a list of objet's of the InputToAttackDataMultiplicator
     each object in the list will create a new modified file
     """
-    #TODO add dst
-    #TODO add NIP (next hop)
-    #TODO add time start time end off all the flows
+
+    #TODO add time start time end off all the flows: datetime.timedelta (datetime.resolution)
     def __init__(self, listtWithModifcationsClass, filePath, attack):
         self.filePath = filePath
         #self.attack= attack
@@ -69,7 +69,6 @@ class AttackDataMultiplicator:
         self.dicOfFileToModifcationsClass[nameofset][1].indexOfBotnetsize = index
         return rec
 
-
 class InputToAttackDataMultiplicator:
     """
     This is a class that create a object with the parmeters to use when modfiing attack data in Silk format
@@ -88,30 +87,49 @@ class InputToAttackDataMultiplicator:
         self.addBotnetRotationAlgorithm(parmeters)
         self.addListOfIPs(parmeters,"dst")
         self.addListOfIPs(parmeters,"nIP")
+        self.addStartAndEndOfAttack(parmeters,"stratTimeOfAttack")
+        self.addStartAndEndOfAttack(parmeters,"endTimeOfAttack")
         
+    def addStartAndEndOfAttack(self,parmeters,startOrEnd):
+        try:
+            vaule= parmeters[startOrEnd]
+        except KeyError:
+            vaule = datetime.datetime.min
+            self.printDefault(["to earliest of the datetime object"],startOrEnd)
+        self.setstartorend(vaule,startOrEnd)
 
+    def setstartorend(self,time,startOrEnd):
+        if startOrEnd == "stratTimeOfAttack":
+            self.stratTimeOfAttack=time
+        elif startOrEnd == "endTimeOfAttack":
+            if time>self.stratTimeOfAttack:
+                self.endTimeOfAttack=time
+            else:
+                self.printDefault(["1 min after stratTimeOfAttack"],"endTimeOfAttack")
+                self.endTimeOfAttack=self.stratTimeOfAttack +datetime.timedelta(minutes=1)#datetime.timedelta(microseconds=100000)
+    
     def setips(self,listOfips,typOfIP):
         if typOfIP == "src":
             if len(listOfips)>0:
                 self.addCorrectNumberOfSrc(listOfips)
             else:
-                self.printDefault(["192.168.55.11 -> botnetsize"],typOfIP)
+                self.printDefault(["192.168.55.11 -> botnetsize"],typOfIP +" IP")
                 self.addCorrectNumberOfSrc(["192.168.56.11"])
         elif typOfIP == "nIP":
             if len(listOfips)>0:
                 self.nIP = listOfips
             else:
-                self.printDefault(["192.168.55.11"],typOfIP)
+                self.printDefault(["192.168.55.11"],typOfIP +" IP")
                 self.nIP= ["192.168.55.11"]
         elif typOfIP == "dst":
             if len(listOfips)>0:
                 self.dst= listOfips
             else:
-                self.printDefault(["192.168.57.11"],typOfIP)
+                self.printDefault(["192.168.57.11"],typOfIP +" IP")
                 self.dst= ["192.168.57.11"]
 
-    def printDefault(self,listOfips,typOfIP):
-        print("no or no vaild, "+typOfIP+" ip, so set to "+listOfips[0])
+    def printDefault(self,printFirstVauleInList,typeOfAttribute):
+        print("no or no vaild, "+typeOfAttribute+", so set to "+printFirstVauleInList[0])
 
 
     def addListOfIPs(self,parmeters,typOfIP):
@@ -193,18 +211,29 @@ def checkUniqeIP(ips):
 listOfSrc=["192.168.56.11","192.168.56.12","192.168.56.13", "192.168.56.13"]
 listOfSrc=checkUniqeIP(listOfSrc)
 
-#ia1 = InputToAttackDataMultiplicator({"botsize":4,"src":listOfSrc})
-#ia2 = InputToAttackDataMultiplicator({"botsize":1,"src":["192.168.56.11"]})
+
+start = datetime.datetime(2024, 2, 4, 2, 1, 50, 10000)
+end = datetime.datetime(2024, 2, 4, 2, 1, 50, 0)
+#print(start)
+#print(start+datetime.timedelta(microseconds=100000))
+#print(start+datetime.datetime(start.year, start.month, start.day, start.hour, start.min, start.second, 10000))
+
+
+
+#ia1 = InputToAttackDataMultiplicator({"botsize":4,"src":listOfSrc, "stratTimeOfAttack" : start, "endTimeOfAttack"  : end})
+ia1 = InputToAttackDataMultiplicator({"botsize":4,"src":listOfSrc})
+#ia2 = InputToAttackDataMultiplicator({"botsize":1,"src":["192.168.56.11"], "stratTimeOfAttack" : start , "endTimeOfAttack"  : end })
 #ia2 = InputToAttackDataMultiplicator({"botsize":2,"src":listOfSrc})
 #a1=AttackDataMultiplicator([ia1,ia2],"pathtofile","TCP_SYN_Flodd")
 
 #print(ia1.src)
 #print(ia1.botNetSize)
-
+print(ia1.stratTimeOfAttack)
+print(ia1.endTimeOfAttack)
 #print(ia2.src)
 #print(ia2.botNetSize)
 
 
-ia1 = InputToAttackDataMultiplicator({"botsize":4,"src":["192.168.2.2"]})
+#ia1 = InputToAttackDataMultiplicator({"botsize":4,"src":["192.168.2.2"], "stratTimeOfAttack" : start , "endTimeOfAttack"  : end})
 #ia2 = InputToAttackDataMultiplicator({"botsize":1,"src":["192.168.3.3"]})
-a1=AttackDataMultiplicator([ia1],"GenratedAttacks/ext2ext-S0_20240125.11","TCP_SYN_Flodd")
+#a1=AttackDataMultiplicator([ia1],"GenratedAttacks/ext2ext-S0_20240125.11","TCP_SYN_Flodd")
