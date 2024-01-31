@@ -1,4 +1,4 @@
-#from silk import *
+from silk import *
 import ipaddress
 import datetime
 
@@ -24,6 +24,11 @@ class AttackDataMultiplicator:
     """
     def modifyfile(self):
         infile_r = silkfile_open(self.filePath, READ)
+        self.count =0
+        for rec in infile_r: 
+            self.count+=1
+        infile_r.close()
+        infile_r = silkfile_open(self.filePath, READ)
         for rec in infile_r:   
             #print (rec)
             #for setFileModclass in self.dicOfFileToModifcationsClass.values():
@@ -37,11 +42,20 @@ class AttackDataMultiplicator:
                 temprec =self.modifySIPRecord(temprec,nameofset)
                 temprec =self.modifyNIPRecord(temprec,nameofset)
                 temprec =self.modifyDIPRecord(temprec,nameofset)
+                temprec =self.modifystime(temprec,nameofset)
                 self.dicOfFileToModifcationsClass[nameofset][0].write(temprec)
         self.closeAllFiles()
         infile_r.close()
         pass    
+
+    def modifystime(self,rec,nameofset):
+        if self.dicOfFileToModifcationsClass[nameofset][1].startTimeIncreasAlgorithm =="standard":
+            rec=self.modifystimeStandard(rec,nameofset)
+        return rec
     
+    def modifystimeStandard(self,rec,nameofset):
+        return rec
+
     def closeAllFiles(self):
         for set in self.dicOfFileToModifcationsClass.values():
             set[0].close()
@@ -89,6 +103,7 @@ class InputToAttackDataMultiplicator:
         self.addListOfIPs(parmeters,"nIP")
         self.addStartAndEndOfAttack(parmeters,"stratTimeOfAttack")
         self.addStartAndEndOfAttack(parmeters,"endTimeOfAttack")
+        self.addStartTimeIncreasAlgorithm(parmeters)
         
     def addStartAndEndOfAttack(self,parmeters,startOrEnd):
         try:
@@ -143,8 +158,16 @@ class InputToAttackDataMultiplicator:
         try:
             self.botnetRotationAlgorithm = parmeters["botnet_rotation_algorithm"]
         except KeyError:
-            print("no botnet_rotation_algorithm, so set to standard")
+            self.printDefault(["standard"],"botnet_rotation_algorithm")
             self.botnetRotationAlgorithm= "standard"
+
+    def addStartTimeIncreasAlgorithm(self,parmeters):
+        try:
+            self.startTimeIncreasAlgorithm = parmeters["startTimeIncreasAlgorithm"]
+        except KeyError:
+            self.printDefault(["standard"],"startTimeIncreasAlgorithm")
+            self.startTimeIncreasAlgorithm= "standard"
+
             
     def addBotNetSize(self,parmeters):
         try:
@@ -221,19 +244,19 @@ end = datetime.datetime(2024, 2, 4, 2, 1, 50, 0)
 
 
 #ia1 = InputToAttackDataMultiplicator({"botsize":4,"src":listOfSrc, "stratTimeOfAttack" : start, "endTimeOfAttack"  : end})
-ia1 = InputToAttackDataMultiplicator({"botsize":4,"src":listOfSrc})
+#ia1 = InputToAttackDataMultiplicator({"botsize":4,"src":listOfSrc})
 #ia2 = InputToAttackDataMultiplicator({"botsize":1,"src":["192.168.56.11"], "stratTimeOfAttack" : start , "endTimeOfAttack"  : end })
 #ia2 = InputToAttackDataMultiplicator({"botsize":2,"src":listOfSrc})
 #a1=AttackDataMultiplicator([ia1,ia2],"pathtofile","TCP_SYN_Flodd")
 
 #print(ia1.src)
 #print(ia1.botNetSize)
-print(ia1.stratTimeOfAttack)
-print(ia1.endTimeOfAttack)
+#print(ia1.stratTimeOfAttack)
+#print(ia1.endTimeOfAttack)
 #print(ia2.src)
 #print(ia2.botNetSize)
 
 
-#ia1 = InputToAttackDataMultiplicator({"botsize":4,"src":["192.168.2.2"], "stratTimeOfAttack" : start , "endTimeOfAttack"  : end})
+ia1 = InputToAttackDataMultiplicator({"botsize":4,"src":["192.168.2.2"], "stratTimeOfAttack" : start , "endTimeOfAttack"  : end})
 #ia2 = InputToAttackDataMultiplicator({"botsize":1,"src":["192.168.3.3"]})
-#a1=AttackDataMultiplicator([ia1],"GenratedAttacks/ext2ext-S0_20240125.11","TCP_SYN_Flodd")
+a1=AttackDataMultiplicator([ia1],"GenratedAttacks/ext2ext-S0_20240125.11","TCP_SYN_Flodd")
