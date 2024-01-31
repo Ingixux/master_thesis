@@ -7,8 +7,9 @@ class AttackDataMultiplicator:
     The listtWithModifcationsClass incule a list of objet's of the InputToAttackDataMultiplicator
     each object in the list will create a new modified file
     """
-    
-    
+    #TODO add dst
+    #TODO add NIP (next hop)
+    #TODO add time start time end off all the flows
     def __init__(self, listtWithModifcationsClass, filePath, attack):
         self.filePath = filePath
         #self.attack= attack
@@ -34,6 +35,8 @@ class AttackDataMultiplicator:
                 #temprec=copy.deepcopy(rec)
                 temprec=rec #TODO Do I need a deep copy as I am chaning the 
                 temprec =self.modifySIPRecord(temprec,nameofset)
+                temprec =self.modifyNIPRecord(temprec,nameofset)
+                temprec =self.modifyDIPRecord(temprec,nameofset)
                 self.dicOfFileToModifcationsClass[nameofset][0].write(temprec)
         self.closeAllFiles()
         infile_r.close()
@@ -46,6 +49,13 @@ class AttackDataMultiplicator:
     def modifySIPRecord(self,rec,nameofset):
         if self.dicOfFileToModifcationsClass[nameofset][1].botnetRotationAlgorithm =="standard":
            rec=self.modifySIPRecordstander(rec,nameofset)
+        return rec
+    
+    def modifyDIPRecord(self,rec,nameofset):
+        rec.dip = IPAddr(self.dicOfFileToModifcationsClass[nameofset][1].dst[0])
+        return rec
+    def modifyNIPRecord(self,rec,nameofset):
+        rec.nhip = IPAddr(self.dicOfFileToModifcationsClass[nameofset][1].nIP[0])
         return rec
 
     def modifySIPRecordstander(self,rec,nameofset):
@@ -74,8 +84,42 @@ class InputToAttackDataMultiplicator:
     """
     def __init__(self, parmeters):
         self.addBotNetSize(parmeters)
-        self.addSrc(parmeters)
+        self.addListOfIPs(parmeters,"src")
         self.addBotnetRotationAlgorithm(parmeters)
+        self.addListOfIPs(parmeters,"dst")
+        self.addListOfIPs(parmeters,"nIP")
+        
+
+    def setips(self,listOfips,typOfIP):
+        if typOfIP == "src":
+            if len(listOfips)>0:
+                self.addCorrectNumberOfSrc(listOfips)
+            else:
+                self.printDefault(["192.168.55.11 -> botnetsize"],typOfIP)
+                self.addCorrectNumberOfSrc(["192.168.56.11"])
+        elif typOfIP == "nIP":
+            if len(listOfips)>0:
+                self.nIP = listOfips
+            else:
+                self.printDefault(["192.168.55.11"],typOfIP)
+                self.nIP= ["192.168.55.11"]
+        elif typOfIP == "dst":
+            if len(listOfips)>0:
+                self.dst= listOfips
+            else:
+                self.printDefault(["192.168.57.11"],typOfIP)
+                self.dst= ["192.168.57.11"]
+
+    def printDefault(self,listOfips,typOfIP):
+        print("no or no vaild, "+typOfIP+" ip, so set to "+listOfips[0])
+
+
+    def addListOfIPs(self,parmeters,typOfIP):
+        try:
+            listOfips=self.checkListOfIPs(parmeters[typOfIP])
+        except KeyError:
+            listOfips = []
+        self.setips(listOfips,typOfIP)
         
     def addBotnetRotationAlgorithm(self,parmeters):
         try:
@@ -84,7 +128,6 @@ class InputToAttackDataMultiplicator:
             print("no botnet_rotation_algorithm, so set to standard")
             self.botnetRotationAlgorithm= "standard"
             
-
     def addBotNetSize(self,parmeters):
         try:
             if self.checkBotNetSize(parmeters["botsize"]):
@@ -96,29 +139,13 @@ class InputToAttackDataMultiplicator:
             print("no botNetSize, so botNetSize is set to 1")
             self.botNetSize = 1
 
-    def addSrc(self,parmeters):
-                #if "botsize" in parmeters.keys():
-        try:
-            srcs=self.checkSrc(parmeters["src"].copy())
-            if len(srcs)>0:
-                self.src = self.addCorrectNumberOfSrc(srcs)
-            else:
-                print("no accpecet src, so src is set to 192.168.56.11 -> (to botsize)")
-                self.src = self.addCorrectNumberOfSrc(["192.168.56.11"])
-        except KeyError:
-            print("no src, so src is set to 192.168.56.11 -> (to botsize)")
-            self.src = self.addCorrectNumberOfSrc(["192.168.56.11"])
-        self.indexOfBotnetsize=0
-
     def addCorrectNumberOfSrc(self,srcs):
+        self.indexOfBotnetsize=0
         if len(srcs) > self.botNetSize:
             srcs= self.removeSrc(srcs,self.botNetSize)
-            return srcs
         elif len(srcs) < self.botNetSize:
             srcs= self.addMoreSrc(srcs,self.botNetSize)
-            return srcs
-        else:
-            return srcs
+        self.src=srcs
         
     def addMoreSrc(self,srcs,botnetsize):
         for x in range(0,botnetsize-len(srcs)):
@@ -133,9 +160,9 @@ class InputToAttackDataMultiplicator:
         for x in range(0,len(srcs)-botnetsize):
             del tempsrc[-1]
         return tempsrc
-
-    def checkSrc(self,srcs):
-        tempsrc = srcs.copy()
+    
+    def checkListOfIPs(self,listOfSrc):
+        tempsrc = listOfSrc.copy()
         for ip in tempsrc:
             if not self.isIP(ip):
                 tempsrc.remove(ip)
@@ -166,9 +193,8 @@ def checkUniqeIP(ips):
 listOfSrc=["192.168.56.11","192.168.56.12","192.168.56.13", "192.168.56.13"]
 listOfSrc=checkUniqeIP(listOfSrc)
 
-
-#ia1 = InputToAttackDataMultiplicator({"botsize":8,"src":listOfSrc})
-#ia2 = InputToAttackDataMultiplicator({"botsize":1,"src":"192.168.56.11"})
+#ia1 = InputToAttackDataMultiplicator({"botsize":4,"src":listOfSrc})
+#ia2 = InputToAttackDataMultiplicator({"botsize":1,"src":["192.168.56.11"]})
 #ia2 = InputToAttackDataMultiplicator({"botsize":2,"src":listOfSrc})
 #a1=AttackDataMultiplicator([ia1,ia2],"pathtofile","TCP_SYN_Flodd")
 
