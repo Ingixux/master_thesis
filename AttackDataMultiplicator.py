@@ -16,6 +16,7 @@ class AttackDataMultiplicator:
         #self.numberOfOutputFiles=len(listtWithModifcationsClass)
         #self.listtWithModifcationsClass = listtWithModifcationsClass
         self.dicOfFileToModifcationsClass ={}
+        self.dicToMatchBiFlows={}
         for x in range(0, len(listtWithModifcationsClass)):
             self.dicOfFileToModifcationsClass["ModifiedAttackFiles/"+attack+str(x)]= [silkfile_open("ModifiedAttackFiles/"+attack+str(x), WRITE),listtWithModifcationsClass[x]]
             #self.dicOfFileToModifcationsClass["ModifiedAttackFiles/"+attack+str(x)]= ["test open ModifiedAttackFiles/"+attack+str(x),listtWithModifcationsClass[x]]
@@ -29,7 +30,16 @@ class AttackDataMultiplicator:
             self.count+=1
         infile_r.close()
         infile_r = silkfile_open(self.filePath, READ)
-        for rec in infile_r:   
+        for rec in infile_r:
+            isbiflow=False
+            checkKeyOfBiFlow = str(rec.dip)+ str(rec.sip) + str(rec.dport) +str(rec.sport) +str(rec.protocol)
+            keyOfBiFlow= ""
+            if checkKeyOfBiFlow in self.dicToMatchBiFlows.keys():
+                keyOfBiFlow =checkKeyOfBiFlow
+                isbiflow=True
+            else:
+                keyOfBiFlow= str(rec.sip) + str(rec.dip) +str(rec.sport) + str(rec.dport) +str(rec.protocol)
+                self.dicToMatchBiFlows[keyOfBiFlow]= {}
             #print (rec)
             #for setFileModclass in self.dicOfFileToModifcationsClass.values():
                 #temprec=copy.deepcopy(rec)
@@ -37,20 +47,31 @@ class AttackDataMultiplicator:
             #    temprec =self.modifySIPRecord(temprec,setFileModclass)
             #    setFileModclass[0].write(temprec)
             for nameofset in self.dicOfFileToModifcationsClass.keys():
+                if isbiflow == False:
+                    self.dicToMatchBiFlows[keyOfBiFlow][nameofset] = {}
                 #temprec=copy.deepcopy(rec)
                 temprec=rec #TODO Do I need a deep copy as I am chaning the 
-                temprec =self.modifySIPRecord(temprec,nameofset)
-                temprec =self.modifyNIPRecord(temprec,nameofset)
-                temprec =self.modifyDIPRecord(temprec,nameofset)
-                temprec =self.modifystime(temprec,nameofset)
+                temprec =self.modifySIPRecord(temprec,nameofset,keyOfBiFlow,isbiflow)
+                temprec =self.modifyNIPRecord(temprec,nameofset,keyOfBiFlow,isbiflow)
+                temprec =self.modifyDIPRecord(temprec,nameofset,keyOfBiFlow,isbiflow)
+                temprec =self.modifystime(temprec,nameofset,keyOfBiFlow,isbiflow)
                 self.dicOfFileToModifcationsClass[nameofset][0].write(temprec)
+            if isbiflow == True:
+                #TODO reomove the biflow from the dic
+                self.dicToMatchBiFlows.pop(keyOfBiFlow)
         self.closeAllFiles()
         infile_r.close()
         pass    
 
-    def modifystime(self,rec,nameofset):
+    def addInfoToDicToMatchBiFlows(self,whatToAdd,valueToAdd,nameofset,keyOfBiFlow,isbiflow):
+        if isbiflow == False:
+            self.dicToMatchBiFlows[keyOfBiFlow][nameofset][whatToAdd] = valueToAdd
+
+
+    def modifystime(self,rec,nameofset,keyOfBiFlow,isbiflow):
         if self.dicOfFileToModifcationsClass[nameofset][1].startTimeIncreasAlgorithm =="standard":
             rec=self.modifystimeStandard(rec,nameofset)
+        self.addInfoToDicToMatchBiFlows("stime",rec.stime,nameofset,keyOfBiFlow,isbiflow)
         return rec
     
     def modifystimeStandard(self,rec,nameofset):
@@ -60,27 +81,41 @@ class AttackDataMultiplicator:
         for set in self.dicOfFileToModifcationsClass.values():
             set[0].close()
 
-    def modifySIPRecord(self,rec,nameofset):
+    def modifySIPRecord(self,rec,nameofset,keyOfBiFlow,isbiflow):
         if self.dicOfFileToModifcationsClass[nameofset][1].botnetRotationAlgorithm =="standard":
-           rec=self.modifySIPRecordstander(rec,nameofset)
+           rec=self.modifySIPRecordstander(rec,nameofset,keyOfBiFlow,isbiflow)
+        self.addInfoToDicToMatchBiFlows("sip",rec.sip,nameofset,keyOfBiFlow,isbiflow)
         return rec
     
-    def modifyDIPRecord(self,rec,nameofset):
-        rec.dip = IPAddr(self.dicOfFileToModifcationsClass[nameofset][1].dst[0])
+    def modifyDIPRecord(self,rec,nameofset,keyOfBiFlow,isbiflow):
+        if isbiflow == False:
+            rec.dip = IPAddr(self.dicOfFileToModifcationsClass[nameofset][1].dst[0])
+        else:
+            rec.dip = self.dicToMatchBiFlows[keyOfBiFlow][nameofset]["sip"]
+        self.addInfoToDicToMatchBiFlows("dip",rec.sip,nameofset,keyOfBiFlow,isbiflow)
         return rec
-    def modifyNIPRecord(self,rec,nameofset):
-        rec.nhip = IPAddr(self.dicOfFileToModifcationsClass[nameofset][1].nIP[0])
+    
+
+    def modifyNIPRecord(self,rec,nameofset,keyOfBiFlow,isbiflow):
+        if isbiflow ==False:
+            rec.nhip = IPAddr(self.dicOfFileToModifcationsClass[nameofset][1].nIP[0])
+        else:
+            rec.nhip = IPAddr(self.dicOfFileToModifcationsClass[nameofset][1].nIP[1])
+        #self.addInfoToDicToMatchBiFlows("nhip",rec.nhip,nameofset,keyOfBiFlow,isbiflow)
         return rec
 
-    def modifySIPRecordstander(self,rec,nameofset):
-        index= self.dicOfFileToModifcationsClass[nameofset][1].indexOfBotnetsize
-        ip = self.dicOfFileToModifcationsClass[nameofset][1].src[index]
-        Botnetsize =self.dicOfFileToModifcationsClass[nameofset][1].botNetSize
-        rec.sip = IPAddr(ip)
-        index +=1
-        if Botnetsize <= index:
-            index =0
-        self.dicOfFileToModifcationsClass[nameofset][1].indexOfBotnetsize = index
+    def modifySIPRecordstander(self,rec,nameofset,keyOfBiFlow,isbiflow):
+        if isbiflow == False:
+            index= self.dicOfFileToModifcationsClass[nameofset][1].indexOfBotnetsize
+            ip = self.dicOfFileToModifcationsClass[nameofset][1].src[index]
+            Botnetsize =self.dicOfFileToModifcationsClass[nameofset][1].botNetSize
+            rec.sip = IPAddr(ip)
+            index +=1
+            if Botnetsize <= index:
+                index =0
+            self.dicOfFileToModifcationsClass[nameofset][1].indexOfBotnetsize = index
+        else:
+            rec.sip = self.dicToMatchBiFlows[keyOfBiFlow][nameofset]["dip"]
         return rec
 
 class InputToAttackDataMultiplicator:
@@ -131,11 +166,19 @@ class InputToAttackDataMultiplicator:
                 self.printDefault(["192.168.55.11 -> botnetsize"],typOfIP +" IP")
                 self.addCorrectNumberOfSrc(["192.168.56.11"])
         elif typOfIP == "nIP":
-            if len(listOfips)>0:
+            if len(listOfips)>1:
+                self.nIP = listOfips
+            elif len(listOfips)>0:
+                if "192.168.55.11" in listOfips:
+                    self.printDefault(["192.168.54.11"],typOfIP +" IP, (only one enter)")
+                    listOfips.append("192.168.54.11")
+                else:
+                    self.printDefault(["192.168.55.11"],typOfIP +" IP (only one enter)")
+                    listOfips.append("192.168.55.11")             
                 self.nIP = listOfips
             else:
-                self.printDefault(["192.168.55.11"],typOfIP +" IP")
-                self.nIP= ["192.168.55.11"]
+                self.printDefault(["192.168.55.11 and 192.168.54.11"],typOfIP +" IP")
+                self.nIP= ["192.168.55.11","192.168.54.11"]
         elif typOfIP == "dst":
             if len(listOfips)>0:
                 self.dst= listOfips
