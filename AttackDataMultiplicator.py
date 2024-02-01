@@ -25,9 +25,10 @@ class AttackDataMultiplicator:
     """
     def modifyfile(self):
         infile_r = silkfile_open(self.filePath, READ)
-        self.count =0
-        for rec in infile_r: 
-            self.count+=1
+        #self.count =0
+        #for rec in infile_r: 
+        #    self.count+=1
+        self.counterUnqiueFlows =0
         infile_r.close()
         infile_r = silkfile_open(self.filePath, READ)
         for rec in infile_r:
@@ -38,6 +39,7 @@ class AttackDataMultiplicator:
                 keyOfBiFlow =checkKeyOfBiFlow
                 isbiflow=True
             else:
+                self.counterUnqiueFlows +=1
                 keyOfBiFlow= str(rec.sip) + str(rec.dip) +str(rec.sport) + str(rec.dport) +str(rec.protocol)
                 self.dicToMatchBiFlows[keyOfBiFlow]= {}
             #print (rec)
@@ -70,11 +72,24 @@ class AttackDataMultiplicator:
 
     def modifystime(self,rec,nameofset,keyOfBiFlow,isbiflow):
         if self.dicOfFileToModifcationsClass[nameofset][1].startTimeIncreasAlgorithm =="standard":
-            rec=self.modifystimeStandard(rec,nameofset)
+            rec=self.modifystimeStandard(rec,nameofset,keyOfBiFlow,isbiflow)
+        if self.dicOfFileToModifcationsClass[nameofset][1].startTimeIncreasAlgorithm =="standardBasedOnBotnetsize":
+            rec=self.modifystimestandardBasedOnBotnetsize(rec,nameofset,keyOfBiFlow,isbiflow)
         self.addInfoToDicToMatchBiFlows("stime",rec.stime,nameofset,keyOfBiFlow,isbiflow)
         return rec
     
-    def modifystimeStandard(self,rec,nameofset):
+    def modifystimestandardBasedOnBotnetsize(self,rec,nameofset,keyOfBiFlow,isbiflow):
+        if isbiflow == False:
+            rec.stime = self.dicOfFileToModifcationsClass[nameofset][1].stratTimeOfAttack + self.dicOfFileToModifcationsClass[nameofset][1].TT1 + self.dicOfFileToModifcationsClass[nameofset][1].TBA * ((self.counterUnqiueFlows-1) // self.dicOfFileToModifcationsClass[nameofset][1].botNetSize)
+        else:
+            rec.stime = self.dicToMatchBiFlows[keyOfBiFlow][nameofset]["stime"] + self.dicOfFileToModifcationsClass[nameofset][1].TT2
+        return rec
+    
+    def modifystimeStandard(self,rec,nameofset,keyOfBiFlow,isbiflow):
+        if isbiflow == False:
+            rec.stime = self.dicOfFileToModifcationsClass[nameofset][1].stratTimeOfAttack + self.dicOfFileToModifcationsClass[nameofset][1].TT1 + self.dicOfFileToModifcationsClass[nameofset][1].TBA * self.counterUnqiueFlows
+        else:
+            rec.stime = self.dicToMatchBiFlows[keyOfBiFlow][nameofset]["stime"] + self.dicOfFileToModifcationsClass[nameofset][1].TT2
         return rec
 
     def closeAllFiles(self):
@@ -124,11 +139,36 @@ class InputToAttackDataMultiplicator:
     Input:
     The varible parmeters is a dictionary and can inculde:
         - int of botsize with key 'botsize'
-            -if no valid or no botsize is entered then it is set to 1
+            - the can be 1 -> ,
+            - if no valid or no botsize is entered then it is set to 1
         - list of unqiue src addresses with key 'src'
             - if src is not a ip it will be removed
             - if there are more src then botsize, then ip from src will be remove to match botsize
             - if there are less src then botsize, then unqiue ips will be added to src to match botsize
+        - list of dst addresses with key 'dst'
+            - the list can have 1 -> , entries, 
+            - if dst is not a ip it will be removed
+            - if none are provied a default is set
+        - list of next hop ip addresses with key 'nhip'
+            - the list can have 2 -> , entries, 
+            - if nhip is not a ip it will be removed
+            - if less tahn two are provided, defaults are added to get to two entries
+        - a String with the algortim to use to get through the botnet, has key "botnet_rotation_algorithm"
+            - if none are provied a default (Standard) is set
+        - a String with the algortim to use to set starttime of flow, has key "startTimeIncreasAlgorithm"
+            - if none are provied a default (Standard) is set
+        - a Datatime.datatime object of when the attack flows should start, has key "stratTimeOfAttack"
+            - if none are provied a default (earlist possible by Datatime.datatime) is set
+        - a Datatime.datatime object of when the attack flows should end, has key "endTimeOfAttack"
+            - if none are provied a default (earlist possible by Datatime.datatime) is set
+        - a Datatime.timedelta object of the travel time from attacker to netflow capture point, has key "TT1"
+            - if none are provied a default (1000 microsecond) is set
+        - a Datatime.timedelta object of the travel time from netflow capture poin to vicitm and back again, has key "TT2"
+            - if none are provied a default (1000 microsecond) is set
+        - a Datatime.timedelta object of the Time Between Attacks packets sendt from attacker, has key "TBA"
+            - if none are provied a default (1000 microsecond) is set
+        
+        #TODO add check if valide stratTimeOfAttack, endTimeOfAttack, TT1, TT2 and TBA
     """
     def __init__(self, parmeters):
         self.addBotNetSize(parmeters)
@@ -138,8 +178,25 @@ class InputToAttackDataMultiplicator:
         self.addListOfIPs(parmeters,"nIP")
         self.addStartAndEndOfAttack(parmeters,"stratTimeOfAttack")
         self.addStartAndEndOfAttack(parmeters,"endTimeOfAttack")
+        self.addTimes(parmeters,"TT1")
+        self.addTimes(parmeters,"TT2")
+        self.addTimes(parmeters,"TBA")
         self.addStartTimeIncreasAlgorithm(parmeters)
         
+
+    def addTimes(self,parmeters,time):
+        try:
+            vaule= parmeters[time]
+        except KeyError:
+            vaule = datetime.timedelta(microseconds=10000)
+            self.printDefault(["to earliest of the datetime object"],time)
+        if (time) =="TT1":
+             self.TT1=vaule
+        elif (time) =="TT2":
+             self.TT2=vaule
+        elif (time) =="TBA":
+             self.TBA=vaule
+
     def addStartAndEndOfAttack(self,parmeters,startOrEnd):
         try:
             vaule= parmeters[startOrEnd]
@@ -189,7 +246,6 @@ class InputToAttackDataMultiplicator:
     def printDefault(self,printFirstVauleInList,typeOfAttribute):
         print("no or no vaild, "+typeOfAttribute+", so set to "+printFirstVauleInList[0])
 
-
     def addListOfIPs(self,parmeters,typOfIP):
         try:
             listOfips=self.checkListOfIPs(parmeters[typOfIP])
@@ -198,20 +254,27 @@ class InputToAttackDataMultiplicator:
         self.setips(listOfips,typOfIP)
         
     def addBotnetRotationAlgorithm(self,parmeters):
+        accpecetAlgorithms = ["standard"]
         try:
-            self.botnetRotationAlgorithm = parmeters["botnet_rotation_algorithm"]
+            if parmeters["botnet_rotation_algorithm"] in accpecetAlgorithms:
+                self.botnetRotationAlgorithm = parmeters["botnet_rotation_algorithm"]
+            else:
+                raise KeyError
         except KeyError:
             self.printDefault(["standard"],"botnet_rotation_algorithm")
             self.botnetRotationAlgorithm= "standard"
 
     def addStartTimeIncreasAlgorithm(self,parmeters):
+        accpecetAlgorithms = ["standard","standardBasedOnBotnetsize"]
         try:
-            self.startTimeIncreasAlgorithm = parmeters["startTimeIncreasAlgorithm"]
+            if parmeters["startTimeIncreasAlgorithm"] in accpecetAlgorithms:
+                self.startTimeIncreasAlgorithm = parmeters["startTimeIncreasAlgorithm"]
+            else:
+                raise KeyError
         except KeyError:
             self.printDefault(["standard"],"startTimeIncreasAlgorithm")
             self.startTimeIncreasAlgorithm= "standard"
-
-            
+         
     def addBotNetSize(self,parmeters):
         try:
             if self.checkBotNetSize(parmeters["botsize"]):
@@ -300,6 +363,6 @@ end = datetime.datetime(2024, 2, 4, 2, 1, 50, 0)
 #print(ia2.botNetSize)
 
 
-ia1 = InputToAttackDataMultiplicator({"botsize":4,"src":["192.168.2.2"], "stratTimeOfAttack" : start , "endTimeOfAttack"  : end})
+ia1 = InputToAttackDataMultiplicator({"botsize":4,"src":["192.168.2.2"], "stratTimeOfAttack" : start , "endTimeOfAttack"  : end, "startTimeIncreasAlgorithm":"standardBasedOnBotnetsize"})
 #ia2 = InputToAttackDataMultiplicator({"botsize":1,"src":["192.168.3.3"]})
 a1=AttackDataMultiplicator([ia1],"GenratedAttacks/ext2ext-S0_20240125.11","TCP_SYN_Flodd")
