@@ -17,19 +17,25 @@ class AttackDataMultiplicator:
         #self.listtWithModifcationsClass = listtWithModifcationsClass
         self.dicOfFileToModifcationsClass ={}
         self.dicToMatchBiFlows={}
+        unqiename=[]
         for x in range(0, len(listtWithModifcationsClass)):
-            self.dicOfFileToModifcationsClass["ModifiedAttackFiles/"+attack+str(x)]= [silkfile_open("ModifiedAttackFiles/"+attack+str(x), WRITE),listtWithModifcationsClass[x]]
+            name =listtWithModifcationsClass[x].name
+            unqiename.append(name)
+            if name in unqiename:
+                self.dicOfFileToModifcationsClass["ModifiedAttackFiles/"+attack+str(x)]= [silkfile_open("ModifiedAttackFiles/"+attack+str(x), WRITE),listtWithModifcationsClass[x]]
+            else:
+                self.dicOfFileToModifcationsClass["ModifiedAttackFiles/"+attack+str(x)]= [silkfile_open("ModifiedAttackFiles/"+attack+str(name), WRITE),listtWithModifcationsClass[x]]
             #self.dicOfFileToModifcationsClass["ModifiedAttackFiles/"+attack+str(x)]= ["test open ModifiedAttackFiles/"+attack+str(x),listtWithModifcationsClass[x]]
         self.modifyfile()
     """
     """
     def modifyfile(self):
-        infile_r = silkfile_open(self.filePath, READ)
+        #infile_r = silkfile_open(self.filePath, READ)
         #self.count =0
         #for rec in infile_r: 
         #    self.count+=1
         self.counterUnqiueFlows =0
-        infile_r.close()
+        #infile_r.close()
         infile_r = silkfile_open(self.filePath, READ)
         for rec in infile_r:
             isbiflow=False
@@ -168,7 +174,7 @@ class InputToAttackDataMultiplicator:
         - a Datatime.timedelta object of the Time Between Attacks packets sendt from attacker, has key "TBA"
             - if none are provied a default (1000 microsecond) is set
         
-        #TODO add check if valide stratTimeOfAttack, endTimeOfAttack, TT1, TT2 and TBA
+        #TODO add check if valide stratTimeOfAttack, endTimeOfAttack, TT1, TT2, TBA and name
     """
     def __init__(self, parmeters):
         self.addBotNetSize(parmeters)
@@ -182,7 +188,14 @@ class InputToAttackDataMultiplicator:
         self.addTimes(parmeters,"TT2")
         self.addTimes(parmeters,"TBA")
         self.addStartTimeIncreasAlgorithm(parmeters)
+        self.addName(parmeters)
         
+    def addName(self,parmeters):
+        try:
+            self.name= parmeters["name"]
+        except KeyError:
+            self.name="default"
+
 
     def addTimes(self,parmeters,time):
         try:
