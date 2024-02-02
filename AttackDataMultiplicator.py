@@ -2,14 +2,34 @@ from silk import *
 import ipaddress
 import datetime
 
+
 class AttackDataMultiplicator:       
+ 
+    #TODO create a file assoted with the attack where informaation about the attack is stored (start time, endtime, botsize, sourceip?, dst ip, nhip)
+    #TODO create a check that the first flow in a bi is from the Attacker VM, (as this file comes sorted, this should not be a problem, But I am not 100%, that it isn't a problem) 
     """
     Start the class with the silk file you to change with filePath
     The listtWithModifcationsClass incule a list of objet's of the InputToAttackDataMultiplicator
-    each object in the list will create a new modified file
+    the attack varible is the name of the attack gets added to the new file
+    The dicOfFileToModifcationsClass is a dictionary with the name of a modified attack as the key, 
+    and key points to a list where the first entry is the file of it that name 
+    and the second entry is the AttackDataMultiplicator object, which acts on the file 
+    The dicToMatchBiFlows is a dictionary with 3 layers (nested nested dictionary), 
+    where the key for the first layer is vaules (sip,dip,sport,dport,protcol) gathered from the first flow in biflow
+    flow are added to the dictionary, if there is no match in the dictionary if you swap source and destination of the new flow
+    The key point to a new dictionary, where the key of the second layer is same as the key of dicOfFileToModifcationsClass.
+    While the last key is the diffrent vaule being modified
+    These can then be used to modify if this is flow is apart of a biflow
+    After both records of a biflow has been modified, 
+    then all vaules associated with this biflow are removed from dicToMatchBiFlows
+    Create one new file for each of the AttackDataMultiplicator object, 
+    where that AttackDataMultiplicator object will store the modified attack
+    Adds the name of AttackDataMultiplicator object to unqiename name,
+    if two share the same name, 
+    the file will get a number in the name instead of the name
+    This to aviod creating files with the same name 
+    Init starts modifyfile function
     """
-
-    #TODO add time start time end off all the flows: datetime.timedelta (datetime.resolution)
     def __init__(self, listtWithModifcationsClass, filePath, attack):
         self.filePath = filePath
         #self.attack= attack
@@ -22,14 +42,21 @@ class AttackDataMultiplicator:
             name =listtWithModifcationsClass[x].name
             unqiename.append(name)
             if name in unqiename:
-                self.dicOfFileToModifcationsClass["ModifiedAttackFiles/"+attack+str(x)]= [silkfile_open("ModifiedAttackFiles/"+attack+str(x), WRITE),listtWithModifcationsClass[x]]
+                self.dicOfFileToModifcationsClass["ModifiedAttackFiles/"+attack+str(x)]= [silkfile_open("data/ModifiedAttackFiles/"+attack+str(x), WRITE),listtWithModifcationsClass[x]]
             else:
-                self.dicOfFileToModifcationsClass["ModifiedAttackFiles/"+attack+str(x)]= [silkfile_open("ModifiedAttackFiles/"+attack+str(name), WRITE),listtWithModifcationsClass[x]]
+                self.dicOfFileToModifcationsClass["ModifiedAttackFiles/"+attack+str(x)]= [silkfile_open("data/ModifiedAttackFiles/"+attack+str(name), WRITE),listtWithModifcationsClass[x]]
             #self.dicOfFileToModifcationsClass["ModifiedAttackFiles/"+attack+str(x)]= ["test open ModifiedAttackFiles/"+attack+str(x),listtWithModifcationsClass[x]]
         self.modifyfile()
     """
     """
     def modifyfile(self):
+        """
+        Modifiles based on the AttackDataMultiplicator object.
+        For each record in the orginal silk file, 
+        each AttackDataMultiplicator object will modify the record and add it to the corresponding file
+        after all AttackDataMultiplicator object have modified the record, 
+        then it moves to the next record 
+        """
         #infile_r = silkfile_open(self.filePath, READ)
         #self.count =0
         #for rec in infile_r: 
@@ -65,7 +92,6 @@ class AttackDataMultiplicator:
                 temprec =self.modifystime(temprec,nameofset,keyOfBiFlow,isbiflow)
                 self.dicOfFileToModifcationsClass[nameofset][0].write(temprec)
             if isbiflow == True:
-                #TODO reomove the biflow from the dic
                 self.dicToMatchBiFlows.pop(keyOfBiFlow)
         self.closeAllFiles()
         infile_r.close()
@@ -173,6 +199,7 @@ class InputToAttackDataMultiplicator:
             - if none are provied a default (1000 microsecond) is set
         - a Datatime.timedelta object of the Time Between Attacks packets sendt from attacker, has key "TBA"
             - if none are provied a default (1000 microsecond) is set
+        - a string with the name of configure class, has key "name" 
         
         #TODO add check if valide stratTimeOfAttack, endTimeOfAttack, TT1, TT2, TBA and name
     """
@@ -195,7 +222,6 @@ class InputToAttackDataMultiplicator:
             self.name= parmeters["name"]
         except KeyError:
             self.name="default"
-
 
     def addTimes(self,parmeters,time):
         try:
@@ -344,6 +370,9 @@ class InputToAttackDataMultiplicator:
             return True
     
 def checkUniqeIP(ips):
+    """
+    Used to check that the ips are unique
+    """
     tempIps=[]
     for ip in ips:
         if not ip in tempIps:
@@ -378,4 +407,4 @@ end = datetime.datetime(2024, 2, 4, 2, 1, 50, 0)
 
 ia1 = InputToAttackDataMultiplicator({"botsize":4,"src":["192.168.2.2"], "stratTimeOfAttack" : start , "endTimeOfAttack"  : end, "startTimeIncreasAlgorithm":"standardBasedOnBotnetsize"})
 #ia2 = InputToAttackDataMultiplicator({"botsize":1,"src":["192.168.3.3"]})
-a1=AttackDataMultiplicator([ia1],"GenratedAttacks/ext2ext-S0_20240125.11","TCP_SYN_Flodd")
+a1=AttackDataMultiplicator([ia1],"data/GenratedAttacks/ext2ext-S0_20240125.11","TCP_SYN_Flodd")

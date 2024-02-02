@@ -1,1 +1,5 @@
-ext*
+data/GenratedAttacks/*
+data/ModifiedAttackFiles/*
+data/SilkFilesFromSikt/*
+data/MixDatasets/*
+data/DiffrentSamplingRates/*
