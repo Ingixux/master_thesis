@@ -47,8 +47,7 @@ class AttackDataMultiplicator:
                 self.dicOfFileToModifcationsClass["ModifiedAttackFiles/"+attack+str(x)]= [silkfile_open("data/ModifiedAttackFiles/"+attack+str(name), WRITE),listtWithModifcationsClass[x]]
             #self.dicOfFileToModifcationsClass["ModifiedAttackFiles/"+attack+str(x)]= ["test open ModifiedAttackFiles/"+attack+str(x),listtWithModifcationsClass[x]]
         self.modifyfile()
-    """
-    """
+
     def modifyfile(self):
         """
         Modifiles based on the AttackDataMultiplicator object.
@@ -97,12 +96,18 @@ class AttackDataMultiplicator:
         infile_r.close()
         pass    
 
+    
     def addInfoToDicToMatchBiFlows(self,whatToAdd,valueToAdd,nameofset,keyOfBiFlow,isbiflow):
+        """
+        addes a vaule to dicToMatchBiFlows
+        """
         if isbiflow == False:
             self.dicToMatchBiFlows[keyOfBiFlow][nameofset][whatToAdd] = valueToAdd
 
-
     def modifystime(self,rec,nameofset,keyOfBiFlow,isbiflow):
+        """
+        Will chose the methode for adding start time
+        """
         if self.dicOfFileToModifcationsClass[nameofset][1].startTimeIncreasAlgorithm =="standard":
             rec=self.modifystimeStandard(rec,nameofset,keyOfBiFlow,isbiflow)
         if self.dicOfFileToModifcationsClass[nameofset][1].startTimeIncreasAlgorithm =="standardBasedOnBotnetsize":
@@ -111,6 +116,9 @@ class AttackDataMultiplicator:
         return rec
     
     def modifystimestandardBasedOnBotnetsize(self,rec,nameofset,keyOfBiFlow,isbiflow):
+        """
+        incresses time between attack each time there have been botnetsize new biflows
+        """
         if isbiflow == False:
             rec.stime = self.dicOfFileToModifcationsClass[nameofset][1].stratTimeOfAttack + self.dicOfFileToModifcationsClass[nameofset][1].TT1 + self.dicOfFileToModifcationsClass[nameofset][1].TBA * ((self.counterUnqiueFlows-1) // self.dicOfFileToModifcationsClass[nameofset][1].botNetSize)
         else:
@@ -118,6 +126,9 @@ class AttackDataMultiplicator:
         return rec
     
     def modifystimeStandard(self,rec,nameofset,keyOfBiFlow,isbiflow):
+        """
+        incresses time between attack by each uqnuie biflow
+        """
         if isbiflow == False:
             rec.stime = self.dicOfFileToModifcationsClass[nameofset][1].stratTimeOfAttack + self.dicOfFileToModifcationsClass[nameofset][1].TT1 + self.dicOfFileToModifcationsClass[nameofset][1].TBA * self.counterUnqiueFlows
         else:
@@ -125,16 +136,25 @@ class AttackDataMultiplicator:
         return rec
 
     def closeAllFiles(self):
+        """
+        closes all files
+        """
         for set in self.dicOfFileToModifcationsClass.values():
             set[0].close()
 
     def modifySIPRecord(self,rec,nameofset,keyOfBiFlow,isbiflow):
+        """
+        Will chose the methode for adding start time
+        """
         if self.dicOfFileToModifcationsClass[nameofset][1].botnetRotationAlgorithm =="standard":
            rec=self.modifySIPRecordstander(rec,nameofset,keyOfBiFlow,isbiflow)
         self.addInfoToDicToMatchBiFlows("sip",rec.sip,nameofset,keyOfBiFlow,isbiflow)
         return rec
     
     def modifyDIPRecord(self,rec,nameofset,keyOfBiFlow,isbiflow):
+        """
+        changes the Dip, either to the dip in the InputToAttackDataMultiplicator class or the source of the associated biflow
+        """
         if isbiflow == False:
             rec.dip = IPAddr(self.dicOfFileToModifcationsClass[nameofset][1].dst[0])
         else:
@@ -142,8 +162,11 @@ class AttackDataMultiplicator:
         self.addInfoToDicToMatchBiFlows("dip",rec.sip,nameofset,keyOfBiFlow,isbiflow)
         return rec
     
-
     def modifyNIPRecord(self,rec,nameofset,keyOfBiFlow,isbiflow):
+        """
+        changes the nhip, either to frist or second vaule of nhip in the InputToAttackDataMultiplicator class, 
+        the frist flow in a biflow gets the first vaule the other gets the second 
+        """
         if isbiflow ==False:
             rec.nhip = IPAddr(self.dicOfFileToModifcationsClass[nameofset][1].nIP[0])
         else:
@@ -152,6 +175,12 @@ class AttackDataMultiplicator:
         return rec
 
     def modifySIPRecordstander(self,rec,nameofset,keyOfBiFlow,isbiflow):
+        """
+        changes the sip, for new biflow
+        it will move through the sip in the botnet sequentially 
+        and start at the begining again when it has reach the end 
+        if not new, it will add the destiation of the associated biflow
+        """
         if isbiflow == False:
             index= self.dicOfFileToModifcationsClass[nameofset][1].indexOfBotnetsize
             ip = self.dicOfFileToModifcationsClass[nameofset][1].src[index]
