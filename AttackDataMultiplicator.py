@@ -6,7 +6,8 @@ import datetime
 class AttackDataMultiplicator:       
  
     #TODO create a file assoted with the attack where informaation about the attack is stored (start time, endtime, botsize, sourceip?, dst ip, nhip)
-    #TODO create a check that the first flow in a bi is from the Attacker VM, (as this file comes sorted, this should not be a problem, But I am not 100%, that it isn't a problem) 
+    #TODO create a check that the first flow in a bi is from the Attacker VM, (as this file comes sorted, this should not be a problem, But I am not 100%, that it isn't a problem)
+    #TODO Add code so that it will be easy for a new user to modify and other type of record type. 
     """
     Start the class with the silk file you to change with filePath
     The listtWithModifcationsClass incule a list of objet's of the InputToAttackDataMultiplicator
@@ -89,14 +90,22 @@ class AttackDataMultiplicator:
                 temprec =self.modifyNIPRecord(temprec,nameofset,keyOfBiFlow,isbiflow)
                 temprec =self.modifyDIPRecord(temprec,nameofset,keyOfBiFlow,isbiflow)
                 temprec =self.modifystime(temprec,nameofset,keyOfBiFlow,isbiflow)
+                temprec =self.modifyports(temprec,nameofset,keyOfBiFlow,isbiflow)
                 self.dicOfFileToModifcationsClass[nameofset][0].write(temprec)
             if isbiflow == True:
                 self.dicToMatchBiFlows.pop(keyOfBiFlow)
         self.closeAllFiles()
         infile_r.close()
         pass    
-
     
+    def modifyports(self,rec,nameofset,keyOfBiFlow,isbiflow):
+        if isbiflow == True:
+            rec.sport=self.dicToMatchBiFlows[keyOfBiFlow][nameofset]["dport"]
+            rec.dport=self.dicToMatchBiFlows[keyOfBiFlow][nameofset]["sport"]
+        self.addInfoToDicToMatchBiFlows("sport",rec.sport,nameofset,keyOfBiFlow,isbiflow)
+        self.addInfoToDicToMatchBiFlows("dport",rec.dport,nameofset,keyOfBiFlow,isbiflow)
+        return rec
+
     def addInfoToDicToMatchBiFlows(self,whatToAdd,valueToAdd,nameofset,keyOfBiFlow,isbiflow):
         """
         addes a vaule to dicToMatchBiFlows
@@ -159,7 +168,7 @@ class AttackDataMultiplicator:
             rec.dip = IPAddr(self.dicOfFileToModifcationsClass[nameofset][1].dst[0])
         else:
             rec.dip = self.dicToMatchBiFlows[keyOfBiFlow][nameofset]["sip"]
-        self.addInfoToDicToMatchBiFlows("dip",rec.sip,nameofset,keyOfBiFlow,isbiflow)
+        self.addInfoToDicToMatchBiFlows("dip",rec.dip,nameofset,keyOfBiFlow,isbiflow)
         return rec
     
     def modifyNIPRecord(self,rec,nameofset,keyOfBiFlow,isbiflow):

@@ -1,4 +1,4 @@
-from silk import *
+#from silk import *
 
 
 """ 
@@ -37,3 +37,43 @@ multiple attack files needs to be possible
 
 When mixing move through the time and add a packtet when you get to the sampling rate
 """
+
+class MixingOfData:
+    def __init__(self,listWithChaningOfSamplingRate,inputFile1,inputFile2,innput=[100,1]):
+        if len(innput) >2 or type(innput) != list:
+            innput ==[100,1]
+        else:
+            if len(innput) >1:
+                if type(innput[1])!=int:
+                    innput[1] = 1
+            if type(innput[0])!=int:
+                innput[0] = 100
+        self.dicOfFileOutput ={}
+        if len(inputFile1) ==0:
+            raise ValueError("Sorry, no input for inputFile1") 
+        else:
+            if len(inputFile2) !=0:
+                if type(inputFile2) != str:
+                    raise SyntaxError("Sorry, not valid string for the file inputFile2")
+            if type(inputFile1) != str :
+                raise SyntaxError("Sorry, not valid string for the file inputFile1") 
+        self.inputFile1 = inputFile1
+        if len(inputFile2) ==0 :
+            self.inputFile2 = 0
+        else:
+            self.inputFile2 = inputFile2
+        
+        #for x in range(0, len(listWithChaningOfSamplingRate)):
+        #    self.dicOfFileOutput["ModifiedAttackFiles/"+attack+str(x)]= [silkfile_open("data/ModifiedAttackFiles/"+attack+str(x), WRITE),listWithChaningOfSamplingRate[x]]
+
+
+
+class ChaningOfSamplingRate:
+    def __init__(self):
+        pass
+        
+
+
+innput="sa"
+if type(innput) == str:
+    print("hei")
