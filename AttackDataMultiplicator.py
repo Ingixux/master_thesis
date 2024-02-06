@@ -8,6 +8,7 @@ class AttackDataMultiplicator:
     #TODO create a file assoted with the attack where informaation about the attack is stored (start time, endtime, botsize, sourceip?, dst ip, nhip)
     #TODO create a check that the first flow in a bi is from the Attacker VM, (as this file comes sorted, this should not be a problem, But I am not 100%, that it isn't a problem)
     #TODO Add code so that it will be easy for a new user to modify and other type of record type. 
+    #TODO add the possiblety to remove files that exits
     """
     Start the class with the silk file you to change with filePath
     The listtWithModifcationsClass incule a list of objet's of the InputToAttackDataMultiplicator
