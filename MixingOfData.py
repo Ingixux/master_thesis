@@ -38,7 +38,10 @@ When mixing move through the time and add a packtet when you get to the sampling
 """
 
 class MixingOfData:
-    #TODO add the possiblety to remove files that exits
+    #TODO add the possiblety to remove files that exits, when oping to write
+    """
+    The class assumes that the two files inputFile1 and inputFile2 are sorted on time
+    """
     def __init__(self,listWithChaningOfSamplingRate,inputFile1,inputFile2,innput):
         innput= self.checkInput(innput)
         self.dicOfFileOutput ={}
@@ -48,17 +51,72 @@ class MixingOfData:
         for chaningOfSamplingRate in self.dicOfFileOutput.values():
             namOupFile= inputFile1.split("/")[-1] 
             chaningOfSamplingRate.append(silkfile_open("data/DiffrentSamplingRates/"+namOupFile+chaningOfSamplingRate[0].changeTosamplingRate.samplingRate, WRITE))
-        
-        #TODO add the mixing
+        self.currentTime=0
         self.mix()
         
         self.closeAllFiles()
 
     def mix(self):
+        #TODO add the mixing
         if len(self.dicOfFileInnput.keys)==1:
             pass
 
+        #when mixing, for each time the max is reach save temp of all record that arrive until max is reach again. save the temp in a list in a dic, so that it can be erased based on the chaning
+        tempRecordList=[] 
 
+    def readNextRecs(self):
+        temprec=0
+        if self.currentTime == 0:
+            for key in self.dicOfFileInnput.keys():
+                self.dicOfFileInnput[key][0].addNextRec(self.dicOfFileInnput[key][1].read())
+                if self.currentTime == 0:
+                    self.currentTime =self.dicOfFileInnput[key][0].currentStartTime
+                    #temprec=self.dicOfFileInnput[key][0].nextRec
+                elif self.currentTime==self.dicOfFileInnput[key][0].currentStartTime:
+                    #TODO also add this record dic of temps
+                    pass   
+                elif self.currentTime>self.dicOfFileInnput[key][0].currentStartTime:
+                    self.currentTime =self.dicOfFileInnput[key][0].currentStartTime  
+                    #temprec= self.dicOfFileInnput[key][0].nextRec         
+            #TODO add the temo record to dic of temps
+        #TODO also add this record dic of temps   
+        temprec =self.addNewRecWhileSameSTIME()
+        if temprec==0: 
+            tempkey=0
+            for key in self.dicOfFileInnput.keys():
+                if tempkey== 0:
+                    tempkey=key
+                elif self.dicOfFileInnput[tempkey][0].currentStartTime>self.dicOfFileInnput[key][0].currentStartTime:
+                    tempkey=key
+            temp =self.dicOfFileInnput[tempkey][1].read()
+            self.dicOfFileInnput[tempkey][0].addNextRec(temp)
+            #TODO also add this record dic of temps          
+            temprec =self.addNewRecWhileSameSTIME()
+
+    def addNewRecWhileSameSTIME(self):
+        temp = 0
+        while self.checkIfOverCurrent == False:
+            for key in self.dicOfFileInnput.keys():
+                if self.currentTime==self.dicOfFileInnput[key][0].currentStartTime:
+                    temp =self.dicOfFileInnput[key][1].read()
+                    if temp == None:
+                        break
+                    else:
+                        self.dicOfFileInnput[key][0].addNextRec(temp)
+                        #TODO also add this record dic of temps
+            #get all record of the same start time
+        return temp
+        
+        
+
+
+
+    def checkIfOverCurrent(self):
+        allAreOver = True
+        for key in self.dicOfFileInnput.keys():
+            if self.currentTime==self.dicOfFileInnput[key][0].currentStartTime:
+                allAreOver =False
+        return allAreOver
 
     def checkChaningOfsamplingRate(self,listWithChaningOfSamplingRate,innput):
         for SamplingRateTochange in listWithChaningOfSamplingRate:
@@ -127,11 +185,21 @@ class ChaningOfSamplingRate:
         self.inputFile1SamplingRate = 0
         self.inputFile2SamplingRate = 0
 
+    def addPackets(self,newPackets):
+        return self.changeTosamplingRate.addPackets(newPackets)
 
 class SamplingRate:
     def __init__(self,samplingRate):
         self.initCheckSamplingRate(samplingRate)
         self.currentStartTime=0
+        self.nextRec=0
+
+    def getTotalPacketsInFlow(self, packets):
+        return self.maxpackets * packets
+
+    def addNextRec(self,nextRec):
+        self.nextRec=nextRec
+        self.currentStartTime=self.nextRec.stime
 
     def initCheckSamplingRate(self,samplingRate):
         self.samplingRate = samplingRate
