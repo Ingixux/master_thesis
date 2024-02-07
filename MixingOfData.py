@@ -67,7 +67,7 @@ class TempRecords:
     def setPacketsWeightZero(self,overPackets):
         self.packetsWeight=overPackets
 
-    def checkEnd(self,timeNow):
+    def checkEnd(self):
         if (self.packetsUsed >= self.totalPackets):
             return True
         else:
@@ -137,12 +137,12 @@ class MixingOfData:
                         packetToUseNow =tempRecords.getPacketsLeft() // dDBDIST
                         tempRecords.increasePacketsUsed(packetToUseNow,nextstime)
                     countpackets +=packetToUseNow
-                overMax,timesover=samplingRateFiles.addPackets(countpackets) 
+                overMax,timesover=samplingRateFiles[0].addPackets(countpackets) 
                 if overMax:
                     theWeights =[]
                     recordsToUse =[]
-                    setWeightStart =samplingRateFiles.countpackets // len(records)
-                    extraSetWeightStart=samplingRateFiles.countpackets % len(records)
+                    setWeightStart =samplingRateFiles[0].countpackets // len(records)
+                    extraSetWeightStart=samplingRateFiles[0].countpackets % len(records)
                     x=0
                     for tempRecords in records: #TODO need to handle if there are more packets than sample rate
                         tempsetWeightStart = setWeightStart
@@ -156,11 +156,19 @@ class MixingOfData:
                     incressWrite=random.choices(recordsToUse, weights=theWeights, k=timesover) #create the 
                     for tempRecords in incressWrite:
                         tempRecords.increasePacketToWrite()
-                    #TODO check if record is being remove
-
-
-
-            records =self.getNextRecord()   
+                    for tempRecords in records:
+                        if tempRecords.checkEnd:
+                            #TODO write the record
+                            samplingRateFiles[1].write(tempRecords.endOfFlow(self.currentTime))
+                            records.remove(tempRecords)
+                            del tempRecords
+                        #TODO check if record is being remove
+            newNext=self.getNextRecord()
+            if len(newNext) != 0: #TODO check if this is the correct way to end it
+                for tempRecords in newNext:
+                    records.append(tempRecords)
+            else:
+                records=[]
                     
     def findLowestNextRecStime(self):
         tempkey=0
