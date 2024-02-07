@@ -60,8 +60,12 @@ class TempRecords:
         self.packetsWeight += packets
         self.currentetime=timeNow
 
-    def setPacketsWeightZero(self):
-        self.packetsWeight=0
+    def decreasePacketsUsed(self, packets):
+        self.packetsUsed -= packets
+    
+
+    def setPacketsWeightZero(self,overPackets):
+        self.packetsWeight=overPackets
 
     def checkEnd(self,timeNow):
         if (self.packetsUsed >= self.totalPackets):
@@ -137,10 +141,18 @@ class MixingOfData:
                 if overMax:
                     theWeights =[]
                     recordsToUse =[]
+                    setWeightStart =samplingRateFiles.countpackets // len(records)
+                    extraSetWeightStart=samplingRateFiles.countpackets % len(records)
+                    x=0
                     for tempRecords in records: #TODO need to handle if there are more packets than sample rate
-                        theWeights.append(tempRecords.packetsWeight)
+                        tempsetWeightStart = setWeightStart
+                        if x>extraSetWeightStart:
+                            tempsetWeightStart+=1
+                            x+=1
+                        theWeights.append(tempRecords.packetsWeight-tempsetWeightStart)
                         recordsToUse.append(tempRecords)
-                        tempRecords.setPacketsWeightZero()
+                        tempRecords.setPacketsWeightZero(tempsetWeightStart)
+                        tempRecords.decreasePacketsUsed(tempsetWeightStart)
                     incressWrite=random.choices(recordsToUse, weights=theWeights, k=timesover) #create the 
                     for tempRecords in incressWrite:
                         tempRecords.increasePacketToWrite()
