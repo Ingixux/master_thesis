@@ -3,6 +3,7 @@ import copy
 import datetime
 import random 
 import os
+import math
 """ 
 count the total number of packets, inside of the time space the attack is being mix inn,
 The number of real packets have to be mdultiplied with 100, add the number of total attack packets and normal packets, 
@@ -60,12 +61,14 @@ class TempRecords:
         return self.totalPackets - self.packetsUsed
     
     def increasePacketsUsed(self, packets,timeNow):
+        self.packetsUsed += packets
+        self.packetsWeight += packets
+        self.currentetime=timeNow
         if self.packetsUsed>=self.totalPackets:
             pass
         else:
-            self.packetsUsed += packets
-            self.packetsWeight += packets
-            self.currentetime=timeNow
+            pass
+
 
     def decreasePacketsUsed(self, packets):
         self.packetsUsed -= packets
@@ -81,6 +84,7 @@ class TempRecords:
             self.packetsWeight=overPackets
 
     def checkEnd(self):
+        return self.end
         if self.end:
         #if self.lastTime == True:
             return True
@@ -149,14 +153,18 @@ class MixingOfData:
                         diffrentInStartTime =0
                         packetToUseNow=0
                         dDBDIST = 0 #dDBDIST=durationDivivedByDiffrentInStartTime
-                        if tempRecords.currentetime < nextstime:
+                        if nextstime - tempRecords.currentetime < tempRecords.duration:
                             packetToUseNow =tempRecords.getPacketsLeft()
                             tempRecords.increasePacketsUsed(packetToUseNow,tempRecords.currentetime)
                         else:
                             diffrentInStartTime = nextstime- tempRecords.currentetime
-                            dDBDIST = tempRecords.duration / diffrentInStartTime  
-                            packetToUseNow =tempRecords.getPacketsLeft() // dDBDIST
+                            dDBDIST = math.floor(tempRecords.duration / diffrentInStartTime)  
+                            if dDBDIST<1:
+                                packetToUseNow =tempRecords.getPacketsLeft()
+                            else:
+                                packetToUseNow =int(tempRecords.getPacketsLeft() // dDBDIST)
                             tempRecords.increasePacketsUsed(packetToUseNow,nextstime)
+                        
                         countpackets +=packetToUseNow
                     overMax,timesover=samplingRateFiles[0].addPackets(countpackets)
                     print()
@@ -201,7 +209,8 @@ class MixingOfData:
                         #for tempRecords2 in incressWrite:
                         #    if tempRecords == tempRecords2:
                         #        tempRecords.increasePacketToWrite()
-                        print(tempRecords2.checkEnd())
+                        
+                        #print(tempRecords2.checkEnd())
                         if tempRecords2.checkEnd():
                             #TODO write the record
                             recToWrtie= tempRecords2.endOfFlow(self.currentTime)
