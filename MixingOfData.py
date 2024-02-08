@@ -2,6 +2,7 @@ from silk import *
 import copy
 import datetime
 import random 
+import os
 """ 
 count the total number of packets, inside of the time space the attack is being mix inn,
 The number of real packets have to be mdultiplied with 100, add the number of total attack packets and normal packets, 
@@ -41,7 +42,8 @@ When mixing move through the time and add a packtet when you get to the sampling
 
 class TempRecords:
     def __init__(self,rec,samplingUsedToCollect,keyToFile):
-        self.rec=copy.deepcopy(rec)
+        #self.rec=copy.deepcopy(rec)
+        self.rec=rec
         self.stime = self.rec.stime
         self.totalPackets = self.rec.packets *samplingUsedToCollect
         self.duration = self.rec.duration
@@ -103,7 +105,10 @@ class MixingOfData:
         self.checkChaningOfsamplingRate(listWithChaningOfSamplingRate,innput)
         for chaningOfSamplingRate in self.dicOfFileOutput.values():
             namOupFile= inputFile1.split("/")[-1] 
-            chaningOfSamplingRate.append(silkfile_open("data/DiffrentSamplingRates/"+namOupFile+chaningOfSamplingRate[0].changeTosamplingRate.samplingRate, WRITE))
+            pathToFile ="data/DiffrentSamplingRates/"+namOupFile+str(chaningOfSamplingRate[0].maxpackets)
+            if os.path.isfile(pathToFile):
+                os.remove(pathToFile)
+            chaningOfSamplingRate.append(silkfile_open(pathToFile, WRITE))
         self.currentTime=0
         
         self.mix()
@@ -117,58 +122,77 @@ class MixingOfData:
 
         #when mixing, for each time the max is reach save temp of all record that arrive until max is reach again. save the temp in a list in a dic, so that it can be erased based on the chaning#
         records =self.getNextRecord()
+        newNext =records
         while len(records)>0:
             nextstime= self.findLowestNextRecStime()
+            #print(newNext)
             for samplingRateFiles in self.dicOfFileOutput.values():
-                #for record in records:
-                #    samplingRateFiles.listOfCurrenttempRecords.append(TempRecords(record,))
-                #for tempRecords in samplingRateFiles.listOfCurrenttempRecords:
-                countpackets =0
-                for tempRecords in records:
-                    diffrentInStartTime =0
-                    packetToUseNow=0
-                    dDBDIST = 0 #dDBDIST=durationDivivedByDiffrentInStartTime
-                    if tempRecords.currentetime < nextstime:
-                        packetToUseNow =tempRecords.getPacketsLeft()
-                        tempRecords.increasePacketsUsed(packetToUseNow,tempRecords.currentetime)
-                    else:
-                        diffrentInStartTime = nextstime- tempRecords.currentetime
-                        dDBDIST = tempRecords.duration / diffrentInStartTime  
-                        packetToUseNow =tempRecords.getPacketsLeft() // dDBDIST
-                        tempRecords.increasePacketsUsed(packetToUseNow,nextstime)
-                    countpackets +=packetToUseNow
-                overMax,timesover=samplingRateFiles[0].addPackets(countpackets) 
-                if overMax:
-                    theWeights =[]
-                    recordsToUse =[]
-                    setWeightStart =samplingRateFiles[0].countpackets // len(records)
-                    extraSetWeightStart=samplingRateFiles[0].countpackets % len(records)
-                    x=0
-                    for tempRecords in records: #TODO need to handle if there are more packets than sample rate
-                        tempsetWeightStart = setWeightStart
-                        if x>extraSetWeightStart:
-                            tempsetWeightStart+=1
-                            x+=1
-                        theWeights.append(tempRecords.packetsWeight-tempsetWeightStart)
-                        recordsToUse.append(tempRecords)
-                        tempRecords.setPacketsWeightZero(tempsetWeightStart)
-                        tempRecords.decreasePacketsUsed(tempsetWeightStart)
-                    incressWrite=random.choices(recordsToUse, weights=theWeights, k=timesover) #create the 
-                    for tempRecords in incressWrite:
-                        tempRecords.increasePacketToWrite()
+                if len(newNext) != 0:
+                    #for record in records:
+                    #    samplingRateFiles.listOfCurrenttempRecords.append(TempRecords(record,))
+                    #for tempRecords in samplingRateFiles.listOfCurrenttempRecords:
+                    countpackets =0
                     for tempRecords in records:
-                        if tempRecords.checkEnd:
-                            #TODO write the record
-                            samplingRateFiles[1].write(tempRecords.endOfFlow(self.currentTime))
-                            records.remove(tempRecords)
-                            del tempRecords
-                        #TODO check if record is being remove
+                        diffrentInStartTime =0
+                        packetToUseNow=0
+                        dDBDIST = 0 #dDBDIST=durationDivivedByDiffrentInStartTime
+                        if tempRecords.currentetime < nextstime:
+                            packetToUseNow =tempRecords.getPacketsLeft()
+                            tempRecords.increasePacketsUsed(packetToUseNow,tempRecords.currentetime)
+                        else:
+                            diffrentInStartTime = nextstime- tempRecords.currentetime
+                            dDBDIST = tempRecords.duration / diffrentInStartTime  
+                            packetToUseNow =tempRecords.getPacketsLeft() // dDBDIST
+                            tempRecords.increasePacketsUsed(packetToUseNow,nextstime)
+                        countpackets +=packetToUseNow
+                    overMax,timesover=samplingRateFiles[0].addPackets(countpackets)
+                    print(overMax) 
+                    if overMax:
+                        theWeights =[]
+                        recordsToUse =[]
+                        setWeightStart =samplingRateFiles[0].countpackets // len(records)
+                        extraSetWeightStart=samplingRateFiles[0].countpackets % len(records)
+                        x=0
+                        for tempRecords in records: #TODO need to handle if there are more packets than sample rate
+                            tempsetWeightStart = setWeightStart
+                            if x>extraSetWeightStart:
+                                tempsetWeightStart+=1
+                                x+=1
+                            theWeights.append(tempRecords.packetsWeight-tempsetWeightStart)
+                            recordsToUse.append(tempRecords)
+                            tempRecords.setPacketsWeightZero(tempsetWeightStart)
+                            tempRecords.decreasePacketsUsed(tempsetWeightStart)
+                        incressWrite=random.choices(recordsToUse, weights=theWeights, k=timesover) #create the
+                        #print(incressWrite)
+                        #print(samplingRateFiles[0].maxpackets) 
+                        for tempRecords in incressWrite:
+                            timeToWrtie= nextstime
+                            if nextstime == datetime.datetime.max:
+                                timeToWrtie = self.currentTime
+                            tempRecords.increasePacketToWrite(timeToWrtie)
+                        for tempRecords in records:
+                            if tempRecords.checkEnd:
+                                #TODO write the record
+                                recToWrtie= tempRecords.endOfFlow(self.currentTime)
+                                if recToWrtie!=0:
+                                    samplingRateFiles[1].write(recToWrtie)
+                                records.remove(tempRecords)
+                                del tempRecords
+                            #TODO check if record is being remove
+                else:
+                    for tempRecords in records:
+                        #TODO write the record
+                        recToWrtie= tempRecords.endOfFlow(self.currentTime)
+                        if recToWrtie!=0:
+                            samplingRateFiles[1].write(recToWrtie)
+                        records.remove(tempRecords)
+                        del tempRecords
+                    print(records)
+
             newNext=self.getNextRecord()
             if len(newNext) != 0: #TODO check if this is the correct way to end it
                 for tempRecords in newNext:
                     records.append(tempRecords)
-            else:
-                records=[]
                     
     def findLowestNextRecStime(self):
         tempkey=0
@@ -325,10 +349,10 @@ class MixingOfData:
                 raise SyntaxError("Sorry, not valid string for the file inputFile1") 
         
         self.dicOfFileInnput[inputFile1]= [innput[0],silkfile_open(inputFile1, READ)]
-        if len(inputFile2) ==0 :
-            self.inputFile2 = 0
+        if len(inputFile2) !=0 :
+            self.dicOfFileInnput[inputFile2]= [innput[1],silkfile_open(inputFile2, READ)]
         else:
-            self.dicOfFileInnput[inputFile1]= [innput[1],silkfile_open(inputFile2, READ)]
+            self.inputFile2 = 0
         
     def closeInputFiles(self):
         """
