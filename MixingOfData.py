@@ -43,7 +43,7 @@ When mixing move through the time and add a packtet when you get to the sampling
 
 class TempRecords:
     def __init__(self,rec,samplingUsedToCollect,keyToFile):
-        #self.rec=copy.deepcopy(rec)
+        #self.rec=copy.copy(rec)
         self.rec=rec
         self.stime = self.rec.stime
         self.totalPackets = self.rec.packets *samplingUsedToCollect
@@ -54,8 +54,9 @@ class TempRecords:
         self.currentetime= self.rec.stime
         self.bytes= rec.bytes *samplingUsedToCollect
         self.keyToFile=keyToFile
-        self.lastTime=False
-        self.end=False
+
+
+
 
     def getPacketsLeft(self):
         return self.totalPackets - self.packetsUsed
@@ -75,17 +76,14 @@ class TempRecords:
     
 
     def setPacketsWeightZero(self,overPackets):
-        if self.lastTime == True:
-            self.end == True
-        elif self.packetsUsed>=self.totalPackets:
-            self.lastTime = True
+        if self.packetsUsed>=self.totalPackets:
             self.packetsWeight=overPackets
         else:
             self.packetsWeight=overPackets
 
     def checkEnd(self):
-        return self.end
-        if self.end:
+        #return self.end
+        if self.packetsUsed>=self.totalPackets:
         #if self.lastTime == True:
             return True
         else:
@@ -149,13 +147,26 @@ class MixingOfData:
                     #    samplingRateFiles.listOfCurrenttempRecords.append(TempRecords(record,))
                     #for tempRecords in samplingRateFiles.listOfCurrenttempRecords:
                     countpackets =0
+                    longerflows=0
                     for tempRecords in samplingRateFiles[0].listOfCurrenttempRecords:
+                        packetToUseNow=0
+                        if nextstime - tempRecords.currentetime <= tempRecords.duration:
+                            packetToUseNow =tempRecords.getPacketsLeft()
+                            tempRecords.increasePacketsUsed(packetToUseNow,tempRecords.currentetime)
+                            #tempRecords.setEnd()
+
+                        countpackets +=packetToUseNow
+                    for tempRecords in samplingRateFiles[0].listOfCurrenttempRecords:
+                        longerflows+=1
                         diffrentInStartTime =0
                         packetToUseNow=0
                         dDBDIST = 0 #dDBDIST=durationDivivedByDiffrentInStartTime
-                        if nextstime - tempRecords.currentetime < tempRecords.duration:
+                        #if nextstime - tempRecords.currentetime < tempRecords.duration:
+                        #    packetToUseNow =tempRecords.getPacketsLeft()
+                        #    tempRecords.increasePacketsUsed(packetToUseNow,tempRecords.currentetime)
+                        #else:
+                        if nextstime ==datetime.datetime.max:
                             packetToUseNow =tempRecords.getPacketsLeft()
-                            tempRecords.increasePacketsUsed(packetToUseNow,tempRecords.currentetime)
                         else:
                             diffrentInStartTime = nextstime- tempRecords.currentetime
                             dDBDIST = math.floor(tempRecords.duration / diffrentInStartTime)  
@@ -163,32 +174,37 @@ class MixingOfData:
                                 packetToUseNow =tempRecords.getPacketsLeft()
                             else:
                                 packetToUseNow =int(tempRecords.getPacketsLeft() // dDBDIST)
-                            tempRecords.increasePacketsUsed(packetToUseNow,nextstime)
+                        tempRecords.increasePacketsUsed(packetToUseNow,nextstime)
                         
                         countpackets +=packetToUseNow
+                    #print(samplingRateFiles[0].countpackets)
                     overMax,timesover=samplingRateFiles[0].addPackets(countpackets)
-                    print()
-                    print(countpackets)
-                    print(timesover)
-                    print(overMax)
-                    print("smapling "+str(samplingRateFiles[0].maxpackets))
+                    #print(countpackets)
+                    #print(timesover)
+                    #print(overMax)
+                    #print("smapling "+str(samplingRateFiles[0].maxpackets))
+                    #print()
                     if overMax:
                         theWeights =[]
                         recordsToUse =[]
-                        setWeightStart =(samplingRateFiles[0].countpackets) // len(samplingRateFiles[0].listOfCurrenttempRecords)
-                        extraSetWeightStart=(samplingRateFiles[0].countpackets) % len(samplingRateFiles[0].listOfCurrenttempRecords)
+                        setWeightStart =(samplingRateFiles[0].countpackets) //longerflows
+                        extraSetWeightStart=(samplingRateFiles[0].countpackets) % longerflows
                         #print(setWeightStart*len(samplingRateFiles[0].listOfCurrenttempRecords))
                         #print(extraSetWeightStart)
                         x=0
                         for tempRecords in samplingRateFiles[0].listOfCurrenttempRecords: #TODO need to handle if there are more packets than sample rate
-                            tempsetWeightStart = copy.copy(setWeightStart)
-                            if x<extraSetWeightStart:
-                                tempsetWeightStart+=1
-                                x+=1
+                            if tempRecords.checkEnd() == False:
+                                tempsetWeightStart = copy.copy(setWeightStart)
+                                if x<extraSetWeightStart:
+                                    tempsetWeightStart+=1
+                                    x+=1
+                                theWeights.append(tempRecords.packetsWeight-tempsetWeightStart)
+                                tempRecords.setPacketsWeightZero(tempsetWeightStart)
+                            else:
+                                theWeights.append(tempRecords.packetsWeight)
                             #print(x+setWeightStart)
                             #tempRecords.decreasePacketsUsed(tempsetWeightStart)
-                            theWeights.append(tempRecords.packetsWeight-tempsetWeightStart)
-                            tempRecords.setPacketsWeightZero(tempsetWeightStart)
+                                
                             #theWeights.append(tempRecords.packetsWeight-tempsetWeightStart)
                             recordsToUse.append(tempRecords)
                         incressWrite=random.choices(recordsToUse, weights=theWeights, k=timesover) #create the
@@ -205,33 +221,40 @@ class MixingOfData:
                             tempRecords.increasePacketToWrite()
                             #tempRecords.increasePacketToWrite(timeToWrtie)
                     #listToDel=[]
-                    for tempRecords2 in samplingRateFiles[0].listOfCurrenttempRecords:
+                    tempDelList =[]
+                    for tempRecords in samplingRateFiles[0].listOfCurrenttempRecords:
                         #for tempRecords2 in incressWrite:
                         #    if tempRecords == tempRecords2:
                         #        tempRecords.increasePacketToWrite()
                         
                         #print(tempRecords2.checkEnd())
-                        if tempRecords2.checkEnd():
+                        
+                        if tempRecords.checkEnd():
+                            #print("hei")
                             #TODO write the record
-                            recToWrtie= tempRecords2.endOfFlow(self.currentTime)
+                            recToWrtie= tempRecords.endOfFlow(self.currentTime)
                             if recToWrtie!=0:
                                 samplingRateFiles[1].write(recToWrtie)
-                            samplingRateFiles[0].listOfCurrenttempRecords.remove(tempRecords2)    
-                            del tempRecords2
+                            tempDelList.append(tempRecords)
+                    for tempRecords in tempDelList:
+                        samplingRateFiles[0].listOfCurrenttempRecords.remove(tempRecords)    
+                        del tempRecords
                             #listToDel.append(tempRecords)
                     #for tempRecords in listToDel:
                     #        samplingRateFiles[0].listOfCurrenttempRecords.remove(tempRecords)
                     #        del tempRecords
                         #TODO check if record is being remove
                 else:
+                    tempDelList =[]
                     for tempRecords in samplingRateFiles[0].listOfCurrenttempRecords:
-                        #TODO write the record
                         recToWrtie= tempRecords.endOfFlow(self.currentTime)
                         if recToWrtie!=0:
                             samplingRateFiles[1].write(recToWrtie)
+                        tempDelList.append(tempRecords)
+                    for tempRecords in tempDelList:
                         samplingRateFiles[0].listOfCurrenttempRecords.remove(tempRecords)
                         del tempRecords
-                        records =0
+                    records =0
 
 
                     
@@ -413,7 +436,7 @@ class ChaningOfSamplingRate:
 
     def checkIfOverMax(self):
         if self.countpackets>=self.maxpackets:
-            self.countpackets= self.countpackets-self.maxpackets
+            #self.countpackets= self.countpackets-self.maxpackets
             return True
         else:
             return False
@@ -424,15 +447,16 @@ class ChaningOfSamplingRate:
 
     def addPackets(self,newPackets): #TODO Wrong!!!!!!!
         if newPackets>self.maxpackets:
-            timesover= newPackets//self.maxpackets
+            timesover= (newPackets +self.countpackets)//self.maxpackets
             newPackets = newPackets- self.maxpackets*timesover
             self.countpackets+=newPackets
             self.checkIfOverMax()
-            return True,timesover+1 
+            return True,timesover 
         else:
             self.countpackets+=newPackets
             isover = self.checkIfOverMax()
             if isover:
+                self.countpackets= self.countpackets-self.maxpackets
                 return isover, 1
             else: 
                 return isover, 0 
