@@ -128,11 +128,6 @@ class MixingOfData:
                                 theWeights.append(tempRecords.packetsWeight)
                             recordsToUse.append(tempRecords)
                         incressWrite=random.choices(recordsToUse, weights=theWeights, k=timesover) #create the
-                        #print(len(incressWrite))
-                        #print("smapling "+str(samplingRateFiles[0].maxpackets))
-                        #print()
-                        #print(samplingRateFiles[0].maxpackets) 
-                        #print()
                         for tempRecords in incressWrite:
                             tempRecords.increasePacketToWrite()
                     self.writeAndDelTemprecdors(samplingRateFiles)
@@ -171,7 +166,7 @@ class MixingOfData:
         temprec=0
         if self.currentTime == 0:
             for key in self.dicOfFileInnput.keys():
-                temprec=self.dicOfFileInnput[key][1].read()
+                temprec=self.dicOfFileInnput[key][1].read() # TODO check what happen if the file stops
                 self.dicOfFileInnput[key][0].addNextRec(temprec)
                 if self.currentTime == 0:
                     self.currentTime =self.dicOfFileInnput[key][0].currentStartTime
