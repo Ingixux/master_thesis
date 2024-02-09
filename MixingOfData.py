@@ -26,14 +26,6 @@ class TempRecords:
         self.packetsUsed += packets
         self.packetsWeight += packets
         self.currentetime=timeNow
-        if self.packetsUsed>=self.totalPackets:
-            pass
-        else:
-            pass
-
-    def decreasePacketsUsed(self, packets):
-        self.packetsUsed -= packets
-    
 
     def setPacketsWeightZero(self,overPackets):
         if self.packetsUsed>=self.totalPackets:
@@ -42,16 +34,11 @@ class TempRecords:
             self.packetsWeight=overPackets
 
     def checkEnd(self):
-        #return self.end
         if self.packetsUsed>=self.totalPackets:
-        #if self.lastTime == True:
             return True
         else:
             return False
-    
-    def findDifInTime(self):
-        pass
-
+        
     def increasePacketToWrite(self):
         self.packetToWrite+=1
 
@@ -63,8 +50,6 @@ class TempRecords:
             self.rec.bytes =(self.bytes // self.totalPackets) * self.packetToWrite 
             self.rec.duration = (timeNow - self.rec.stime)
             return self.rec
-
-
 
 class MixingOfData:
     #TODO add the possiblety to remove files that exits, when oping to write
@@ -90,11 +75,6 @@ class MixingOfData:
         self.closeAllFiles()
 
     def mix(self):
-        #TODO add the mixing
-        #if len(self.dicOfFileInnput.keys)==1:
-        #    pass
-
-        #when mixing, for each time the max is reach save temp of all record that arrive until max is reach again. save the temp in a list in a dic, so that it can be erased based on the chaning#
         records =1
         while records>0:
             newNext=self.getNextRecord()
@@ -103,9 +83,6 @@ class MixingOfData:
                 if len(newNext) != 0:
                     for tempRecords in newNext:
                         samplingRateFiles[0].listOfCurrenttempRecords.append(copy.copy(tempRecords))
-                    #for record in records:
-                    #    samplingRateFiles.listOfCurrenttempRecords.append(TempRecords(record,))
-                    #for tempRecords in samplingRateFiles.listOfCurrenttempRecords:
                     countpackets =0
                     longerflows=0
                     #TODO somthing must be added here, so that records here don't get remove if there isn't enugh, in the current time, but they are completet
@@ -114,18 +91,12 @@ class MixingOfData:
                         if nextstime - tempRecords.currentetime <= tempRecords.duration:
                             packetToUseNow =tempRecords.getPacketsLeft()
                             tempRecords.increasePacketsUsed(packetToUseNow,tempRecords.currentetime)
-                            #tempRecords.setEnd()
-
                         countpackets +=packetToUseNow
                     for tempRecords in samplingRateFiles[0].listOfCurrenttempRecords:
                         longerflows+=1
                         diffrentInStartTime =0
                         packetToUseNow=0
                         dDBDIST = 0 #dDBDIST=durationDivivedByDiffrentInStartTime
-                        #if nextstime - tempRecords.currentetime < tempRecords.duration:
-                        #    packetToUseNow =tempRecords.getPacketsLeft()
-                        #    tempRecords.increasePacketsUsed(packetToUseNow,tempRecords.currentetime)
-                        #else:
                         if nextstime ==datetime.datetime.max:
                             packetToUseNow =tempRecords.getPacketsLeft()
                         else:
@@ -138,20 +109,12 @@ class MixingOfData:
                         tempRecords.increasePacketsUsed(packetToUseNow,nextstime)
                         
                         countpackets +=packetToUseNow
-                    #print(samplingRateFiles[0].countpackets)
                     overMax,timesover=samplingRateFiles[0].addPackets(countpackets)
-                    #print(countpackets)
-                    #print(timesover)
-                    #print(overMax)
-                    #print("smapling "+str(samplingRateFiles[0].maxpackets))
-                    #print()
                     if overMax:
                         theWeights =[]
                         recordsToUse =[]
                         setWeightStart =(samplingRateFiles[0].countpackets) //longerflows
                         extraSetWeightStart=(samplingRateFiles[0].countpackets) % longerflows
-                        #print(setWeightStart*len(samplingRateFiles[0].listOfCurrenttempRecords))
-                        #print(extraSetWeightStart)
                         x=0
                         for tempRecords in samplingRateFiles[0].listOfCurrenttempRecords: #TODO need to handle if there are more packets than sample rate
                             if tempRecords.checkEnd() == False:
@@ -163,62 +126,32 @@ class MixingOfData:
                                 tempRecords.setPacketsWeightZero(tempsetWeightStart)
                             else:
                                 theWeights.append(tempRecords.packetsWeight)
-                            #print(x+setWeightStart)
-                            #tempRecords.decreasePacketsUsed(tempsetWeightStart)
-                                
-                            #theWeights.append(tempRecords.packetsWeight-tempsetWeightStart)
                             recordsToUse.append(tempRecords)
                         incressWrite=random.choices(recordsToUse, weights=theWeights, k=timesover) #create the
-
                         #print(len(incressWrite))
                         #print("smapling "+str(samplingRateFiles[0].maxpackets))
                         #print()
                         #print(samplingRateFiles[0].maxpackets) 
                         #print()
                         for tempRecords in incressWrite:
-                            #timeToWrtie= nextstime
-                            #if nextstime == datetime.datetime.max:
-                            #    timeToWrtie = self.currentTime
                             tempRecords.increasePacketToWrite()
-                            #tempRecords.increasePacketToWrite(timeToWrtie)
-                    #listToDel=[]
-                    tempDelList =[]
-                    for tempRecords in samplingRateFiles[0].listOfCurrenttempRecords:
-                        #for tempRecords2 in incressWrite:
-                        #    if tempRecords == tempRecords2:
-                        #        tempRecords.increasePacketToWrite()
-                        
-                        #print(tempRecords2.checkEnd())
-                        
-                        if tempRecords.checkEnd():
-                            #print("hei")
-                            #TODO write the record
-                            recToWrtie= tempRecords.endOfFlow(self.currentTime)
-                            if recToWrtie!=0:
-                                samplingRateFiles[1].write(recToWrtie)
-                            tempDelList.append(tempRecords)
-                    for tempRecords in tempDelList:
-                        samplingRateFiles[0].listOfCurrenttempRecords.remove(tempRecords)    
-                        del tempRecords
-                            #listToDel.append(tempRecords)
-                    #for tempRecords in listToDel:
-                    #        samplingRateFiles[0].listOfCurrenttempRecords.remove(tempRecords)
-                    #        del tempRecords
-                        #TODO check if record is being remove
+                    self.writeAndDelTemprecdors(samplingRateFiles)
                 else:
-                    tempDelList =[]
-                    for tempRecords in samplingRateFiles[0].listOfCurrenttempRecords:
-                        recToWrtie= tempRecords.endOfFlow(self.currentTime)
-                        if recToWrtie!=0:
-                            samplingRateFiles[1].write(recToWrtie)
-                        tempDelList.append(tempRecords)
-                    for tempRecords in tempDelList:
-                        samplingRateFiles[0].listOfCurrenttempRecords.remove(tempRecords)
-                        del tempRecords
+                    self.writeAndDelTemprecdors(samplingRateFiles)
                     records =0
 
+    def writeAndDelTemprecdors(self,samplingRateFiles):
+        tempDelList =[]
+        for tempRecords in samplingRateFiles[0].listOfCurrenttempRecords:
+            if tempRecords.checkEnd():
+                recToWrtie= tempRecords.endOfFlow(self.currentTime)
+                if recToWrtie!=0:
+                    samplingRateFiles[1].write(recToWrtie)
+                tempDelList.append(tempRecords)
+        for tempRecords in tempDelList:
+            samplingRateFiles[0].listOfCurrenttempRecords.remove(tempRecords)    
+            del tempRecords
 
-                    
     def findLowestNextRecStime(self):
         tempkey=0
         for key in self.dicOfFileInnput.keys():
@@ -236,17 +169,14 @@ class MixingOfData:
         """
         temprecords= []
         temprec=0
-        # will the first record, the first time it is run
         if self.currentTime == 0:
             for key in self.dicOfFileInnput.keys():
                 temprec=self.dicOfFileInnput[key][1].read()
                 self.dicOfFileInnput[key][0].addNextRec(temprec)
-                #self.dicOfFileInnput[key][0].currentStartTime =temprec.stime
                 if self.currentTime == 0:
                     self.currentTime =self.dicOfFileInnput[key][0].currentStartTime
                 elif self.currentTime>self.dicOfFileInnput[key][0].currentStartTime:
                     self.currentTime =self.dicOfFileInnput[key][0].currentStartTime 
-                
         for x in self.addNewRecWhileSameSTIME():
             temprecords.append(x)
         if temprec==0:
@@ -265,21 +195,16 @@ class MixingOfData:
     def addNewRecWhileSameSTIME(self):
         temprecords =[]
         for key in self.dicOfFileInnput.keys():
-            #print(self.dicOfFileInnput[key][0].getNextRecord())
-            #print(self.currentTime)
             record = self.dicOfFileInnput[key][0].getNextRecord()
             if record !=0:
                 while record.stime ==self.currentTime:
                     if self.currentTime==self.dicOfFileInnput[key][0].currentStartTime:
-                        #temprecords.append(record)
                         temprecords.append(TempRecords(record,self.dicOfFileInnput[key][0].maxpackets,key))
                         temprec=self.dicOfFileInnput[key][1].read()
                         if temprec != None:
                             self.dicOfFileInnput[key][0].addNextRec(temprec)
-                            #self.dicOfFileInnput[key][0].currentStartTime =temprec.stime
                         else:
                             self.dicOfFileInnput[key][0].addNextRec(0)
-                            #self.dicOfFileInnput[key][0].currentStartTime =datetime.datetime.max
                     record = self.dicOfFileInnput[key][0].getNextRecord()
                     if record==0:
                         break
@@ -301,10 +226,8 @@ class MixingOfData:
                     raise ValueError("the sampling rate to change to can't be lower than the sampling rate of the to input file")
             if not SamplingRateTochange.samplingRate in self.dicOfFileOutput.keys():
                 self.dicOfFileOutput[SamplingRateTochange.samplingRate]=[ChaningOfSamplingRate(SamplingRateTochange)]
-                #self.dicOfFileOutput[SamplingRateTochange.samplingRate][0].inputFile1SamplingRate= copy.deepcopy(innput[0])
                 self.dicOfFileOutput[SamplingRateTochange.samplingRate][0].inputFile1SamplingRate= innput[0].maxpackets
                 if len(innput) == 2:
-                    #self.dicOfFileOutput[SamplingRateTochange.samplingRate][0].inputFile2SamplingRate= copy.deepcopy(innput[1])
                     self.dicOfFileOutput[SamplingRateTochange.samplingRate][0].inputFile2SamplingRate= innput[1].maxpackets
 
     def closeAllFiles(self):
@@ -357,7 +280,6 @@ class MixingOfData:
 
 class ChaningOfSamplingRate:
     def __init__(self,changeTosamplingRate):
-        #self.changeTosamplingRate = changeTosamplingRate.maxpackets
         self.maxpackets = changeTosamplingRate.maxpackets
         self.inputFile1SamplingRate = 0
         self.inputFile2SamplingRate = 0
@@ -366,14 +288,9 @@ class ChaningOfSamplingRate:
 
     def checkIfOverMax(self):
         if self.countpackets>=self.maxpackets:
-            #self.countpackets= self.countpackets-self.maxpackets
             return True
         else:
             return False
-        
-    def addToListOfCurrenttempRecords(self, tempRecords):    
-        self.listOfCurrenttempRecords.append(copy.deepcopy(tempRecords))
-
 
     def addPackets(self,newPackets): 
         if newPackets>self.maxpackets:
@@ -399,9 +316,6 @@ class SamplingRate:
 
     def getNextRecord(self):
         return self.nextRec
-
-    def getTotalPacketsInFlow(self, packets):
-        return self.maxpackets * packets
 
     def addNextRec(self,nextRec):
         self.nextRec=nextRec
@@ -430,25 +344,6 @@ class SamplingRate:
         self.samplingRate = "1OF"+str(self.maxpackets)
         self.countpackets =0
 
-    def checkIfOverMax(self):
-        if self.countpackets>=self.maxpackets:
-            self.countpackets= self.countpackets-self.maxpackets
-            return True
-        else:
-            return False
-        
-    def addPackets(self,newPackets):
-        if newPackets>self.maxpackets:
-            timesover= newPackets//self.maxpackets
-            newPackets = newPackets- self.maxpackets*timesover
-            self.countpackets+=newPackets
-            if self.checkIfOverMax() == True:
-                return timesover+1, True
-            else:
-                return timesover, False
-        else:
-            self.countpackets+=newPackets
-            return 1, self.checkIfOverMax()
         
 
 sa1 =SamplingRate("1:1")
@@ -456,5 +351,7 @@ sa2 =SamplingRate("1:100")
 ca1 =SamplingRate("1:500")
 ca2 =SamplingRate("1:1000")
 
+
+#MD = MixingOfData([ca2],"data/ModifiedAttackFiles/TCP_SYN_Flodd","data/SilkFilesFromSikt/TCP_SYN_Flodd",[sa1,sa2])
 MD = MixingOfData([ca1,ca2],"data/ModifiedAttackFiles/TCP_SYN_Flodd","data/SilkFilesFromSikt/TCP_SYN_Flodd",[sa1,sa2])
 
