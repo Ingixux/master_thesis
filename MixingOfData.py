@@ -4,42 +4,6 @@ import datetime
 import random 
 import os
 import math
-""" 
-count the total number of packets, inside of the time space the attack is being mix inn,
-The number of real packets have to be mdultiplied with 100, add the number of total attack packets and normal packets, 
-and remove 1/100 of pactkes and other info so that it looks like it was sampeled with 1/100 (myby it is here the change of sampling rates happens)
-
-multiple attack files needs to be possible
-
-5000 packets -> attack
-
-450 * 100 = 45000 -> normal  
-
-50000
-
-5000/50000 = 10%
-
-45000/50000= 90 %
-
-
-1/100
-500 packets in new 
-450 packets of normal 
-50 packets of attack
-
-1/1000
-50 packets in new  
-45 packets of normal 
-5 packets of attack
-
-1/10000
-5 packets in new  
-4 packets of normal 
-1 packets of attack
-
-
-When mixing move through the time and add a packtet when you get to the sampling rate
-"""
 
 class TempRecords:
     def __init__(self,rec,samplingUsedToCollect,keyToFile):
@@ -55,9 +19,6 @@ class TempRecords:
         self.bytes= rec.bytes *samplingUsedToCollect
         self.keyToFile=keyToFile
 
-
-
-
     def getPacketsLeft(self):
         return self.totalPackets - self.packetsUsed
     
@@ -69,7 +30,6 @@ class TempRecords:
             pass
         else:
             pass
-
 
     def decreasePacketsUsed(self, packets):
         self.packetsUsed -= packets
@@ -148,6 +108,7 @@ class MixingOfData:
                     #for tempRecords in samplingRateFiles.listOfCurrenttempRecords:
                     countpackets =0
                     longerflows=0
+                    #TODO somthing must be added here, so that records here don't get remove if there isn't enugh, in the current time, but they are completet
                     for tempRecords in samplingRateFiles[0].listOfCurrenttempRecords:
                         packetToUseNow=0
                         if nextstime - tempRecords.currentetime <= tempRecords.duration:
@@ -323,37 +284,6 @@ class MixingOfData:
                     if record==0:
                         break
         return temprecords
-
-    """
-    def readNextRecs(self):
-        temprec=0
-        if self.currentTime == 0:
-            for key in self.dicOfFileInnput.keys():
-                self.dicOfFileInnput[key][0].addNextRec(self.dicOfFileInnput[key][1].read())
-                if self.currentTime == 0:
-                    self.currentTime =self.dicOfFileInnput[key][0].currentStartTime
-                    #temprec=self.dicOfFileInnput[key][0].nextRec
-                elif self.currentTime==self.dicOfFileInnput[key][0].currentStartTime:
-                    #TODO also add this record dic of temps
-                    pass   
-                elif self.currentTime>self.dicOfFileInnput[key][0].currentStartTime:
-                    self.currentTime =self.dicOfFileInnput[key][0].currentStartTime  
-                    #temprec= self.dicOfFileInnput[key][0].nextRec         
-            #TODO add the temo record to dic of temps
-        #TODO also add this record dic of temps   
-        temprec =self.addNewRecWhileSameSTIME()
-        if temprec==0: 
-            tempkey=0
-            for key in self.dicOfFileInnput.keys():
-                if tempkey== 0:
-                    tempkey=key
-                elif self.dicOfFileInnput[tempkey][0].currentStartTime>self.dicOfFileInnput[key][0].currentStartTime:
-                    tempkey=key
-            temp =self.dicOfFileInnput[tempkey][1].read()
-            self.dicOfFileInnput[tempkey][0].addNextRec(temp)
-            temprec =self.addNewRecWhileSameSTIME()
-        return False
-        """
     
     def checkIfOverCurrent(self):
         allAreOver = True
@@ -445,7 +375,7 @@ class ChaningOfSamplingRate:
         self.listOfCurrenttempRecords.append(copy.deepcopy(tempRecords))
 
 
-    def addPackets(self,newPackets): #TODO Wrong!!!!!!!
+    def addPackets(self,newPackets): 
         if newPackets>self.maxpackets:
             timesover= (newPackets +self.countpackets)//self.maxpackets
             newPackets = newPackets- self.maxpackets*timesover
