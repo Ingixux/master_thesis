@@ -1,6 +1,7 @@
 from silk import *
 import ipaddress
 import datetime
+import os
 
 #rwsort --fields=stime --input-pipe=/home/kali/data/ModifiedAttackFiles/TCP_SYN_Flodd0 --output-path=/home/kali/data/ModifiedAttackFiles/sorted
 class AttackDataMultiplicator:       
@@ -43,10 +44,13 @@ class AttackDataMultiplicator:
         for x in range(0, len(listtWithModifcationsClass)):
             name =listtWithModifcationsClass[x].name
             unqiename.append(name)
+            pathToFile="data/ModifiedAttackFiles/"+attack+str(x)
+            if os.path.isfile(pathToFile):
+                os.remove(pathToFile)
             if name in unqiename:
-                self.dicOfFileToModifcationsClass["ModifiedAttackFiles/"+attack+str(x)]= [silkfile_open("data/ModifiedAttackFiles/"+attack+str(x), WRITE),listtWithModifcationsClass[x]]
+                self.dicOfFileToModifcationsClass[pathToFile]= [silkfile_open(pathToFile, WRITE),listtWithModifcationsClass[x]]
             else:
-                self.dicOfFileToModifcationsClass["ModifiedAttackFiles/"+attack+str(x)]= [silkfile_open("data/ModifiedAttackFiles/"+attack+str(name), WRITE),listtWithModifcationsClass[x]]
+                self.dicOfFileToModifcationsClass[pathToFile]= [silkfile_open(pathToFile, WRITE),listtWithModifcationsClass[x]]
             #self.dicOfFileToModifcationsClass["ModifiedAttackFiles/"+attack+str(x)]= ["test open ModifiedAttackFiles/"+attack+str(x),listtWithModifcationsClass[x]]
         self.modifyfile()
 
@@ -92,6 +96,7 @@ class AttackDataMultiplicator:
                 temprec =self.modifyDIPRecord(temprec,nameofset,keyOfBiFlow,isbiflow)
                 temprec =self.modifystime(temprec,nameofset,keyOfBiFlow,isbiflow)
                 temprec =self.modifyports(temprec,nameofset,keyOfBiFlow,isbiflow)
+                temprec =self.modifyIsattack(temprec,nameofset,keyOfBiFlow,isbiflow)
                 self.dicOfFileToModifcationsClass[nameofset][0].write(temprec)
             if isbiflow == True:
                 self.dicToMatchBiFlows.pop(keyOfBiFlow)
@@ -105,6 +110,14 @@ class AttackDataMultiplicator:
             rec.dport=self.dicToMatchBiFlows[keyOfBiFlow][nameofset]["sport"]
         self.addInfoToDicToMatchBiFlows("sport",rec.sport,nameofset,keyOfBiFlow,isbiflow)
         self.addInfoToDicToMatchBiFlows("dport",rec.dport,nameofset,keyOfBiFlow,isbiflow)
+        return rec
+    
+
+    def modifyIsattack(self,rec,nameofset,keyOfBiFlow,isbiflow):
+        """
+        #TODO add a description of that this needs to be inline with the silk config files.
+        """
+        rec.sensor=self.dicOfFileToModifcationsClass[nameofset][1].isAttack
         return rec
 
     def addInfoToDicToMatchBiFlows(self,whatToAdd,valueToAdd,nameofset,keyOfBiFlow,isbiflow):
@@ -239,6 +252,8 @@ class InputToAttackDataMultiplicator:
         - a Datatime.timedelta object of the Time Between Attacks packets sendt from attacker, has key "TBA"
             - if none are provied a default (1000 microsecond) is set
         - a string with the name of configure class, has key "name" 
+        - a string which will be added to the sensor name, has key "isattack"
+            - if none are provied a default (isattack) is set 
         
         #TODO add check if valide stratTimeOfAttack, endTimeOfAttack, TT1, TT2, TBA and name
     """
@@ -255,6 +270,16 @@ class InputToAttackDataMultiplicator:
         self.addTimes(parmeters,"TBA")
         self.addStartTimeIncreasAlgorithm(parmeters)
         self.addName(parmeters)
+        self.addisAttack(parmeters)
+
+    def addisAttack(self,parmeters):
+        try:
+            if type(parmeters["isAttack"]) != str:
+                raise KeyError
+            else:
+                self.isAttack =parmeters["isAttack"]
+        except KeyError:
+            self.isAttack="isattack"
         
     def addName(self,parmeters):
         try:

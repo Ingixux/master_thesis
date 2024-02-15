@@ -260,9 +260,9 @@ class MixingOfData:
             if type(inputFile1) != str :
                 raise SyntaxError("Sorry, not valid string for the file inputFile1") 
         
-        self.dicOfFileInnput[inputFile1]= [innput[0],silkfile_open(inputFile1, READ)]
+        self.dicOfFileInnput[inputFile1]= [copy.copy(innput[0]),silkfile_open(inputFile1, READ)]
         if len(inputFile2) !=0 :
-            self.dicOfFileInnput[inputFile2]= [innput[1],silkfile_open(inputFile2, READ)]
+            self.dicOfFileInnput[inputFile2]= [copy.copy(innput[1]),silkfile_open(inputFile2, READ)]
         else:
             self.inputFile2 = 0
         
@@ -348,5 +348,7 @@ ca2 =SamplingRate("1:1000")
 
 
 #MD = MixingOfData([ca2],"data/ModifiedAttackFiles/TCP_SYN_Flodd","data/SilkFilesFromSikt/TCP_SYN_Flodd",[sa1,sa2])
-MD = MixingOfData([ca1,ca2],"data/ModifiedAttackFiles/TCP_SYN_Flodd","data/SilkFilesFromSikt/TCP_SYN_Flodd",[sa1,sa2])
+#MD = MixingOfData([ca1,ca2],"data/ModifiedAttackFiles/TCP_SYN_Flodd","data/SilkFilesFromSikt/TCP_SYN_Flodd",[sa1,sa2])
+
+MD = MixingOfData([ca1,sa2],"data/ModifiedAttackFiles/isattack","data/SilkFilesFromSikt/TCP_SYN_Flodd",[sa2,sa2])
 
