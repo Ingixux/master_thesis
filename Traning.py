@@ -1,4 +1,3 @@
-from sklearn.ensemble import RandomForestClassifier
 import numpy as np
 import pickle as pickle
 import os
@@ -7,6 +6,7 @@ from silk import *
 import datetime
 
 class TraningOfClassification:
+    #TODO decide who I want to handle training and testing from same file adn diffrentfiles
     def __init__(self, listOfTrainingClasses,listOfPathToSilkFiles):
         #self.listOfTrainingClasses=listOfTrainingClasses
         self.listOfPathToSilkFiles=listOfPathToSilkFiles
@@ -18,7 +18,7 @@ class TraningOfClassification:
         #for inputFiles in listOfPathToSilkFiles:
         #    self.dicOfFileInnput[inputFiles]= [???,silkfile_open(inputFiles, READ)]
         self.getDataFromSilkFile()
-        self.train()
+        #self.train()
         
 
 
@@ -83,3 +83,4 @@ RF=RandomforestDetection("fields","","")
 
 #a1=TraningOfClassification([RF],["data/DiffrentSamplingRates/TCP_SYN_Flodd500"])
 a1=TraningOfClassification([RF],["data/DiffrentSamplingRates/isattack100"])
+a1.train()

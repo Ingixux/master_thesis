@@ -13,16 +13,6 @@ class GeneralClassifier:
         self.filepathOfInput=0
         self.clf =0
 
-    def checkTypeOfFeatures(self,typeOfFeatures):
-        allowedtypeOfFeatures=["fields","entropy","combined","entropylimited","combinedlimited"]
-        if typeOfFeatures not in allowedtypeOfFeatures:
-            raise ValueError("no allowed type of training type")
-        self.classifier="RandomForest"
-        self.typeOfFeatures =typeOfFeatures
-        
-    def setname(self):
-        self.name =self.classifier +self.typeOfFeatures
-
     def detect(self,arrayToDetect):
         return self.clf.predict(arrayToDetect)
 
