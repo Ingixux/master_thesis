@@ -2,15 +2,25 @@ from sklearn.ensemble import RandomForestClassifier
 import numpy as np
 import pickle as pickle
 import os
+import Entropy
 
 class RandomforestDetection:
-    def __init__(self,typeOfFeatures,filepathOfClassifier ="",filepathOfInput=""):
+    def __init__(self,typeOfFeatures,filepathOfClassifier ="",filepathOfInput="",standertimes=[1,5,0]):
+        #TODO make standertimes to datetimedelta 
         #filepathOfInput might not be nessacary nor filepathOfClassifier
         self.checkTypeOfFeatures(typeOfFeatures)
         self.setname()
         self.clf = RandomForestClassifier(n_estimators = 100)
         self.filepathOfClassifier= filepathOfClassifier
         self.filepathOfInput=filepathOfInput
+
+        
+        if typeOfFeatures in ["entropy","combined"] :
+            self.entropy=Entropy(standertimes[0],standertimes[1],standertimes[2],False)
+        elif typeOfFeatures in ["entropylimited","combinedlimited"] :
+            self.entropy=Entropy(standertimes[0],standertimes[1],standertimes[2],True)
+        else:
+            self.entropy=None
 
     def checkTypeOfFeatures(self,typeOfFeatures):
         allowedtypeOfFeatures=["fields","entropy","combined","entropylimited","combinedlimited"]

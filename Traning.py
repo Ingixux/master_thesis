@@ -32,20 +32,34 @@ class TraningOfClassification:
             self.setDataToZero()
             for rec in infile:
                 for trainingClasses in self.dicOfFileOutput.values():
+                    #newData=[rec.stime,rec.etime]
                     if trainingClasses[0].typeOfFeatures =="fields":
                         trainingClasses[1]=self.createNetlfowFeilds(rec,trainingClasses[1])
                     elif trainingClasses[0].typeOfFeatures =="entropy":
-                        trainingClasses[1]=self.createNetlfowEntropy(rec,trainingClasses[1],False)
+                        trainingClasses[1]=self.createNetlfowEntropy(rec,trainingClasses[1],trainingClasses[0])
                     elif trainingClasses[0].typeOfFeatures =="combined":
-                        trainingClasses[1]=self.createNetlfowCombined(rec,trainingClasses[1],False)
+                        trainingClasses[1]=self.createNetlfowCombined(rec,trainingClasses[1],trainingClasses[0])
                     elif trainingClasses[0].typeOfFeatures =="entropylimited":
-                        trainingClasses[1]=self.createNetlfowEntropy(rec,trainingClasses[1],True)
+                        trainingClasses[1]=self.createNetlfowEntropy(rec,trainingClasses[1],trainingClasses[0])
                     elif trainingClasses[0].typeOfFeatures =="combinedlimited":
-                        trainingClasses[1]=self.createNetlfowCombined(rec,trainingClasses[1],True)
+                        trainingClasses[1]=self.createNetlfowCombined(rec,trainingClasses[1],trainingClasses[0])
+                    #isAttackFlow=0
+                    #if rec.sensor_id==3:
+                    #    isAttackFlow=1
+                    #newData.append(isAttackFlow)
+                    #trainingClasses[1].append(newData)
+            #TODO add handlig to how to deal with entropy which is not yet over the window size
             self.saveDataTofile(file)
         #data = np.array(data)
         pass
 
+    def setIsAttack(self,rec):
+        isAttackFlow=0
+        #if rec.sensor=="isAttack": #TODO why does this not work
+        #    isAttackFlow=1
+        if rec.sensor_id==3:
+            isAttackFlow=1
+        return isAttackFlow
 
     def saveDataTofile(self,file):
         for trainingClasses in self.dicOfFileOutput.values():
@@ -62,22 +76,25 @@ class TraningOfClassification:
             trainingClasses[1]=[]
 
     def createNetlfowFeilds(self,rec,data):
-        isAttackFlow=0
-        #if rec.sensor=="isAttack": #TODO why does this not work
-        #    isAttackFlow=1
-        if rec.sensor_id==3:
-            isAttackFlow=1
+        #li=[rec.sport, rec.dport, rec.protocol, rec.packets, rec.bytes, 
+        #                    int(rec.tcpflags.fin), int(rec.tcpflags.syn), int(rec.tcpflags.rst), int(rec.tcpflags.psh), int(rec.tcpflags.ack), 
+        #                    int(rec.tcpflags.urg), int(rec.tcpflags.ece), int(rec.tcpflags.cwr), rec.duration/datetime.timedelta(milliseconds=1)]
+        #for x in (0,len(li)):
+        #    data.append(li[x])
         data.append([rec.stime, rec.etime, rec.sport, rec.dport, rec.protocol, rec.packets, rec.bytes, 
                             int(rec.tcpflags.fin), int(rec.tcpflags.syn), int(rec.tcpflags.rst), int(rec.tcpflags.psh), int(rec.tcpflags.ack), 
                             int(rec.tcpflags.urg), int(rec.tcpflags.ece), int(rec.tcpflags.cwr), rec.duration/datetime.timedelta(milliseconds=1), 
-                            isAttackFlow])
+                            self.setIsAttack(rec)])
         return data
 
-    def createNetlfowEntropy(self,rec,data,limited):
-        pass
+    def createNetlfowEntropy(self,rec,data,decttionclass):
+        decttionclass.entropy.addNewRec(rec)
+        #TODO add handlig to how to deal with entropy which is not yet over the window size
+        return data
 
-    def createNetlfowCombined(self,rec,data,limited):
-        pass
+    def createNetlfowCombined(self,rec,data,trainingClasses):
+        #TODO add handlig to how to deal with entropy which is not yet over the window size
+        return data
 
 RF=RandomforestDetection("fields","","")
 
