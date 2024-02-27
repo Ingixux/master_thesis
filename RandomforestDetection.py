@@ -2,10 +2,10 @@ from sklearn.ensemble import RandomForestClassifier
 import numpy as np
 import pickle as pickle
 import os
-import Entropy
+from Entropy import Entropy
 
 class RandomforestDetection:
-    def __init__(self,typeOfFeatures,filepathOfClassifier ="",filepathOfInput="",standertimes=[1,5,0]):
+    def __init__(self,typeOfFeatures,filepathOfClassifier ="",filepathOfInput="",standertimes=[3,15,0]):
         #TODO make standertimes to datetimedelta 
         #filepathOfInput might not be nessacary nor filepathOfClassifier
         self.checkTypeOfFeatures(typeOfFeatures)
@@ -13,14 +13,18 @@ class RandomforestDetection:
         self.clf = RandomForestClassifier(n_estimators = 100)
         self.filepathOfClassifier= filepathOfClassifier
         self.filepathOfInput=filepathOfInput
+        self.standertimes=standertimes
 
-        
+               
         if typeOfFeatures in ["entropy","combined"] :
-            self.entropy=Entropy(standertimes[0],standertimes[1],standertimes[2],False)
+            self.entropy=Entropy(self.standertimes[0],self.standertimes[1],self.standertimes[2],False)
         elif typeOfFeatures in ["entropylimited","combinedlimited"] :
-            self.entropy=Entropy(standertimes[0],standertimes[1],standertimes[2],True)
+            self.entropy=Entropy(self.standertimes[0],self.standertimes[1],self.standertimes[2],True)
         else:
             self.entropy=None
+
+    def resetentropy(self):
+        self.entropy=Entropy(self.standertimes[0],self.standertimes[1],self.standertimes[2],False)    
 
     def checkTypeOfFeatures(self,typeOfFeatures):
         allowedtypeOfFeatures=["fields","entropy","combined","entropylimited","combinedlimited"]
@@ -44,8 +48,22 @@ class RandomforestDetection:
             raise ValueError("no vaule input file for training")
         if not os.path.isfile(self.filepathOfInput):
             raise ValueError("no vaule input file for training")
+        trainingSet=[]
         with open(self.filepathOfInput, "rb") as fileOfFeatures:
-            trainingSet=np.load(fileOfFeatures, allow_pickle=True)
+            try:
+                while True:
+                    #print(trainingSet)
+                    #print(fileOfFeatures)
+                    data=np.load(fileOfFeatures, allow_pickle=True)
+                    trainingSet.append(data)
+            #except EOFError:
+            except (pickle.UnpicklingError, EOFError): #TODO This is not optimal, entropy and fleids create diffrent EOFError
+                pass
+            
+            #trainingSet=np.load(fileOfFeatures, allow_pickle=True)
+            #trainingSet=np.load(fileOfFeatures, allow_pickle=True)
+        #print(trainingSet)
+        trainingSet=np.array(trainingSet)
         Features=trainingSet[:,2:-1]
         labels=trainingSet[:,-1]
 
