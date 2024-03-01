@@ -70,6 +70,7 @@ class RandomforestDetection:
         labels=labels.astype('int') 
         #print(Features)
         #print(labels)
+        #print(Features)
         self.clf=self.clf.fit(Features,labels)
         self.saveClassifier()
 

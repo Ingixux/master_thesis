@@ -100,7 +100,7 @@ class TraningOfClassification:
                         for r in toadd:
                             tempr=[]
                             if trainingClasses[0].typeOfFeatures =="entropy":
-                                tempr=r[0:2]+r[18:]
+                                tempr=r[0:2]+r[19:]
                             else:
                                 tempr= r 
                             if detectortrain=="train":
@@ -129,7 +129,7 @@ class TraningOfClassification:
         #for x in (0,len(li)):
         #    data.append(li[x])
         data=[rec.stime, rec.etime, int(rec.sip), int(rec.dip), rec.sport, rec.dport, rec.protocol, rec.packets, rec.bytes, 
-                            int(rec.tcpflags.fin), int(rec.tcpflags.syn), int(rec.tcpflags.rst), int(rec.tcpflags.psh), int(rec.tcpflags.ack), 
+                            int(rec.tcpflags.fin), int(rec.tcpflags.syn), int(rec.tcpflags.rst), int(rec.tcpflags.psh), int(rec.tcpflags.ack),int(rec.nhip), 
                             int(rec.tcpflags.urg), int(rec.tcpflags.ece), int(rec.tcpflags.cwr), rec.duration/datetime.timedelta(milliseconds=1), 
                             self.setIsAttack(rec)]
         return data
@@ -143,7 +143,7 @@ class TraningOfClassification:
                 for r in toadd:
                     tempr=[]
                     if decttionclass.typeOfFeatures =="entropy":
-                        tempr=r[0:2]+r[18:]
+                        tempr=r[0:2]+r[19:]
                         data.append(tempr)
                     else:
                         data.append(r)
