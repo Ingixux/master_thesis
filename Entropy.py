@@ -212,6 +212,7 @@ class Entropy:
 
         totalicmprate= totalicmp/totalpackets     
 
+        #TODO handle that there might be zero entropy, (syn can be 0)
         arrayToAdd=[]
         listofprobability=[]
         listofprobability2=[]

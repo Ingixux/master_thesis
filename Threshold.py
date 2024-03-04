@@ -3,6 +3,7 @@ import numpy as np
 import pickle as pickle
 import os
 from Entropy import Entropy
+import statistics
 
 class Threshold:
     def __init__(self,typeOfFeatures="threshold",filepathOfClassifier ="",filepathOfInput="",standertimes=[3,15,30]):
@@ -66,12 +67,33 @@ class Threshold:
 
         trainingSet=np.array(trainingSet)
         #print(trainingSet)
+
+        vaules={"entropySip":[],"entropyRateSip":[],"entropyDip":[],"entropyRateDip":[],"entropyPacketsize":[],"entropyRatePacketsize":[],
+                                           "entropyBiflowSyn":[],"entropySipSyn":[],"entropyDipSyn":[],"entropyBiflow":[],"entropyRateBiflow":[],
+                                           "HigstNumberOfSyn":[],"HigstNumberOfURGPSHFIN":[],"countBiflow":[],"totalicmpDUnreachable":[],
+                                           "totalBytes":[],"totalpackets":[],"totalicmp":[],"totalicmprate":[],"isAtttack":0}
+        #print(trainingSet)
         for rec in trainingSet:
             temprec=dict(rec)
+            for key in vaules.keys():
+                if key !="isAtttack":
+                    vaules[key].append(temprec[key])
+                else:
+                   vaules[key]= temprec[key]
+
+        for key in vaules.keys():
+            if key not in ["isAtttack","HigstNumberOfSyn","HigstNumberOfURGPSHFIN"]:
+                self.threshold[key]=statistics.stdev(vaules[key])
+            elif key in ["HigstNumberOfSyn","HigstNumberOfURGPSHFIN"]: #TODO this should only look at a small number of vaules (most will be low)
+                self.threshold[key]=statistics.mean(vaules[key])
+
+            
             #TODO create the the array or something else
             #TODO open the file with all past threashold and find the avagre
             #print(temprec)
-        self.threshold =temprec
+        
+        #self.threshold =statistics.stdev()
+        #print(self.threshold)
         self.saveClassifier()
         
 
