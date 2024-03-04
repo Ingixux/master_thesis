@@ -36,8 +36,8 @@ class RandomforestDetection:
     def setname(self):
         self.name =self.classifier +self.typeOfFeatures
 
-    def detect(self,arrayToDetect):
-        return self.clf.predict(arrayToDetect)
+    def detect(self,arrayToDetect,isattack):
+        return ["RandomForest",self.clf.predict(arrayToDetect)[0],isattack]
 
     def train(self):
     #def train(self,typeOfFeatures):

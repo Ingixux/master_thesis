@@ -13,7 +13,7 @@ class Entropy:
         self.vaulesToCompare={"entropySip":0,"entropyRateSip":0,"entropyDip":0,"entropyRateDip":0,"entropyPacketsize":0,"entropyRatePacketsize":0,
                                            "entropyBiflowSyn":0,"entropySipSyn":0,"entropyDipSyn":0,"entropyBiflow":0,"entropyRateBiflow":0,
                                            "HigstNumberOfSyn":0,"HigstNumberOfURGPSHFIN":0,"countBiflow":0,"totalicmpDUnreachable":0,
-                                           "totalBytes":0,"totalpackets":0,"totalicmp":0,"totalicmprate":0}
+                                           "totalBytes":0,"totalpackets":0,"totalicmp":0,"totalicmprate":0,"isAtttack":0}
         self.aggregate_window={"currentTime":0,"earlistTime":0,"interval":datetime.timedelta(microseconds=aggregate_window_duration*50000),"vaules":[]}
         #self.comparison_window={"currentTime":0,"currentRecs":[],"earlistTime":0,"interval":comparison_window_interval,"vaules":[]}
         #TODO compare the current vaule to the avgarge of the diffrent vaules, that is in the comparison_window
@@ -165,6 +165,8 @@ class Entropy:
         totalicmp=0
         totalicmpDUnreachable=0
 
+        thereisOneAttack=0 #TODO should this been on the whole 
+
         for x in range(0,len(self.aggregate_window["vaules"])):
             totalpackets+=self.aggregate_window["vaules"][x]["packets"]
             totalBytes+=self.aggregate_window["vaules"][x]["bytes"]
@@ -172,6 +174,8 @@ class Entropy:
             totalicmp+=self.aggregate_window["vaules"][x]["icmp"]
             totalicmpDUnreachable+=self.aggregate_window["vaules"][x]["Destination unreachable"]
             for rec in self.aggregate_window["vaules"][x]["currentRecs"]:
+                if thereisOneAttack==0:
+                    thereisOneAttack=self.setIsAttack(rec)
                 if rec.tcpflags.syn==1:
                     if rec.packets >HigstNumberOfSyn:
                         HigstNumberOfSyn=rec.packets
@@ -246,6 +250,7 @@ class Entropy:
 
 
         #print(self.aggregate_window["vaules"][0]["currentRecs"])
+        
         for rec in self.aggregate_window["vaules"][-1]["currentRecs"]:
             arrayToAdd.append([rec.stime, rec.etime, int(rec.sip), int(rec.dip), rec.sport, rec.dport, rec.protocol, rec.packets, rec.bytes, 
                                 int(rec.tcpflags.fin), int(rec.tcpflags.syn), int(rec.tcpflags.rst), int(rec.tcpflags.psh), int(rec.tcpflags.ack), 
@@ -294,7 +299,7 @@ class Entropy:
                                    "entropyRatePacketsize":entropyRatePacketsize,"entropyBiflowSyn":entropyBiflowSyn,"entropySipSyn":entropySipSyn,"entropyDipSyn":entropyDipSyn,
                                    "entropyBiflow":entropyBiflow,"entropyRateBiflow":entropyRateBiflow,"HigstNumberOfSyn":HigstNumberOfSyn,"HigstNumberOfURGPSHFIN":HigstNumberOfURGPSHFIN,
                                    "countBiflow":countBiflow,"totalicmpDUnreachable":totalicmpDUnreachable,"totalBytes":totalBytes,"totalpackets":totalpackets,"totalicmp":totalicmp,
-                                   "totalicmprate":totalicmprate}
+                                   "totalicmprate":totalicmprate, "isAtttack":thereisOneAttack}
         return arrayToAdd                 
 
     def entropyCal(self,listofprobability):
@@ -349,8 +354,8 @@ class Entropy:
         TotalentropyDipSyn=0
         totalentropyBiflow=0
         totalentropyRateBiflow=0
-        HigstNumberOfSyn=self.vaulesToCompare[0]["HigstNumberOfSyn"] #this should only compare this value
-        HigstNumberOfURGPSHFIN=self.vaulesToCompare[0]["HigstNumberOfURGPSHFIN"] #this should only compare this value
+        HigstNumberOfSyn=0#self.vaulesToCompare["HigstNumberOfSyn"] #this should only compare this value
+        HigstNumberOfURGPSHFIN=0#self.vaulesToCompare["HigstNumberOfURGPSHFIN"] #this should only compare this value
         TotalcountBiflow=0
         totaltotalicmpDUnreachable=0
         countTotalBytes=0 #this should look at the change
@@ -362,49 +367,55 @@ class Entropy:
         if end:
             self.removeFromComparison_window()
         
-        for x in range(1,len(self.vaulesToCompare)):
-            totalentropySip+=self.vaulesToCompare[x]["entropySip"]  
-            totalentropyRateSip +=self.vaulesToCompare[x]["entropyRateSip"]
-            totalentropyDip +=self.vaulesToCompare[x]["entropyDip"]
-            totalentropyRateDip+=self.vaulesToCompare[x]["entropyRateDip"]
-            totalentropyPacketsize+=self.vaulesToCompare[x]["entropyPacketsize"]
-            totalentropyPacketsize+=self.vaulesToCompare[x]["entropyRatePacketsize"]
 
-            totalentropyBiflowSyn+=self.vaulesToCompare[x]["entropyBiflowSyn"]
-            totalentropySipSyn+=self.vaulesToCompare[x]["entropySipSyn"]
-            TotalentropyDipSyn+=self.vaulesToCompare[x]["entropyDipSyn"]
-            totalentropyBiflow+=self.vaulesToCompare[x]["entropyBiflow"]
-            totalentropyRateBiflow+=self.vaulesToCompare[x]["entropyRateBiflow"]
-            TotalcountBiflow+=self.vaulesToCompare[x]["countBiflow"]
-            totaltotalicmpDUnreachable+=self.vaulesToCompare[x]["totalicmpDUnreachable"]
-            countTotalBytes+=self.vaulesToCompare[x]["totalBytes"]
-            countTotalpackets+=self.vaulesToCompare[x]["totalpackets"]
-            countTotalicmp+=self.vaulesToCompare[x]["totalicmp"]
-            countTotalicmprate+=self.vaulesToCompare[x]["totalicmprate"]
+        isattack=self.comparison_window["vaules"][0]["isAtttack"]
+        for x in range(1,len(self.comparison_window["vaules"])):
+            totalentropySip+=self.comparison_window["vaules"][x]["entropySip"]  
+            totalentropyRateSip +=self.comparison_window["vaules"][x]["entropyRateSip"]
+            totalentropyDip +=self.comparison_window["vaules"][x]["entropyDip"]
+            totalentropyRateDip+=self.comparison_window["vaules"][x]["entropyRateDip"]
+            totalentropyPacketsize+=self.comparison_window["vaules"][x]["entropyPacketsize"]
+            totalentropyPacketsize+=self.comparison_window["vaules"][x]["entropyRatePacketsize"]
 
+            totalentropyBiflowSyn+=self.comparison_window["vaules"][x]["entropyBiflowSyn"]
+            totalentropySipSyn+=self.comparison_window["vaules"][x]["entropySipSyn"]
+            TotalentropyDipSyn+=self.comparison_window["vaules"][x]["entropyDipSyn"]
+            totalentropyBiflow+=self.comparison_window["vaules"][x]["entropyBiflow"]
+            totalentropyRateBiflow+=self.comparison_window["vaules"][x]["entropyRateBiflow"]
+            TotalcountBiflow+=self.comparison_window["vaules"][x]["countBiflow"]
+            totaltotalicmpDUnreachable+=self.comparison_window["vaules"][x]["totalicmpDUnreachable"]
+            countTotalBytes+=self.comparison_window["vaules"][x]["totalBytes"]
+            countTotalpackets+=self.comparison_window["vaules"][x]["totalpackets"]
+            countTotalicmp+=self.comparison_window["vaules"][x]["totalicmp"]
+            countTotalicmprate+=self.comparison_window["vaules"][x]["totalicmprate"]
+            if self.comparison_window["vaules"][x]["HigstNumberOfSyn"]>HigstNumberOfSyn: 
+                HigstNumberOfSyn=self.comparison_window["vaules"][x]["HigstNumberOfSyn"]            
+            if self.comparison_window["vaules"][x]["HigstNumberOfURGPSHFIN"]>HigstNumberOfURGPSHFIN: 
+                HigstNumberOfURGPSHFIN=self.comparison_window["vaules"][x]["HigstNumberOfURGPSHFIN"]
 
-        entropySip=abs((totalentropySip/(len(self.vaulesToCompare)-1))-self.vaulesToCompare[0]["entropySip"] )
-        entropyRateSip=abs((totalentropyRateSip/(len(self.vaulesToCompare)-1))-self.vaulesToCompare[0]["entropyRateSip"] )
-        entropyDip=abs((totalentropyDip/(len(self.vaulesToCompare)-1))-self.vaulesToCompare[0]["entropyDip"] )
-        entropyRateDip=abs((totalentropyRateDip/(len(self.vaulesToCompare)-1))-self.vaulesToCompare[0]["entropyRateDip"] )
-        entropyPacketsize=abs((totalentropyPacketsize/(len(self.vaulesToCompare)-1))-self.vaulesToCompare[0]["entropyPacketsize"] )
-        entropyRatePacketsize=abs((totalentropyRatePacketsize/(len(self.vaulesToCompare)-1))-self.vaulesToCompare[0]["entropyRatePacketsize"] )
+        lenght =len(self.comparison_window["vaules"])
+        entropySip=abs((totalentropySip/(lenght-1))-self.comparison_window["vaules"][0]["entropySip"] )
+        entropyRateSip=abs((totalentropyRateSip/(lenght-1))-self.comparison_window["vaules"][0]["entropyRateSip"] )
+        entropyDip=abs((totalentropyDip/(lenght-1))-self.comparison_window["vaules"][0]["entropyDip"] )
+        entropyRateDip=abs((totalentropyRateDip/(lenght-1))-self.comparison_window["vaules"][0]["entropyRateDip"] )
+        entropyPacketsize=abs((totalentropyPacketsize/(lenght-1))-self.comparison_window["vaules"][0]["entropyPacketsize"] )
+        entropyRatePacketsize=abs((totalentropyRatePacketsize/(lenght-1))-self.comparison_window["vaules"][0]["entropyRatePacketsize"] )
 
-        entropyBiflowSyn=abs((totalentropyBiflowSyn/(len(self.vaulesToCompare)-1))-self.vaulesToCompare[0]["entropyBiflowSyn"] )
-        entropySipSyn=abs((totalentropySipSyn/(len(self.vaulesToCompare)-1))-self.vaulesToCompare[0]["entropySipSyn"] )
-        entropyDipSyn=abs((TotalentropyDipSyn/(len(self.vaulesToCompare)-1))-self.vaulesToCompare[0]["entropyDipSyn"] )
-        entropyBiflow=abs((totalentropyBiflow/(len(self.vaulesToCompare)-1))-self.vaulesToCompare[0]["entropyBiflow"] )
-        entropyRateBiflow=abs((totalentropyRateBiflow/(len(self.vaulesToCompare)-1))-self.vaulesToCompare[0]["entropyRateBiflow"] )
-        countBiflow=abs((TotalcountBiflow/(len(self.vaulesToCompare)-1))-self.vaulesToCompare[0]["countBiflow"] )
-        totalicmpDUnreachable=abs((totaltotalicmpDUnreachable/(len(self.vaulesToCompare)-1))-self.vaulesToCompare[0]["totalicmpDUnreachable"] )
-        totalBytes=abs((countTotalBytes/(len(self.vaulesToCompare)-1))-self.vaulesToCompare[0]["totalBytes"] )
-        totalpackets=abs((countTotalpackets/(len(self.vaulesToCompare)-1))-self.vaulesToCompare[0]["totalpackets"] )
-        totalicmp=abs((countTotalicmp/(len(self.vaulesToCompare)-1))-self.vaulesToCompare[0]["totalicmp"] )
-        totalicmprate=abs((countTotalicmprate/(len(self.vaulesToCompare)-1))-self.vaulesToCompare[0]["totalicmprate"] )
+        entropyBiflowSyn=abs((totalentropyBiflowSyn/(lenght-1))-self.comparison_window["vaules"][0]["entropyBiflowSyn"] )
+        entropySipSyn=abs((totalentropySipSyn/(lenght-1))-self.comparison_window["vaules"][0]["entropySipSyn"] )
+        entropyDipSyn=abs((TotalentropyDipSyn/(lenght-1))-self.comparison_window["vaules"][0]["entropyDipSyn"] )
+        entropyBiflow=abs((totalentropyBiflow/(lenght-1))-self.comparison_window["vaules"][0]["entropyBiflow"] )
+        entropyRateBiflow=abs((totalentropyRateBiflow/(lenght-1))-self.comparison_window["vaules"][0]["entropyRateBiflow"] )
+        countBiflow=abs((TotalcountBiflow/(lenght-1))-self.comparison_window["vaules"][0]["countBiflow"] )
+        totalicmpDUnreachable=abs((totaltotalicmpDUnreachable/(lenght-1))-self.comparison_window["vaules"][0]["totalicmpDUnreachable"] )
+        totalBytes=abs((countTotalBytes/(lenght-1))-self.comparison_window["vaules"][0]["totalBytes"] )
+        totalpackets=abs((countTotalpackets/(lenght-1))-self.comparison_window["vaules"][0]["totalpackets"] )
+        totalicmp=abs((countTotalicmp/(lenght-1))-self.comparison_window["vaules"][0]["totalicmp"] )
+        totalicmprate=abs((countTotalicmprate/(lenght-1))-self.comparison_window["vaules"][0]["totalicmprate"] )
 
 
         return {"entropySip":entropySip,"entropyRateSip":entropyRateSip,"entropyDip":entropyDip,"entropyRateDip":entropyRateDip,"entropyPacketsize":entropyPacketsize,
                                    "entropyRatePacketsize":entropyRatePacketsize,"entropyBiflowSyn":entropyBiflowSyn,"entropySipSyn":entropySipSyn,"entropyDipSyn":entropyDipSyn,
                                    "entropyBiflow":entropyBiflow,"entropyRateBiflow":entropyRateBiflow,"HigstNumberOfSyn":HigstNumberOfSyn,"HigstNumberOfURGPSHFIN":HigstNumberOfURGPSHFIN,
                                    "countBiflow":countBiflow,"totalicmpDUnreachable":totalicmpDUnreachable,"totalBytes":totalBytes,"totalpackets":totalpackets,"totalicmp":totalicmp,
-                                   "totalicmprate":totalicmprate}
+                                   "totalicmprate":totalicmprate,"isAtttack":isattack}

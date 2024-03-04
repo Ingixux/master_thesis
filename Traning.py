@@ -29,9 +29,10 @@ class TraningOfClassification:
 
     def doDetectionOnData(self,data,trainingClasses):
         #print(data)
+        toSave=[]
         if trainingClasses[0].typeOfFeatures =="threshold":
             #print(data)
-            print(trainingClasses[0].detect(data))
+            toSave=trainingClasses[0].detect(data,data["isAtttack"])#TODO add the isattack feature
         else:
             toPredict=[]
             toPredict.append(data)
@@ -40,7 +41,10 @@ class TraningOfClassification:
             labels=darecta[:,-1]
             #print(Features)
             #print(labels)
-            print(trainingClasses[0].detect(Features)[0]==labels[0])
+            toSave=trainingClasses[0].detect(Features,labels[0])
+    
+        print(toSave)
+        #TODO save toSave in a file
 
     def detect(self):
         self.getDataFromSilkFile("detect")
@@ -49,14 +53,7 @@ class TraningOfClassification:
         for trainingClasses in self.dicOfFileOutput.values():
             trainingClasses[0].train()
 
-    #def saveDataTofile(self,file):
-    #    for trainingClasses in self.dicOfFileOutput.values():
-    #        trainingClasses[1]=np.array(trainingClasses[1])
-    #        nameoffile=file.split("/")[-1]
-    #        trainingClasses[1].dump("data/Classifiers/"+nameoffile+trainingClasses[0].name+".npy")
-    #        trainingClasses[0].filepathOfInput="data/Classifiers/"+nameoffile+trainingClasses[0].name+".npy"
-    #        trainingClasses[0].filepathOfClassifier="data/Classifiers/"+nameoffile+trainingClasses[0].name+".pkl"
-            #print(trainingClasses[1])
+
 
     def saveDataTofile(self,file,data,trainingClasses):
         #print(data)
@@ -107,7 +104,7 @@ class TraningOfClassification:
                             for rec1 in dataToHandle:
                                 self.doDetectionOnData(rec1,trainingClasses)
                         elif trainingClasses[0].typeOfFeatures in ["threshold"]:
-                            self.doDetectionOnData(trainingClasses[0].entropy.getcurrentvaules(),trainingClasses)
+                            self.doDetectionOnData(trainingClasses[0].entropy.findThreasholds(False),trainingClasses)
             for trainingClasses in self.dicOfFileOutput.values(): #TODO this does only acuount for the vaules in [-1],needs to add the vaule to all in the rec
                 if trainingClasses[0].typeOfFeatures in ["entropy","combined","threshold"]:
                     toadd=trainingClasses[0].entropy.doCalculation()
@@ -115,7 +112,7 @@ class TraningOfClassification:
                         if detectortrain=="train":
                             self.saveDataTofile(file,trainingClasses[0].entropy.getcurrentvaules(),trainingClasses) 
                         elif detectortrain=="detect":
-                            self.doDetectionOnData(trainingClasses[0].entropy.getcurrentvaules(),trainingClasses)
+                            self.doDetectionOnData(trainingClasses[0].entropy.findThreasholds(True),trainingClasses)
                     elif len(toadd) !=0:
                         for r in toadd:
                             tempr=[]

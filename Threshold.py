@@ -36,16 +36,16 @@ class Threshold:
     def setname(self):
         self.name =self.classifier +self.typeOfFeatures
 
-    def detect(self,arrayToDetect):
+    def detect(self,arrayToDetect,isattck):
         #TODO compare the threadshold with the findThreadshold vaules from the Entropy Class, put all the result in a list/dict 
         dataToSave=[]
-        isattck=0
         for key in self.threshold.keys():
-            if self.threshold[key] <  arrayToDetect[key]:
-                dataToSave.append([key,1,isattck])#how to get if there is and attack
-            else:
-                dataToSave.append([key,0,isattck])
-        return 0
+            if key != "isAtttack":
+                if self.threshold[key] <  arrayToDetect[key]:
+                    dataToSave.append([key,1,isattck])#how to get if there is and attack
+                else:
+                    dataToSave.append([key,0,isattck])
+        return dataToSave
 
     def train(self):
         if self.filepathOfInput =="" or type(self.filepathOfInput)!=str:
@@ -69,10 +69,11 @@ class Threshold:
         for rec in trainingSet:
             temprec=dict(rec)
             #TODO create the the array or something else
+            #TODO open the file with all past threashold and find the avagre
             #print(temprec)
         self.threshold =temprec
         self.saveClassifier()
-        #TODO open the file with all past threashold and find the avagre
+        
 
     def loadClassfication(self):
         #self.clf= pickle.load(open(self.filepathOfClassifier, 'rb')) 
