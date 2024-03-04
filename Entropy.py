@@ -10,11 +10,22 @@ class Entropy:
         self.limited=limited
         self.orderEntropy=100
         self.startcounter=1
-        self.aggregate_window={"currentTime":0,"earlistTime":0,"interval":datetime.timedelta(microseconds=aggregate_window_duration*1000),"vaules":[]}
-        self.comparison_window={"currentTime":0,"currentRecs":[],"earlistTime":0,"interval":comparison_window_interval,"vaules":[]}
+        self.vaulesToCompare={"entropySip":0,"entropyRateSip":0,"entropyDip":0,"entropyRateDip":0,"entropyPacketsize":0,"entropyRatePacketsize":0,
+                                           "entropyBiflowSyn":0,"entropySipSyn":0,"entropyDipSyn":0,"entropyBiflow":0,"entropyRateBiflow":0,
+                                           "HigstNumberOfSyn":0,"HigstNumberOfURGPSHFIN":0,"countBiflow":0,"totalicmpDUnreachable":0,
+                                           "totalBytes":0,"totalpackets":0,"totalicmp":0,"totalicmprate":0}
+        self.aggregate_window={"currentTime":0,"earlistTime":0,"interval":datetime.timedelta(microseconds=aggregate_window_duration*50000),"vaules":[]}
+        #self.comparison_window={"currentTime":0,"currentRecs":[],"earlistTime":0,"interval":comparison_window_interval,"vaules":[]}
+        #TODO compare the current vaule to the avgarge of the diffrent vaules, that is in the comparison_window
+        self.comparison_window={"vaules":[],"interval":datetime.timedelta(microseconds=comparison_window_interval*50000)}
         for x in range(0,int(aggregate_window_duration/sliding_window_interval)):
             self.aggregate_window["vaules"].append({"sourceIP":{},"packets":0,"destinationIP":{},"bytes":0,"packetsize":{},"currentRecs":[],
                                                     "biflow":{},"icmp":0,"Destination unreachable":0})
+        for x in range(0,int(((comparison_window_interval- aggregate_window_duration)/sliding_window_interval)+1)):
+            self.comparison_window["vaules"].append({"entropySip":0,"entropyRateSip":0,"entropyDip":0,"entropyRateDip":0,"entropyPacketsize":0,"entropyRatePacketsize":0,
+                                           "entropyBiflowSyn":0,"entropySipSyn":0,"entropyDipSyn":0,"entropyBiflow":0,"entropyRateBiflow":0,
+                                           "HigstNumberOfSyn":0,"HigstNumberOfURGPSHFIN":0,"countBiflow":0,"totalicmpDUnreachable":0,
+                                           "totalBytes":0,"totalpackets":0,"totalicmp":0,"totalicmprate":0})
 
         #for x in range(0,int(comparison_window_interval/sliding_window_interval)-(aggregate_window_duration/sliding_window_interval)):
         #    self.comparison_window["vaules"].append({"sourceIP":{},"packets":0,"destinationIP":{}})
@@ -30,14 +41,21 @@ class Entropy:
         if self.aggregate_window["earlistTime"]==0:
             self.aggregate_window["earlistTime"]=rec.stime
         self.aggregate_window["currentTime"]=rec.stime
+        #print(self.aggregate_window["currentTime"]-self.aggregate_window["earlistTime"])
+        #print(rec.stime)
         if self.checkIfpastedSliding_window():
+            movewindow=(self.aggregate_window["currentTime"]-self.aggregate_window["earlistTime"])//self.aggregate_window["interval"]
+            #print(self.aggregate_window["currentTime"]-self.aggregate_window["earlistTime"])
+            #print(movewindow)
             self.aggregate_window["earlistTime"]=self.aggregate_window["currentTime"]
-            if len(self.aggregate_window["vaules"][-1]["currentRecs"])!=0: #TODO this will not handle how I want if there in the midle comes a empty window
-                toretrun=copy.copy(self.doCalculation())
-                #toretrun=self.doCalculation()
-            elif self.startcounter<len(self.aggregate_window["vaules"]):
-                self.startcounter+=1
-            self.removeFromSliding_window()
+            if movewindow>len(self.aggregate_window["vaules"]):
+                movewindow=len(self.aggregate_window["vaules"])
+            for y in range(0,movewindow):
+                if len(self.aggregate_window["vaules"][-1]["currentRecs"])!=0: #TODO this will not handle how I want if there in the midle comes a empty window
+                    toretrun.append(copy.copy(self.doCalculation()))
+                elif self.startcounter<len(self.aggregate_window["vaules"]):
+                    self.startcounter+=1
+                self.removeFromSliding_window()
 
         self.addVaules(rec)
         return toretrun
@@ -107,8 +125,9 @@ class Entropy:
             except KeyError:
                 return True
 
-    def doCalculation(self):
-        #TODO add the remaing entropy
+    def doCalculation(self): 
+       
+        #TODO
         totalpackets=0#self.aggregate_window["vaules"][-1]["packets"]
         totalsourceIP=0 
         totaldestinationIP=0 
@@ -230,11 +249,15 @@ class Entropy:
         for rec in self.aggregate_window["vaules"][-1]["currentRecs"]:
             arrayToAdd.append([rec.stime, rec.etime, int(rec.sip), int(rec.dip), rec.sport, rec.dport, rec.protocol, rec.packets, rec.bytes, 
                                 int(rec.tcpflags.fin), int(rec.tcpflags.syn), int(rec.tcpflags.rst), int(rec.tcpflags.psh), int(rec.tcpflags.ack), 
-                                int(rec.tcpflags.urg), int(rec.tcpflags.ece), int(rec.tcpflags.cwr), rec.duration/datetime.timedelta(milliseconds=1), int(rec.nhip),
-                                totalFlows,totalicmp,totalicmprate,totalBytes,totalpackets,entropySip,entropyRateSip,entropyDip,entropyRateDip,entropyPacketsize,
-                                entropyRatePacketsize,entropyBiflow,entropyRateBiflow,entropyBiflowSyn,entropySipSyn,entropyDipSyn,
+                                int(rec.tcpflags.urg), int(rec.tcpflags.ece), int(rec.tcpflags.cwr), rec.duration/datetime.timedelta(milliseconds=1), int(rec.nhip),#index 18
+                                totalFlows,entropySip,entropyRateSip,entropyDip,entropyRateDip,entropyPacketsize,
+                                entropyRatePacketsize,entropyBiflow,entropyRateBiflow,totalicmp,totalicmprate,
+                                totalBytes,totalpackets,#31
+                                entropyBiflowSyn,entropySipSyn,entropyDipSyn,
                                 countBiflow,HigstNumberOfSyn,HigstNumberOfURGPSHFIN,totalicmpDUnreachable,
                                 self.setIsAttack(rec)])
+            
+
         #TODO add this vaules into the comparison window
         """ vaules to add
 
@@ -267,6 +290,11 @@ class Entropy:
         
         
         """
+        self.vaulesToCompare={"entropySip":entropySip,"entropyRateSip":entropyRateSip,"entropyDip":entropyDip,"entropyRateDip":entropyRateDip,"entropyPacketsize":entropyPacketsize,
+                                   "entropyRatePacketsize":entropyRatePacketsize,"entropyBiflowSyn":entropyBiflowSyn,"entropySipSyn":entropySipSyn,"entropyDipSyn":entropyDipSyn,
+                                   "entropyBiflow":entropyBiflow,"entropyRateBiflow":entropyRateBiflow,"HigstNumberOfSyn":HigstNumberOfSyn,"HigstNumberOfURGPSHFIN":HigstNumberOfURGPSHFIN,
+                                   "countBiflow":countBiflow,"totalicmpDUnreachable":totalicmpDUnreachable,"totalBytes":totalBytes,"totalpackets":totalpackets,"totalicmp":totalicmp,
+                                   "totalicmprate":totalicmprate}
         return arrayToAdd                 
 
     def entropyCal(self,listofprobability):
@@ -289,13 +317,94 @@ class Entropy:
             self.aggregate_window["vaules"][-x]=self.aggregate_window["vaules"][-(x+1)]
         self.aggregate_window["vaules"][0]={"sourceIP":{},"packets":0,"destinationIP":{},"bytes":0,"packetsize":{},"currentRecs":[],
                                             "biflow":{},"icmp":0,"Destination unreachable":0}
+        if len(self.comparison_window["vaules"])>0:
+            self.removeFromComparison_window()
         #self.aggregate_window["vaules"][0]["currentRecs"]=[]
+
+    def removeFromComparison_window(self):
+        for x in range(1,len(self.comparison_window["vaules"])):
+            self.comparison_window["vaules"][-x]=self.comparison_window["vaules"][-(x+1)]
+        self.comparison_window["vaules"][0]= copy.copy(self.vaulesToCompare)
 
     def checkIfpastedSliding_window(self):
         #print(self.aggregate_window["interval"])
         #print(self.aggregate_window["currentTime"]-self.aggregate_window["earlistTime"])
-        if self.aggregate_window["interval"]<self.aggregate_window["currentTime"]-self.aggregate_window["earlistTime"]:
+        if self.aggregate_window["interval"]<self.aggregate_window["currentTime"]-self.aggregate_window["earlistTime"]: 
             return True
         else:
             return False
+
+    def getcurrentvaules(self):
+        return self.vaulesToCompare
+
+    def findThreasholds(self,end):
+        totalentropySip=0
+        totalentropyRateSip=0
+        totalentropyDip=0
+        totalentropyRateDip=0
+        totalentropyPacketsize=0
+        totalentropyRatePacketsize=0
+        totalentropyBiflowSyn=0
+        totalentropySipSyn=0
+        TotalentropyDipSyn=0
+        totalentropyBiflow=0
+        totalentropyRateBiflow=0
+        HigstNumberOfSyn=self.vaulesToCompare[0]["HigstNumberOfSyn"] #this should only compare this value
+        HigstNumberOfURGPSHFIN=self.vaulesToCompare[0]["HigstNumberOfURGPSHFIN"] #this should only compare this value
+        TotalcountBiflow=0
+        totaltotalicmpDUnreachable=0
+        countTotalBytes=0 #this should look at the change
+        countTotalpackets=0#this should look at the change
+        countTotalicmp=0#this should look at the change
+        countTotalicmprate=0#this should look at the change
         
+
+        if end:
+            self.removeFromComparison_window()
+        
+        for x in range(1,len(self.vaulesToCompare)):
+            totalentropySip+=self.vaulesToCompare[x]["entropySip"]  
+            totalentropyRateSip +=self.vaulesToCompare[x]["entropyRateSip"]
+            totalentropyDip +=self.vaulesToCompare[x]["entropyDip"]
+            totalentropyRateDip+=self.vaulesToCompare[x]["entropyRateDip"]
+            totalentropyPacketsize+=self.vaulesToCompare[x]["entropyPacketsize"]
+            totalentropyPacketsize+=self.vaulesToCompare[x]["entropyRatePacketsize"]
+
+            totalentropyBiflowSyn+=self.vaulesToCompare[x]["entropyBiflowSyn"]
+            totalentropySipSyn+=self.vaulesToCompare[x]["entropySipSyn"]
+            TotalentropyDipSyn+=self.vaulesToCompare[x]["entropyDipSyn"]
+            totalentropyBiflow+=self.vaulesToCompare[x]["entropyBiflow"]
+            totalentropyRateBiflow+=self.vaulesToCompare[x]["entropyRateBiflow"]
+            TotalcountBiflow+=self.vaulesToCompare[x]["countBiflow"]
+            totaltotalicmpDUnreachable+=self.vaulesToCompare[x]["totalicmpDUnreachable"]
+            countTotalBytes+=self.vaulesToCompare[x]["totalBytes"]
+            countTotalpackets+=self.vaulesToCompare[x]["totalpackets"]
+            countTotalicmp+=self.vaulesToCompare[x]["totalicmp"]
+            countTotalicmprate+=self.vaulesToCompare[x]["totalicmprate"]
+
+
+        entropySip=abs((totalentropySip/(len(self.vaulesToCompare)-1))-self.vaulesToCompare[0]["entropySip"] )
+        entropyRateSip=abs((totalentropyRateSip/(len(self.vaulesToCompare)-1))-self.vaulesToCompare[0]["entropyRateSip"] )
+        entropyDip=abs((totalentropyDip/(len(self.vaulesToCompare)-1))-self.vaulesToCompare[0]["entropyDip"] )
+        entropyRateDip=abs((totalentropyRateDip/(len(self.vaulesToCompare)-1))-self.vaulesToCompare[0]["entropyRateDip"] )
+        entropyPacketsize=abs((totalentropyPacketsize/(len(self.vaulesToCompare)-1))-self.vaulesToCompare[0]["entropyPacketsize"] )
+        entropyRatePacketsize=abs((totalentropyRatePacketsize/(len(self.vaulesToCompare)-1))-self.vaulesToCompare[0]["entropyRatePacketsize"] )
+
+        entropyBiflowSyn=abs((totalentropyBiflowSyn/(len(self.vaulesToCompare)-1))-self.vaulesToCompare[0]["entropyBiflowSyn"] )
+        entropySipSyn=abs((totalentropySipSyn/(len(self.vaulesToCompare)-1))-self.vaulesToCompare[0]["entropySipSyn"] )
+        entropyDipSyn=abs((TotalentropyDipSyn/(len(self.vaulesToCompare)-1))-self.vaulesToCompare[0]["entropyDipSyn"] )
+        entropyBiflow=abs((totalentropyBiflow/(len(self.vaulesToCompare)-1))-self.vaulesToCompare[0]["entropyBiflow"] )
+        entropyRateBiflow=abs((totalentropyRateBiflow/(len(self.vaulesToCompare)-1))-self.vaulesToCompare[0]["entropyRateBiflow"] )
+        countBiflow=abs((TotalcountBiflow/(len(self.vaulesToCompare)-1))-self.vaulesToCompare[0]["countBiflow"] )
+        totalicmpDUnreachable=abs((totaltotalicmpDUnreachable/(len(self.vaulesToCompare)-1))-self.vaulesToCompare[0]["totalicmpDUnreachable"] )
+        totalBytes=abs((countTotalBytes/(len(self.vaulesToCompare)-1))-self.vaulesToCompare[0]["totalBytes"] )
+        totalpackets=abs((countTotalpackets/(len(self.vaulesToCompare)-1))-self.vaulesToCompare[0]["totalpackets"] )
+        totalicmp=abs((countTotalicmp/(len(self.vaulesToCompare)-1))-self.vaulesToCompare[0]["totalicmp"] )
+        totalicmprate=abs((countTotalicmprate/(len(self.vaulesToCompare)-1))-self.vaulesToCompare[0]["totalicmprate"] )
+
+
+        return {"entropySip":entropySip,"entropyRateSip":entropyRateSip,"entropyDip":entropyDip,"entropyRateDip":entropyRateDip,"entropyPacketsize":entropyPacketsize,
+                                   "entropyRatePacketsize":entropyRatePacketsize,"entropyBiflowSyn":entropyBiflowSyn,"entropySipSyn":entropySipSyn,"entropyDipSyn":entropyDipSyn,
+                                   "entropyBiflow":entropyBiflow,"entropyRateBiflow":entropyRateBiflow,"HigstNumberOfSyn":HigstNumberOfSyn,"HigstNumberOfURGPSHFIN":HigstNumberOfURGPSHFIN,
+                                   "countBiflow":countBiflow,"totalicmpDUnreachable":totalicmpDUnreachable,"totalBytes":totalBytes,"totalpackets":totalpackets,"totalicmp":totalicmp,
+                                   "totalicmprate":totalicmprate}
