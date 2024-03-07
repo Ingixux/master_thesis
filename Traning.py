@@ -96,7 +96,8 @@ class TraningOfClassification:
                             for rec1 in dataToHandle:
                                 self.saveDataTofile(file,rec1,trainingClasses)
                         elif trainingClasses[0].typeOfFeatures =="threshold":
-                           self.saveDataTofile(file,trainingClasses[0].entropy.getcurrentvaules(),trainingClasses) 
+                            self.saveDataTofile(file,trainingClasses[0].entropy.getcurrentvaules(),trainingClasses) 
+                            #self.saveDataTofile(file,trainingClasses[0].entropy.findThreasholds(False),trainingClasses) 
                     elif detectortrain=="detect" and len(dataToHandle)>0:
                         if trainingClasses[0].typeOfFeatures =="fields":
                             self.doDetectionOnData(dataToHandle,trainingClasses)
@@ -110,7 +111,8 @@ class TraningOfClassification:
                     toadd=trainingClasses[0].entropy.doCalculation()
                     if trainingClasses[0].typeOfFeatures =="threshold":
                         if detectortrain=="train":
-                            self.saveDataTofile(file,trainingClasses[0].entropy.getcurrentvaules(),trainingClasses) 
+                            self.saveDataTofile(file,trainingClasses[0].entropy.getcurrentvaules(),trainingClasses)
+                            #self.saveDataTofile(file,trainingClasses[0].entropy.findThreasholds(True),trainingClasses)
                         elif detectortrain=="detect":
                             self.doDetectionOnData(trainingClasses[0].entropy.findThreasholds(True),trainingClasses)
                     elif len(toadd) !=0:
