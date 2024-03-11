@@ -1,11 +1,12 @@
 import numpy as np
 import pickle as pickle
-import os
+#import os
 from RandomforestDetection import RandomforestDetection
 from Threshold import Threshold
+from Kmeans import Kmeans
 from silk import *
 import datetime
-import copy
+#import copy
 
 class TraningOfClassification:
     #TODO decide who I want to handle training and testing from same file adn diffrentfiles
@@ -61,18 +62,18 @@ class TraningOfClassification:
             result = data.items()
             fdate= list(result)
             data=np.array(fdate, dtype=object)
-            
         #print(data)
         data=np.array(data, dtype=object)
-        #print(data)
+        #print(data[2:])
         np.save(trainingClasses[2],data)
 
     def createfilesToSaveTo(self):
         for file in self.listOfPathToSilkFiles:
             nameoffile=file.split("/")[-1]
             for trainingClasses in self.dicOfFileOutput.values():
-                trainingClasses.append(open("data/Classifiers/"+nameoffile+trainingClasses[0].name+".npy", "wb"))
                 trainingClasses[0].filepathOfInput="data/Classifiers/"+nameoffile+trainingClasses[0].name+".npy"
+                #trainingClasses[0].setfilepathOfInput("data/Classifiers/"+nameoffile+trainingClasses[0].name+".npy")
+                trainingClasses.append(open("data/Classifiers/"+nameoffile+trainingClasses[0].name+".npy", "wb"))
                 trainingClasses[0].filepathOfClassifier="data/Classifiers/"+nameoffile+trainingClasses[0].name+".pkl"
 
     def getDataFromSilkFile(self,detectortrain):
@@ -181,17 +182,21 @@ class TraningOfClassification:
         return data
     
 
-RF=RandomforestDetection("fields","","")
-EP=RandomforestDetection("entropy","","")
-CP=RandomforestDetection("combined","","")
+RFF=RandomforestDetection("fields","","")
+RFE=RandomforestDetection("entropy","","")
+RFC=RandomforestDetection("combined","","")
 TH=Threshold("threshold","","")
+KMF=Kmeans("fields","","")
+KME=Kmeans("entropy","","")
+KMC=Kmeans("combined","","")
 
 #a1=TraningOfClassification([RF],["data/DiffrentSamplingRates/TCP_SYN_Flodd500"])
 #a1=TraningOfClassification([RF,EP],["data/DiffrentSamplingRates/isattack100"])
 
-a1=TraningOfClassification([TH],["data/DiffrentSamplingRates/isattack100"])
+#a1=TraningOfClassification([TH],["data/DiffrentSamplingRates/isattack100"])
 #a1=TraningOfClassification([RF],["data/DiffrentSamplingRates/isattack100"])
 #a1=TraningOfClassification([CP],["data/DiffrentSamplingRates/isattack100"])
+a1=TraningOfClassification([KME],["data/DiffrentSamplingRates/isattack100"])
 
 a1.makeTraingData()
 a1.train()
