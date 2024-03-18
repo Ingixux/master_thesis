@@ -117,7 +117,8 @@ class AttackDataMultiplicator:
         """
         #TODO add a description of that this needs to be inline with the silk config files.
         """
-        rec.sensor=self.dicOfFileToModifcationsClass[nameofset][1].isAttack
+        #rec.sensor=self.dicOfFileToModifcationsClass[nameofset][1].isAttack
+        rec.sensor_id=32532
         return rec
 
     def addInfoToDicToMatchBiFlows(self,whatToAdd,valueToAdd,nameofset,keyOfBiFlow,isbiflow):
@@ -447,8 +448,8 @@ listOfSrc=["192.168.56.11","192.168.56.12","192.168.56.13", "192.168.56.13"]
 listOfSrc=checkUniqeIP(listOfSrc)
 
 
-start = datetime.datetime(2024, 2, 4, 2, 1, 50, 10000)
-end = datetime.datetime(2024, 2, 4, 2, 1, 50, 0)
+start = datetime.datetime(2011, 1, 25, 13, 7, 20, 0)
+end = datetime.datetime(2011, 1, 25, 13, 8, 0, 0)
 #print(start)
 #print(start+datetime.timedelta(microseconds=100000))
 #print(start+datetime.datetime(start.year, start.month, start.day, start.hour, start.min, start.second, 10000))
@@ -469,6 +470,6 @@ end = datetime.datetime(2024, 2, 4, 2, 1, 50, 0)
 #print(ia2.botNetSize)
 
 
-ia1 = InputToAttackDataMultiplicator({"botsize":4,"src":["192.168.2.2"], "stratTimeOfAttack" : start , "endTimeOfAttack"  : end, "startTimeIncreasAlgorithm":"standardBasedOnBotnetsize"})
+ia1 = InputToAttackDataMultiplicator({"botsize":9000,"src":["1.168.2.2"], "stratTimeOfAttack" : start , "endTimeOfAttack"  : end, "startTimeIncreasAlgorithm":"standardBasedOnBotnetsize"})
 #ia2 = InputToAttackDataMultiplicator({"botsize":1,"src":["192.168.3.3"]})
-a1=AttackDataMultiplicator([ia1],"data/GenratedAttacks/ext2ext-S0_20240125.11","TCP_SYN_Flodd")
+a1=AttackDataMultiplicator([ia1],"data/GenratedAttacks/ext2ext-S0_20240125.12","TCP_SYN_Flodd")

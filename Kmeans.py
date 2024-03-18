@@ -22,6 +22,8 @@ class Kmeans:
             self.entropy=Entropy(self.standertimes[0],self.standertimes[1],self.standertimes[2],True)
         else:
             self.entropy=None
+        if filepathOfClassifier !="":
+            self.loadClassfication()
 
     def resetentropy(self):
         self.entropy=Entropy(self.standertimes[0],self.standertimes[1],self.standertimes[2],False)    

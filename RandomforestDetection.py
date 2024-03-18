@@ -22,6 +22,8 @@ class RandomforestDetection:
             self.entropy=Entropy(self.standertimes[0],self.standertimes[1],self.standertimes[2],True)
         else:
             self.entropy=None
+        if filepathOfClassifier !="":
+            self.loadClassfication()
 
     def resetentropy(self):
         self.entropy=Entropy(self.standertimes[0],self.standertimes[1],self.standertimes[2],False)    
@@ -49,6 +51,7 @@ class RandomforestDetection:
         if not os.path.isfile(self.filepathOfInput):
             raise ValueError("no vaule input file for training")
         trainingSet=[]
+        x=0
         with open(self.filepathOfInput, "rb") as fileOfFeatures:
             try:
                 while True:
@@ -56,6 +59,7 @@ class RandomforestDetection:
                     #print(fileOfFeatures)
                     data=np.load(fileOfFeatures, allow_pickle=True)
                     trainingSet.append(data)
+                    x+=1
             #except EOFError:
             except (pickle.UnpicklingError, EOFError): #TODO This is not optimal, entropy and fleids create diffrent EOFError
                 pass
@@ -63,6 +67,7 @@ class RandomforestDetection:
             #trainingSet=np.load(fileOfFeatures, allow_pickle=True)
             #trainingSet=np.load(fileOfFeatures, allow_pickle=True)
         #print(trainingSet)
+        print(x)
         trainingSet=np.array(trainingSet)
         Features=trainingSet[:,2:-1]
         labels=trainingSet[:,-1]

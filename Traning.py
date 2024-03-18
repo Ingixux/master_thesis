@@ -12,6 +12,9 @@ class TraningOfClassification:
     #TODO decide who I want to handle training and testing from same file adn diffrentfiles
     def __init__(self, listOfTrainingClasses,listOfPathToSilkFiles):
         #self.listOfTrainingClasses=listOfTrainingClasses
+        self.countcorrect=0
+        self.countwrong=0
+        self.countisattack=0
         self.listOfPathToSilkFiles=listOfPathToSilkFiles
         self.dicOfFileOutput ={}
         data=[]
@@ -44,7 +47,17 @@ class TraningOfClassification:
             #print(labels)
             toSave=trainingClasses[0].detect(Features,labels[0])
     
-        print(toSave)
+        #print(toSave)
+        #countcorrect=0
+        #countwrong=0
+        #isattack=0
+        if toSave[1]==toSave[2]:
+            if toSave[2] ==1:
+                self.countisattack+=1
+            self.countcorrect+=1
+        else:
+            self.countwrong+=1
+        #print(str(self.countwrong) +" "+ str(self.countcorrect) +" " +str(self.countisattack))
         #TODO save toSave in a file
 
     def detect(self):
@@ -80,7 +93,9 @@ class TraningOfClassification:
         for file in self.listOfPathToSilkFiles:
             infile = silkfile_open(file, READ)
             self.setDataToZero()
+            x=0
             for rec in infile:  #TODO Handle that when No rec are for a sliding window time
+                x+=1
                 for trainingClasses in self.dicOfFileOutput.values():
                     #newData=[rec.stime,rec.etime]
                     dataToHandle=[]
@@ -92,6 +107,8 @@ class TraningOfClassification:
                     if detectortrain=="train" and len(dataToHandle)>0:
                         #print(dataToHandle)
                         if trainingClasses[0].typeOfFeatures =="fields":
+                            #if dataToHandle[-1]==1:
+                            #    print(x)
                             self.saveDataTofile(file,dataToHandle,trainingClasses)
                         elif trainingClasses[0].typeOfFeatures in ["entropy","combined"]:
                             for rec1 in dataToHandle:
@@ -131,13 +148,15 @@ class TraningOfClassification:
                             elif detectortrain=="detect":
                                 self.doDetectionOnData(tempr[0],trainingClasses)
                     trainingClasses[0].resetentropy()
+            print(x)
             infile.close()
 
     def setIsAttack(self,rec):
         isAttackFlow=0
         #if rec.sensor=="isAttack": #TODO why does this not work
         #    isAttackFlow=1
-        if rec.sensor_id==3:
+        #if rec.sensor_id==3:
+        if rec.sensor_id==32532:
             isAttackFlow=1
         return isAttackFlow
 
@@ -196,8 +215,22 @@ KMC=Kmeans("combined","","")
 #a1=TraningOfClassification([TH],["data/DiffrentSamplingRates/isattack100"])
 #a1=TraningOfClassification([RF],["data/DiffrentSamplingRates/isattack100"])
 #a1=TraningOfClassification([CP],["data/DiffrentSamplingRates/isattack100"])
-a1=TraningOfClassification([KME],["data/DiffrentSamplingRates/isattack100"])
+#a1=TraningOfClassification([KME],["data/DiffrentSamplingRates/isattack100"])
+
+#a1=TraningOfClassification([RFF],["data/DiffrentSamplingRates/TCP_SYN_Flodd01000"])
+a1=TraningOfClassification([TH],["data/DiffrentSamplingRates/TCP_SYN_Flodd01000"])
+
+#RFF=RandomforestDetection("fields","data/Classifiers/TCP_SYN_Flodd01000RandomForestfields.pkl",
+#                          "data/Classifiers/TCP_SYN_Flodd01000RandomForestfields.npy")
+
+#TH=Threshold("fields","data/Classifiers/TCP_SYN_Flodd01000threshold.pkl",
+#                         "data/Classifiers/TCP_SYN_Flodd01000threshold.npy")
+
+#a2=TraningOfClassification([TH],["data/DiffrentSamplingRates/TCP_SYN_Flodd01000"],)
+#a2.detect()
 
 a1.makeTraingData()
 a1.train()
-a1.detect()
+#a1.detect()
+#print(a1.countcorrect)
+#print(a1.countwrong)

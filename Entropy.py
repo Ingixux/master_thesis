@@ -8,7 +8,7 @@ class Entropy:
         self.aggregate_window_duration=aggregate_window_duration
         self.comparison_window_interval=comparison_window_interval
         self.limited=limited
-        self.orderEntropy=100
+        self.orderEntropy=50
         self.startcounter=1
         self.vaulesToCompare={"entropySip":0,"entropyRateSip":0,"entropyDip":0,"entropyRateDip":0,"entropyPacketsize":0,"entropyRatePacketsize":0,
                                            "entropyBiflowSyn":0,"entropySipSyn":0,"entropyDipSyn":0,"entropyBiflow":0,"entropyRateBiflow":0,
@@ -138,7 +138,7 @@ class Entropy:
         uniqebiflow={}
         countuniqebiflow=0
         uniqebiflowcounter=[]
-        for x in range(0,len(self.aggregate_window["vaules"])):
+        for x in range(0,len(self.aggregate_window["vaules"])): 
             for biflowkey in self.aggregate_window["vaules"][x]["biflow"].keys():
                 try:
                     #uniqebiflow[biflowkey]
@@ -147,12 +147,18 @@ class Entropy:
                 except KeyError:
                     uniqebiflow[biflowkey]=copy.copy(self.aggregate_window["vaules"][x]["biflow"][biflowkey])
         for biflowkey in uniqebiflow.keys():
-
+            countuniqebiflow+=1
+            #if uniqebiflow[biflowkey]["checkKey"] in uniqebiflow.keys():
             if uniqebiflow[biflowkey]["checkKey"] in uniqebiflow.keys() and uniqebiflow[uniqebiflow[biflowkey]["checkKey"]]["foundBiFlow"]==False:
                 uniqebiflow[uniqebiflow[biflowkey]["checkKey"]]["foundBiFlow"]=True
                 uniqebiflow[biflowkey]["foundBiFlow"]=True
-                countuniqebiflow+=1
+                
+                uniqebiflowcounter.append([uniqebiflow[biflowkey]["packets"]+uniqebiflow[uniqebiflow[biflowkey]["checkKey"]]["packets"],
+                                           uniqebiflow[biflowkey]["syn"]+uniqebiflow[uniqebiflow[biflowkey]["checkKey"]]["syn"]]) #TODO add the other side
+            else:
                 uniqebiflowcounter.append([uniqebiflow[biflowkey]["packets"],uniqebiflow[biflowkey]["syn"]])
+
+
         for biflowkey in uniqebiflow:
             uniqebiflow[biflowkey]["foundBiFlow"]=False
 
@@ -211,27 +217,55 @@ class Entropy:
                     uniqepacketsize[key]=self.aggregate_window["vaules"][x]["packetsize"][key]
 
         totalicmprate= totalicmp/totalpackets     
-
+        
         #TODO handle that there might be zero entropy, (syn can be 0)
         arrayToAdd=[]
         listofprobability=[]
         listofprobability2=[]
+        totalsyns=0
         for x in uniqetotalsourceIP.values():
             listofprobability.append(x["packets"]/totalpackets)
-            listofprobability2.append(x["syn"]/totalpackets)
+            #listofprobability2.append(x["syn"]/totalpackets)
+            if x["syn"]!=0:
+                listofprobability2.append(x["syn"])
+                totalsyns+=x["syn"]
         entropySip=self.entropyCal(listofprobability)
         entropyRateSip=entropySip/len(uniqetotalsourceIP)
-        entropySipSyn=self.entropyCal(listofprobability2)
+        #entropySipSyn=self.entropyCal(listofprobability2)
+        
+        listofprobability3=[]
+        for x in listofprobability2:
+            listofprobability3.append(x/totalsyns)
+        if len(listofprobability3)==0:
+            entropySipSyn=0
+        else:
+            entropySipSyn=self.entropyCal(listofprobability3)
+
+        if entropySip==0:
+            print(listofprobability)
         
     
         listofprobability=[]
         listofprobability2=[]
+        totalsyns=0
         for x in uniqedestinationIP.values():
             listofprobability.append(x["packets"]/totalpackets)
-            listofprobability2.append(x["syn"]/totalpackets)
+            #listofprobability2.append(x["syn"]/totalpackets)
+            if x["syn"]!=0:
+                listofprobability2.append(x["syn"])
+                totalsyns+=x["syn"]
         entropyDip=self.entropyCal(listofprobability)
         entropyRateDip=entropyDip/len(uniqedestinationIP)#TODO it might be worth it to look at all the size from the lowest to the highst
-        entropyDipSyn=self.entropyCal(listofprobability2)
+        
+        listofprobability3=[]
+        for x in listofprobability2:
+            listofprobability3.append(x/totalsyns)
+        if len(listofprobability3)==0:
+            entropyDipSyn=0
+        else:
+            entropyDipSyn=self.entropyCal(listofprobability3)
+        
+        #entropyDipSyn=self.entropyCal(listofprobability2)
 
         listofprobability=[]
         for x in uniqepacketsize.values():
@@ -241,12 +275,32 @@ class Entropy:
         
         listofprobability=[]
         listofprobability2=[]
-        for x in uniqebiflowcounter:
+
+        totalsyns=0
+        for x in uniqebiflowcounter: #TODO Has to also add the ones that is not part of biflow, meaning which have only traffic one side 
+        # This now only handles par f biflows    
             listofprobability.append(x[0]/totalpackets)
-            listofprobability2.append(x[1]/totalpackets)
-        entropyBiflow=self.entropyCal(listofprobability)
+            #TODO The syn check is wrong, I belive. I think I need somehitn other than /totalpackets, becasue this is not the only range, the problilty does not add to 1, which I blive it should
+            if x[1]!=0:
+                #listofprobability2.append(x[1]/totalpackets)
+                listofprobability2.append(x[1])
+                totalsyns+=x[1]
+        #if len(listofprobability)==2135:
+
+        #    print(listofprobability)
+        entropyBiflow=self.entropyCal(listofprobability) #TODO error
         entropyRateBiflow=entropyPacketsize/len(uniqebiflowcounter)
-        entropyBiflowSyn=self.entropyCal(listofprobability2)
+        #entropyBiflowSyn=self.entropyCal(listofprobability2)
+
+
+        listofprobability3=[]
+        for x in listofprobability2:
+            listofprobability3.append(x/totalsyns)
+        if len(listofprobability3)==0:
+            entropyBiflowSyn=0
+        else:
+            entropyBiflowSyn=self.entropyCal(listofprobability3)
+            #print(listofprobability2)
         countBiflow=len(uniqebiflowcounter)
 
 
@@ -301,13 +355,23 @@ class Entropy:
                                    "entropyBiflow":entropyBiflow,"entropyRateBiflow":entropyRateBiflow,"HigstNumberOfSyn":HigstNumberOfSyn,"HigstNumberOfURGPSHFIN":HigstNumberOfURGPSHFIN,
                                    "countBiflow":countBiflow,"totalicmpDUnreachable":totalicmpDUnreachable,"totalBytes":totalBytes,"totalpackets":totalpackets,"totalicmp":totalicmp,
                                    "totalicmprate":totalicmprate, "isAtttack":thereisOneAttack}
+        
+
         return arrayToAdd                 
 
     def entropyCal(self,listofprobability):
-        sum=0
-        for x in listofprobability:
-            sum+=x**self.orderEntropy
-        return 1/(1-self.orderEntropy)*np.log2(sum)
+        #sum=0
+        #if len(listofprobability)==0:
+        #    print("hei")
+        temp=[]
+        for x in range(0,len(listofprobability)):
+            temp.append(listofprobability[x]**self.orderEntropy)
+        #for x in listofprobability:
+        #    sum+=x**self.orderEntropy
+        #if sum==0:
+        #    print(listofprobability)
+        #return 1/(1-self.orderEntropy)*np.log2(sum)
+        return 1/(1-self.orderEntropy)*np.log2(sum(temp))
 
     def setIsAttack(self,rec):
         isAttackFlow=0
