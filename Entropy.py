@@ -240,10 +240,6 @@ class Entropy:
             entropySipSyn=0
         else:
             entropySipSyn=self.entropyCal(listofprobability3)
-
-        if entropySip==0:
-            print(listofprobability)
-        
     
         listofprobability=[]
         listofprobability2=[]

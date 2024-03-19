@@ -10,7 +10,11 @@ import datetime
 
 class TraningOfClassification:
     #TODO decide who I want to handle training and testing from same file adn diffrentfiles
+    """
+    This Class does now only handle one set of files for each classifier. Does not handle deceting on to diffrent smapling rate
+    """
     def __init__(self, listOfTrainingClasses,listOfPathToSilkFiles):
+        
         #self.listOfTrainingClasses=listOfTrainingClasses
         self.countcorrect=0
         self.countwrong=0
@@ -31,32 +35,43 @@ class TraningOfClassification:
         self.createfilesToSaveTo()
         self.getDataFromSilkFile("train")
 
+    def openFilesToSaveTo(self):
+        for trainingClasses in self.dicOfFileOutput.values():
+            if trainingClasses[0].filepathOfInput=="" or trainingClasses[0].filepathOfClassifier=="":
+                raise SystemError("The Classifier filepathOfInput or filepathOfClassifier can't be empyt")
+            else:
+                if len(trainingClasses)<=2:
+                    trainingClasses.append(open(trainingClasses[0].filepathOfInput, "ab"))
+                else:
+                    trainingClasses[2]=(open(trainingClasses[0].filepathOfInput, "ab"))
+
+            
+    def appendTraingData(self):
+        self.openFilesToSaveTo()
+        self.getDataFromSilkFile("train")
+
     def doDetectionOnData(self,data,trainingClasses):
-        #print(data)
         toSave=[]
         if trainingClasses[0].typeOfFeatures =="threshold":
-            #print(data)
             toSave=trainingClasses[0].detect(data,data["isAtttack"])#TODO add the isattack feature
+            #for x in toSave:
+            #    if x[1]==x[2]:
+            #        self.countcorrect+=1
+            #    else:
+            #        self.countwrong+=1
         else:
             toPredict=[]
             toPredict.append(data)
             darecta=np.array(toPredict, dtype=object)
             Features=darecta[:,2:-1]
             labels=darecta[:,-1]
-            #print(Features)
-            #print(labels)
             toSave=trainingClasses[0].detect(Features,labels[0])
-    
-        #print(toSave)
-        #countcorrect=0
-        #countwrong=0
-        #isattack=0
-        if toSave[1]==toSave[2]:
-            if toSave[2] ==1:
-                self.countisattack+=1
-            self.countcorrect+=1
-        else:
-            self.countwrong+=1
+        #if toSave[1]==toSave[2]:
+        #    if toSave[2] ==1:
+        #        self.countisattack+=1
+        #    self.countcorrect+=1
+        #else:
+        #    self.countwrong+=1
         #print(str(self.countwrong) +" "+ str(self.countcorrect) +" " +str(self.countisattack))
         #TODO save toSave in a file
 
@@ -66,7 +81,6 @@ class TraningOfClassification:
     def train(self):
         for trainingClasses in self.dicOfFileOutput.values():
             trainingClasses[0].train()
-
 
 
     def saveDataTofile(self,file,data,trainingClasses):
@@ -81,49 +95,54 @@ class TraningOfClassification:
         np.save(trainingClasses[2],data)
 
     def createfilesToSaveTo(self):
-        for file in self.listOfPathToSilkFiles:
-            nameoffile=file.split("/")[-1]
-            for trainingClasses in self.dicOfFileOutput.values():
-                trainingClasses[0].filepathOfInput="data/Classifiers/"+nameoffile+trainingClasses[0].name+".npy"
-                #trainingClasses[0].setfilepathOfInput("data/Classifiers/"+nameoffile+trainingClasses[0].name+".npy")
+        #for file in self.listOfPathToSilkFiles: 
+        file = self.listOfPathToSilkFiles[0][0]#TODO This will no longer overwrite eachother, but will only work with one set of files
+        nameoffile=file.split("/")[-1]
+        for trainingClasses in self.dicOfFileOutput.values():
+            trainingClasses[0].filepathOfInput="data/Classifiers/"+nameoffile+trainingClasses[0].name+".npy"
+            #trainingClasses[0].setfilepathOfInput("data/Classifiers/"+nameoffile+trainingClasses[0].name+".npy")
+            if len(trainingClasses)<=2:
                 trainingClasses.append(open("data/Classifiers/"+nameoffile+trainingClasses[0].name+".npy", "wb"))
-                trainingClasses[0].filepathOfClassifier="data/Classifiers/"+nameoffile+trainingClasses[0].name+".pkl"
+            else:
+                trainingClasses[2]=open("data/Classifiers/"+nameoffile+trainingClasses[0].name+".npy", "wb")
+            trainingClasses[0].filepathOfClassifier="data/Classifiers/"+nameoffile+trainingClasses[0].name+".pkl"
 
     def getDataFromSilkFile(self,detectortrain):
-        for file in self.listOfPathToSilkFiles:
-            infile = silkfile_open(file, READ)
-            self.setDataToZero()
-            x=0
-            for rec in infile:  #TODO Handle that when No rec are for a sliding window time
-                x+=1
-                for trainingClasses in self.dicOfFileOutput.values():
-                    #newData=[rec.stime,rec.etime]
-                    dataToHandle=[]
-                    if trainingClasses[0].typeOfFeatures =="fields":
-                        dataToHandle= self.createNetlfowFeilds(rec)
-                    elif trainingClasses[0].typeOfFeatures in ["entropy","combined","threshold"]:
-                        dataToHandle=self.createNetlfowEntropy(rec,trainingClasses[0])
-                    #print(dataToHandle)
-                    if detectortrain=="train" and len(dataToHandle)>0:
+        for fileCollection in self.listOfPathToSilkFiles:
+            for file in fileCollection:
+                infile = silkfile_open(file, READ)
+                self.setDataToZero()
+                x=0
+                for rec in infile:  #TODO Handle that when No rec are for a sliding window time
+                    x+=1
+                    for trainingClasses in self.dicOfFileOutput.values():
+                        dataToHandle=[]
+                        if trainingClasses[0].typeOfFeatures =="fields":
+                            dataToHandle= self.createNetlfowFeilds(rec)
+                        elif trainingClasses[0].typeOfFeatures in ["entropy","combined","threshold"]:
+                            dataToHandle=self.createNetlfowEntropy(rec,trainingClasses[0])
                         #print(dataToHandle)
-                        if trainingClasses[0].typeOfFeatures =="fields":
-                            #if dataToHandle[-1]==1:
-                            #    print(x)
-                            self.saveDataTofile(file,dataToHandle,trainingClasses)
-                        elif trainingClasses[0].typeOfFeatures in ["entropy","combined"]:
-                            for rec1 in dataToHandle:
-                                self.saveDataTofile(file,rec1,trainingClasses)
-                        elif trainingClasses[0].typeOfFeatures =="threshold":
-                            self.saveDataTofile(file,trainingClasses[0].entropy.getcurrentvaules(),trainingClasses) 
-                            #self.saveDataTofile(file,trainingClasses[0].entropy.findThreasholds(False),trainingClasses) 
-                    elif detectortrain=="detect" and len(dataToHandle)>0:
-                        if trainingClasses[0].typeOfFeatures =="fields":
-                            self.doDetectionOnData(dataToHandle,trainingClasses)
-                        elif trainingClasses[0].typeOfFeatures in ["entropy","combined"]:
-                            for rec1 in dataToHandle:
-                                self.doDetectionOnData(rec1,trainingClasses)
-                        elif trainingClasses[0].typeOfFeatures in ["threshold"]:
-                            self.doDetectionOnData(trainingClasses[0].entropy.findThreasholds(False),trainingClasses)
+                        if detectortrain=="train" and len(dataToHandle)>0:
+                            #print(dataToHandle)
+                            if trainingClasses[0].typeOfFeatures =="fields":
+                                #if dataToHandle[-1]==1:
+                                #    print(x)
+                                self.saveDataTofile(file,dataToHandle,trainingClasses)
+                            elif trainingClasses[0].typeOfFeatures in ["entropy","combined"]:
+                                for rec1 in dataToHandle:
+                                    self.saveDataTofile(file,rec1,trainingClasses)
+                            elif trainingClasses[0].typeOfFeatures =="threshold":
+                                self.saveDataTofile(file,trainingClasses[0].entropy.getcurrentvaules(),trainingClasses) 
+                                #self.saveDataTofile(file,trainingClasses[0].entropy.findThreasholds(False),trainingClasses) 
+                        elif detectortrain=="detect" and len(dataToHandle)>0:
+                            if trainingClasses[0].typeOfFeatures =="fields":
+                                self.doDetectionOnData(dataToHandle,trainingClasses)
+                            elif trainingClasses[0].typeOfFeatures in ["entropy","combined"]:
+                                for rec1 in dataToHandle:
+                                    self.doDetectionOnData(rec1,trainingClasses)
+                            elif trainingClasses[0].typeOfFeatures in ["threshold"]:
+                                self.doDetectionOnData(trainingClasses[0].entropy.findThreasholds(False),trainingClasses)
+                infile.close()
             for trainingClasses in self.dicOfFileOutput.values(): #TODO this does only acuount for the vaules in [-1],needs to add the vaule to all in the rec
                 if trainingClasses[0].typeOfFeatures in ["entropy","combined","threshold"]:
                     toadd=trainingClasses[0].entropy.doCalculation()
@@ -148,8 +167,9 @@ class TraningOfClassification:
                             elif detectortrain=="detect":
                                 self.doDetectionOnData(tempr[0],trainingClasses)
                     trainingClasses[0].resetentropy()
-            print(x)
-            infile.close()
+            #print(x)
+            
+                
 
     def setIsAttack(self,rec):
         isAttackFlow=0
@@ -209,16 +229,19 @@ KMF=Kmeans("fields","","")
 KME=Kmeans("entropy","","")
 KMC=Kmeans("combined","","")
 
-#a1=TraningOfClassification([RF],["data/DiffrentSamplingRates/TCP_SYN_Flodd500"])
-#a1=TraningOfClassification([RF,EP],["data/DiffrentSamplingRates/isattack100"])
+#a1=TraningOfClassification([RF],[["data/DiffrentSamplingRates/TCP_SYN_Flodd500"]])
+#a1=TraningOfClassification([RF,EP],[["data/DiffrentSamplingRates/isattack100"]])
 
-#a1=TraningOfClassification([TH],["data/DiffrentSamplingRates/isattack100"])
-#a1=TraningOfClassification([RF],["data/DiffrentSamplingRates/isattack100"])
-#a1=TraningOfClassification([CP],["data/DiffrentSamplingRates/isattack100"])
-#a1=TraningOfClassification([KME],["data/DiffrentSamplingRates/isattack100"])
+#a1=TraningOfClassification([TH],[["data/DiffrentSamplingRates/isattack100"]])
+#a1=TraningOfClassification([RF],[["data/DiffrentSamplingRates/isattack100"]])
+#a1=TraningOfClassification([CP],[["data/DiffrentSamplingRates/isattack100"]])
+#a1=TraningOfClassification([KME],[["data/DiffrentSamplingRates/isattack100"]])
 
-#a1=TraningOfClassification([RFF],["data/DiffrentSamplingRates/TCP_SYN_Flodd01000"])
-a1=TraningOfClassification([TH],["data/DiffrentSamplingRates/TCP_SYN_Flodd01000"])
+#a1=TraningOfClassification([RFF],[["data/DiffrentSamplingRates/TCP_SYN_Flodd01000"])
+
+TH=Threshold("threshold","data/Classifiers/TCP_SYN_Flodd01000threshold.pkl",
+                          "data/Classifiers/TCP_SYN_Flodd01000threshold.npy")
+a1=TraningOfClassification([TH],[["data/DiffrentSamplingRates/TCP_SYN_Flodd01000"]])
 
 #RFF=RandomforestDetection("fields","data/Classifiers/TCP_SYN_Flodd01000RandomForestfields.pkl",
 #                          "data/Classifiers/TCP_SYN_Flodd01000RandomForestfields.npy")
@@ -226,11 +249,12 @@ a1=TraningOfClassification([TH],["data/DiffrentSamplingRates/TCP_SYN_Flodd01000"
 #TH=Threshold("fields","data/Classifiers/TCP_SYN_Flodd01000threshold.pkl",
 #                         "data/Classifiers/TCP_SYN_Flodd01000threshold.npy")
 
-#a2=TraningOfClassification([TH],["data/DiffrentSamplingRates/TCP_SYN_Flodd01000"],)
+#a2=TraningOfClassification([TH],[["data/DiffrentSamplingRates/TCP_SYN_Flodd01000"]],)
 #a2.detect()
 
-a1.makeTraingData()
-a1.train()
-#a1.detect()
+#a1.appendTraingData()
+#a1.makeTraingData()
+#a1.train()
+a1.detect()
 #print(a1.countcorrect)
 #print(a1.countwrong)
