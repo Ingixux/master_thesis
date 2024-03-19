@@ -115,3 +115,6 @@ class Threshold:
         pickle.dump(self.threshold, open(self.filepathOfClassifier, 'wb'))
         pass
         #TODO save the threashold thrashold
+    
+    def makecopy():
+        pass

@@ -96,16 +96,18 @@ class TraningOfClassification:
 
     def createfilesToSaveTo(self):
         #for file in self.listOfPathToSilkFiles: 
-        file = self.listOfPathToSilkFiles[0][0]#TODO This will no longer overwrite eachother, but will only work with one set of files
-        nameoffile=file.split("/")[-1]
-        for trainingClasses in self.dicOfFileOutput.values():
-            trainingClasses[0].filepathOfInput="data/Classifiers/"+nameoffile+trainingClasses[0].name+".npy"
-            #trainingClasses[0].setfilepathOfInput("data/Classifiers/"+nameoffile+trainingClasses[0].name+".npy")
-            if len(trainingClasses)<=2:
-                trainingClasses.append(open("data/Classifiers/"+nameoffile+trainingClasses[0].name+".npy", "wb"))
-            else:
-                trainingClasses[2]=open("data/Classifiers/"+nameoffile+trainingClasses[0].name+".npy", "wb")
-            trainingClasses[0].filepathOfClassifier="data/Classifiers/"+nameoffile+trainingClasses[0].name+".pkl"
+        for fileCollection in self.listOfPathToSilkFiles:
+            file =fileCollection[0]   #TODO This will no longer overwrite eachother, but will only work with one set of files
+            #file = self.listOfPathToSilkFiles[0][0]
+            nameoffile=file.split("/")[-1]
+            for trainingClasses in self.dicOfFileOutput.values():
+                trainingClasses[0].filepathOfInput="data/Classifiers/"+nameoffile+trainingClasses[0].name+".npy"
+                #trainingClasses[0].setfilepathOfInput("data/Classifiers/"+nameoffile+trainingClasses[0].name+".npy")
+                if len(trainingClasses)<=2:
+                    trainingClasses.append(open("data/Classifiers/"+nameoffile+trainingClasses[0].name+".npy", "wb"))
+                else:
+                    trainingClasses[2]=open("data/Classifiers/"+nameoffile+trainingClasses[0].name+".npy", "wb")
+                trainingClasses[0].filepathOfClassifier="data/Classifiers/"+nameoffile+trainingClasses[0].name+".pkl"
 
     def getDataFromSilkFile(self,detectortrain):
         for fileCollection in self.listOfPathToSilkFiles:
