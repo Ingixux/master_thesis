@@ -6,14 +6,15 @@ from Threshold import Threshold
 from Kmeans import Kmeans
 from silk import *
 import datetime
+from Entropy import Entropy
 #import copy
 
 class TraningOfClassification:
     #TODO decide who I want to handle training and testing from same file adn diffrentfiles
     """
-    This Class does now only handle one set of files for each classifier. Does not handle deceting on to diffrent smapling rate
+    This Class can handle file for the classifers, but it will be the same classifer vaules for all the file
     """
-    def __init__(self, listOfTrainingClasses,listOfPathToSilkFiles):
+    def __init__(self, listOfTrainingClasses,listOfPathToSilkFiles,standertimes=[3,15,30]):
         
         #self.listOfTrainingClasses=listOfTrainingClasses
         self.countcorrect=0
@@ -21,15 +22,19 @@ class TraningOfClassification:
         self.countisattack=0
         self.listOfPathToSilkFiles=listOfPathToSilkFiles
         self.dicOfFileOutput ={}
-        data=[]
+        self.dicOfEntropy ={}
+        self.standertimes=standertimes
+        if not self.dicOfFileOutput:
+            self.makeDicOfFileOutput(listOfTrainingClasses)
+    
+    def makeDicOfFileOutput(self, listOfTrainingClasses):
         for TrainingClasses in listOfTrainingClasses:
-            self.dicOfFileOutput[TrainingClasses.name]= [TrainingClasses,data]
-        #self.dicOfFileInnput ={}
-        #for inputFiles in listOfPathToSilkFiles:
-        #    self.dicOfFileInnput[inputFiles]= [???,silkfile_open(inputFiles, READ)]
-        
-        #self.train()
-        
+            for fileCollection in self.listOfPathToSilkFiles:
+                keyfile =fileCollection[0]
+                if TrainingClasses.typeOfFeatures in ["entropy","combined","threshold"]:
+                    if not keyfile in self.dicOfEntropy.keys():
+                        self.dicOfEntropy[keyfile]=Entropy(self.standertimes[0],self.standertimes[1],self.standertimes[2],False)
+                self.dicOfFileOutput[TrainingClasses.name+keyfile]= [TrainingClasses.makecopy(),keyfile]
 
     def makeTraingData(self):
         self.createfilesToSaveTo()
@@ -101,59 +106,68 @@ class TraningOfClassification:
             #file = self.listOfPathToSilkFiles[0][0]
             nameoffile=file.split("/")[-1]
             for trainingClasses in self.dicOfFileOutput.values():
-                trainingClasses[0].filepathOfInput="data/Classifiers/"+nameoffile+trainingClasses[0].name+".npy"
-                #trainingClasses[0].setfilepathOfInput("data/Classifiers/"+nameoffile+trainingClasses[0].name+".npy")
-                if len(trainingClasses)<=2:
-                    trainingClasses.append(open("data/Classifiers/"+nameoffile+trainingClasses[0].name+".npy", "wb"))
-                else:
-                    trainingClasses[2]=open("data/Classifiers/"+nameoffile+trainingClasses[0].name+".npy", "wb")
-                trainingClasses[0].filepathOfClassifier="data/Classifiers/"+nameoffile+trainingClasses[0].name+".pkl"
+                if trainingClasses[1]==file:
+                    trainingClasses[0].filepathOfInput="data/Classifiers/"+nameoffile+trainingClasses[0].name+".npy"
+                    #trainingClasses[0].setfilepathOfInput("data/Classifiers/"+nameoffile+trainingClasses[0].name+".npy")
+                    if len(trainingClasses)<=2:
+                        trainingClasses.append(open("data/Classifiers/"+nameoffile+trainingClasses[0].name+".npy", "wb"))
+                    else:
+                        trainingClasses[2]=open("data/Classifiers/"+nameoffile+trainingClasses[0].name+".npy", "wb")
+                    trainingClasses[0].filepathOfClassifier="data/Classifiers/"+nameoffile+trainingClasses[0].name+".pkl"
 
     def getDataFromSilkFile(self,detectortrain):
         for fileCollection in self.listOfPathToSilkFiles:
+            keyfile =fileCollection[0]
             for file in fileCollection:
                 infile = silkfile_open(file, READ)
-                self.setDataToZero()
+                #self.setDataToZero()
                 x=0
                 for rec in infile:  #TODO Handle that when No rec are for a sliding window time
                     x+=1
+                    #TODO add to entropy here
+                    entropyVaules=[]
+                    if keyfile in self.dicOfEntropy.keys():
+                    #if entrypy not empty:
+                        entropyVaules =self.dicOfEntropy[keyfile].addNewRec(rec)
                     for trainingClasses in self.dicOfFileOutput.values():
-                        dataToHandle=[]
-                        if trainingClasses[0].typeOfFeatures =="fields":
-                            dataToHandle= self.createNetlfowFeilds(rec)
-                        elif trainingClasses[0].typeOfFeatures in ["entropy","combined","threshold"]:
-                            dataToHandle=self.createNetlfowEntropy(rec,trainingClasses[0])
-                        #print(dataToHandle)
-                        if detectortrain=="train" and len(dataToHandle)>0:
+                        if trainingClasses[1]==file:
+                            dataToHandle=[]
+                            if trainingClasses[0].typeOfFeatures =="fields":
+                                dataToHandle= self.createNetlfowFeilds(rec)
+                            elif trainingClasses[0].typeOfFeatures in ["entropy","combined","threshold"]:
+                                #dataToHandle=self.createNetlfowEntropy(rec,trainingClasses[0])
+                                dataToHandle=self.createNetlfowEntropy(entropyVaules,trainingClasses[0],keyfile)
                             #print(dataToHandle)
-                            if trainingClasses[0].typeOfFeatures =="fields":
-                                #if dataToHandle[-1]==1:
-                                #    print(x)
-                                self.saveDataTofile(file,dataToHandle,trainingClasses)
-                            elif trainingClasses[0].typeOfFeatures in ["entropy","combined"]:
-                                for rec1 in dataToHandle:
-                                    self.saveDataTofile(file,rec1,trainingClasses)
-                            elif trainingClasses[0].typeOfFeatures =="threshold":
-                                self.saveDataTofile(file,trainingClasses[0].entropy.getcurrentvaules(),trainingClasses) 
-                                #self.saveDataTofile(file,trainingClasses[0].entropy.findThreasholds(False),trainingClasses) 
-                        elif detectortrain=="detect" and len(dataToHandle)>0:
-                            if trainingClasses[0].typeOfFeatures =="fields":
-                                self.doDetectionOnData(dataToHandle,trainingClasses)
-                            elif trainingClasses[0].typeOfFeatures in ["entropy","combined"]:
-                                for rec1 in dataToHandle:
-                                    self.doDetectionOnData(rec1,trainingClasses)
-                            elif trainingClasses[0].typeOfFeatures in ["threshold"]:
-                                self.doDetectionOnData(trainingClasses[0].entropy.findThreasholds(False),trainingClasses)
+                            if detectortrain=="train" and len(dataToHandle)>0:
+                                #print(dataToHandle)
+                                if trainingClasses[0].typeOfFeatures =="fields":
+                                    #if dataToHandle[-1]==1:
+                                    #    print(x)
+                                    self.saveDataTofile(file,dataToHandle,trainingClasses)
+                                elif trainingClasses[0].typeOfFeatures in ["entropy","combined"]:
+                                    for rec1 in dataToHandle:
+                                        self.saveDataTofile(file,rec1,trainingClasses)
+                                elif trainingClasses[0].typeOfFeatures =="threshold":
+                                    self.saveDataTofile(file,self.dicOfEntropy[keyfile].getcurrentvaules(),trainingClasses) 
+                                    #self.saveDataTofile(file,trainingClasses[0].entropy.findThreasholds(False),trainingClasses) 
+                            elif detectortrain=="detect" and len(dataToHandle)>0:
+                                if trainingClasses[0].typeOfFeatures =="fields":
+                                    self.doDetectionOnData(dataToHandle,trainingClasses)
+                                elif trainingClasses[0].typeOfFeatures in ["entropy","combined"]:
+                                    for rec1 in dataToHandle:
+                                        self.doDetectionOnData(rec1,trainingClasses)
+                                elif trainingClasses[0].typeOfFeatures in ["threshold"]:
+                                    self.doDetectionOnData(self.dicOfEntropy[keyfile].findThreasholds(False),trainingClasses)
                 infile.close()
             for trainingClasses in self.dicOfFileOutput.values(): #TODO this does only acuount for the vaules in [-1],needs to add the vaule to all in the rec
                 if trainingClasses[0].typeOfFeatures in ["entropy","combined","threshold"]:
-                    toadd=trainingClasses[0].entropy.doCalculation()
+                    toadd=self.dicOfEntropy[keyfile].doCalculation() #TODO change entropy
                     if trainingClasses[0].typeOfFeatures =="threshold":
                         if detectortrain=="train":
-                            self.saveDataTofile(file,trainingClasses[0].entropy.getcurrentvaules(),trainingClasses)
+                            self.saveDataTofile(file,self.dicOfEntropy[keyfile].getcurrentvaules(),trainingClasses)
                             #self.saveDataTofile(file,trainingClasses[0].entropy.findThreasholds(True),trainingClasses)
                         elif detectortrain=="detect":
-                            self.doDetectionOnData(trainingClasses[0].entropy.findThreasholds(True),trainingClasses)
+                            self.doDetectionOnData(self.dicOfEntropy[keyfile].findThreasholds(True),trainingClasses)
                     elif len(toadd) !=0:
                         for r in toadd:
                             tempr=[]
@@ -168,7 +182,9 @@ class TraningOfClassification:
                                 self.saveDataTofile(file,tempr[0],trainingClasses)
                             elif detectortrain=="detect":
                                 self.doDetectionOnData(tempr[0],trainingClasses)
-                    trainingClasses[0].resetentropy()
+            if keyfile in self.dicOfEntropy.keys():
+                self.dicOfEntropy[keyfile] = Entropy(self.standertimes[0],self.standertimes[1],self.standertimes[2],False)
+            #entropy.resetentropy()
             #print(x)
             
                 
@@ -182,9 +198,9 @@ class TraningOfClassification:
             isAttackFlow=1
         return isAttackFlow
 
-    def setDataToZero(self):
-        for trainingClasses in self.dicOfFileOutput.values():
-            trainingClasses[1]=[]
+    #def setDataToZero(self):
+    #    for trainingClasses in self.dicOfFileOutput.values():
+    #        trainingClasses[1]=[]
 
     def createNetlfowFeilds(self,rec):
         #li=[rec.sport, rec.dport, rec.protocol, rec.packets, rec.bytes, 
@@ -197,7 +213,7 @@ class TraningOfClassification:
                             int(rec.tcpflags.urg), int(rec.tcpflags.ece), int(rec.tcpflags.cwr), rec.duration/datetime.timedelta(milliseconds=1), 
                             self.setIsAttack(rec)]
         return data
-
+    """
     def createNetlfowEntropy(self,rec,decttionclass):
         toadd=decttionclass.entropy.addNewRec(rec)
         #print(len(toadd))
@@ -221,6 +237,29 @@ class TraningOfClassification:
                             data.append(r[0:32]+[r[-1]])
             #print(data)
         return data
+    """
+    def createNetlfowEntropy(self,toadd,decttionclass,keyfile):
+        data =[]
+        if len(toadd) !=0:
+            if self.dicOfEntropy[keyfile].checkwindowcomplet():
+                #if decttionclass.typeOfFeatures =="threshold":
+                #    #data.append(r[0:2]+r[20:])
+                #    data.append(toadd[0][20:])
+                #else:
+                for temor in toadd:
+                    for r in temor:
+                        #tempr=[]
+                        if decttionclass.typeOfFeatures =="entropy":
+                            #tempr=r[0:2]+r[19:]+r[-1]
+                            #data.append(tempr)
+                            data.append(r[0:2]+r[19:32]+[r[-1]])
+                        #elif decttionclass.typeOfFeatures =="threshold":
+                            #data.append(r[0:2]+r[20:])
+                        else:
+                            data.append(r[0:32]+[r[-1]])
+            #print(data)
+        return data
+        
     
 
 RFF=RandomforestDetection("fields","","")
@@ -255,8 +294,8 @@ a1=TraningOfClassification([TH],[["data/DiffrentSamplingRates/TCP_SYN_Flodd01000
 #a2.detect()
 
 #a1.appendTraingData()
-#a1.makeTraingData()
-#a1.train()
-a1.detect()
+a1.makeTraingData()
+a1.train()
+#a1.detect()
 #print(a1.countcorrect)
 #print(a1.countwrong)

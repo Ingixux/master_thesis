@@ -16,17 +16,17 @@ class RandomforestDetection:
         self.standertimes=standertimes
 
                
-        if typeOfFeatures in ["entropy","combined"] :
-            self.entropy=Entropy(self.standertimes[0],self.standertimes[1],self.standertimes[2],False)
-        elif typeOfFeatures in ["entropylimited","combinedlimited"] :
-            self.entropy=Entropy(self.standertimes[0],self.standertimes[1],self.standertimes[2],True)
-        else:
-            self.entropy=None
+        #if typeOfFeatures in ["entropy","combined"] :
+        #    self.entropy=Entropy(self.standertimes[0],self.standertimes[1],self.standertimes[2],False)
+        #elif typeOfFeatures in ["entropylimited","combinedlimited"] :
+        #    self.entropy=Entropy(self.standertimes[0],self.standertimes[1],self.standertimes[2],True)
+        #else:
+        #    self.entropy=None
         if filepathOfClassifier !="":
             self.loadClassfication()
 
-    def resetentropy(self):
-        self.entropy=Entropy(self.standertimes[0],self.standertimes[1],self.standertimes[2],False)    
+    #def resetentropy(self):
+    #    self.entropy=Entropy(self.standertimes[0],self.standertimes[1],self.standertimes[2],False)    
 
     def checkTypeOfFeatures(self,typeOfFeatures):
         allowedtypeOfFeatures=["fields","entropy","combined","entropylimited","combinedlimited"]
@@ -84,3 +84,9 @@ class RandomforestDetection:
 
     def saveClassifier(self):
         pickle.dump(self.clf, open(self.filepathOfClassifier, 'wb'))
+    
+    def makecopy(self):
+        randomforestDetection = RandomforestDetection(self.typeOfFeatures)
+        randomforestDetection.filepathOfClassifier =self.filepathOfClassifier
+        randomforestDetection.filepathOfInput = self.filepathOfInput
+        return randomforestDetection

@@ -19,13 +19,13 @@ class Threshold:
         self.filepathOfInput=filepathOfInput
         self.standertimes=standertimes
 
-        self.entropy=Entropy(self.standertimes[0],self.standertimes[1],self.standertimes[2],False)       
+        #self.entropy=Entropy(self.standertimes[0],self.standertimes[1],self.standertimes[2],False)       
         #self.sliding_window=Entropy(self.standertimes[0],self.standertimes[1],self.standertimes[2],False)
         if filepathOfClassifier !="":
             self.loadClassfication()
 
-    def resetentropy(self):
-        self.entropy=Entropy(self.standertimes[0],self.standertimes[1],self.standertimes[2],False)  
+    #def resetentropy(self):
+    #    self.entropy=Entropy(self.standertimes[0],self.standertimes[1],self.standertimes[2],False)  
         #self.sliding_window=Entropy(self.standertimes[0],self.standertimes[1],self.standertimes[2],False)  
 
 
@@ -85,12 +85,12 @@ class Threshold:
 
         for key in vaules.keys():
             if key not in ["isAtttack","HigstNumberOfSyn","HigstNumberOfURGPSHFIN"]:
-                #print(key)
-                #print(vaules[key])
+                print(key)
+                print(vaules[key])
                 self.threshold[key]=statistics.stdev(vaules[key]) #TODO consider other metrics
             elif key in ["HigstNumberOfSyn","HigstNumberOfURGPSHFIN"]: #TODO this should only look at a small number of vaules (most will be low)
-                #print(key)
-                #print(vaules[key])
+                print(key)
+                print(vaules[key])
                 self.threshold[key]=statistics.mean(vaules[key])
 
             
@@ -116,5 +116,8 @@ class Threshold:
         pass
         #TODO save the threashold thrashold
     
-    def makecopy():
-        pass
+    def makecopy(self):
+        threshold = Threshold(self.typeOfFeatures)
+        threshold.filepathOfClassifier =self.filepathOfClassifier
+        threshold.filepathOfInput = self.filepathOfInput
+        return threshold
