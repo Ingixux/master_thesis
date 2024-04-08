@@ -127,4 +127,5 @@ class Kmeans:
         kmeans = Kmeans(self.typeOfFeatures)
         kmeans.filepathOfClassifier =self.filepathOfClassifier
         kmeans.filepathOfInput = self.filepathOfInput
+        kmeans.clf =self.clf 
         return kmeans

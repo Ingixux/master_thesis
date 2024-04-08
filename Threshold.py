@@ -120,4 +120,5 @@ class Threshold:
         threshold = Threshold(self.typeOfFeatures)
         threshold.filepathOfClassifier =self.filepathOfClassifier
         threshold.filepathOfInput = self.filepathOfInput
+        threshold.threshold =self.threshold
         return threshold

@@ -89,4 +89,5 @@ class RandomforestDetection:
         randomforestDetection = RandomforestDetection(self.typeOfFeatures)
         randomforestDetection.filepathOfClassifier =self.filepathOfClassifier
         randomforestDetection.filepathOfInput = self.filepathOfInput
+        randomforestDetection.clf =self.clf 
         return randomforestDetection
