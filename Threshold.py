@@ -18,16 +18,8 @@ class Threshold:
         self.filepathOfClassifier= filepathOfClassifier
         self.filepathOfInput=filepathOfInput
         self.standertimes=standertimes
-
-        #self.entropy=Entropy(self.standertimes[0],self.standertimes[1],self.standertimes[2],False)       
-        #self.sliding_window=Entropy(self.standertimes[0],self.standertimes[1],self.standertimes[2],False)
         if filepathOfClassifier !="":
             self.loadClassfication()
-
-    #def resetentropy(self):
-    #    self.entropy=Entropy(self.standertimes[0],self.standertimes[1],self.standertimes[2],False)  
-        #self.sliding_window=Entropy(self.standertimes[0],self.standertimes[1],self.standertimes[2],False)  
-
 
     def checkTypeOfFeatures(self,typeOfFeatures):
         allowedtypeOfFeatures=["threshold"]

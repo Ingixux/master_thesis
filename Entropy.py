@@ -10,6 +10,11 @@ class Entropy:
         self.limited=limited
         self.orderEntropy=50
         self.startcounter=1
+
+        self.x=0
+        #self.startOfWindow=0
+        #self.EndOfWindow=aggregate_window_duration//sliding_window_interval
+        #print(self.EndOfWindow)
         self.vaulesToCompare={"entropySip":0,"entropyRateSip":0,"entropyDip":0,"entropyRateDip":0,"entropyPacketsize":0,"entropyRatePacketsize":0,
                                            "entropyBiflowSyn":0,"entropySipSyn":0,"entropyDipSyn":0,"entropyBiflow":0,"entropyRateBiflow":0,
                                            "HigstNumberOfSyn":0,"HigstNumberOfURGPSHFIN":0,"countBiflow":0,"totalicmpDUnreachable":0,
@@ -32,11 +37,15 @@ class Entropy:
 
     def checkwindowcomplet(self):
         if self.startcounter>=len(self.aggregate_window["vaules"]):
+        #if self.startOfWindow==self.EndOfWindow:
             return True
         else:
+            #TODO This does not handle if the post more than one
+            #self.startOfWindow +=1
             return False
 
     def addNewRec(self,rec):
+        self.x+=1
         toretrun=[]
         if self.aggregate_window["earlistTime"]==0:
             self.aggregate_window["earlistTime"]=rec.stime
@@ -44,23 +53,29 @@ class Entropy:
         #print(self.aggregate_window["currentTime"]-self.aggregate_window["earlistTime"])
         #print(rec.stime)
         if self.checkIfpastedSliding_window():
+            
+            #THIs moves 
             movewindow=(self.aggregate_window["currentTime"]-self.aggregate_window["earlistTime"])//self.aggregate_window["interval"]
             #print(self.aggregate_window["currentTime"]-self.aggregate_window["earlistTime"])
             #print(movewindow)
             self.aggregate_window["earlistTime"]=self.aggregate_window["currentTime"]
             if movewindow>len(self.aggregate_window["vaules"]):
+                """
+                The new record is futher away than the whole sliding window, 
+                so do not need 
+                """
                 movewindow=len(self.aggregate_window["vaules"])
             for y in range(0,movewindow):
-                if len(self.aggregate_window["vaules"][-1]["currentRecs"])!=0: #TODO this will not handle how I want if there in the midle comes a empty window
-                    toretrun.append(copy.copy(self.doCalculation()))
-                elif self.startcounter<len(self.aggregate_window["vaules"]):
+                toretrun.append(copy.copy(self.doCalculation(False)))
+                if self.startcounter<len(self.aggregate_window["vaules"]):
                     self.startcounter+=1
+                
                 self.removeFromSliding_window()
-
         self.addVaules(rec)
         return toretrun
 
     def addVaules(self,rec):
+        
         #int(rec.tcpflags.fin), int(rec.tcpflags.syn), int(rec.tcpflags.psh),int(rec.tcpflags.urg),
         self.aggregate_window["vaules"][0]["currentRecs"].append(rec)
         self.aggregate_window["vaules"][0]["packets"]=self.aggregate_window["vaules"][0]["packets"] +rec.packets 
@@ -125,8 +140,8 @@ class Entropy:
             except KeyError:
                 return True
 
-    def doCalculation(self): 
-       
+    def doCalculation(self,end): 
+        
         #TODO
         totalpackets=0#self.aggregate_window["vaules"][-1]["packets"]
         totalsourceIP=0 
@@ -301,17 +316,31 @@ class Entropy:
 
 
         #print(self.aggregate_window["vaules"][0]["currentRecs"])
-        
-        for rec in self.aggregate_window["vaules"][-1]["currentRecs"]:
-            arrayToAdd.append([rec.stime, rec.etime, int(rec.sip), int(rec.dip), rec.sport, rec.dport, rec.protocol, rec.packets, rec.bytes, 
-                                int(rec.tcpflags.fin), int(rec.tcpflags.syn), int(rec.tcpflags.rst), int(rec.tcpflags.psh), int(rec.tcpflags.ack), 
-                                int(rec.tcpflags.urg), int(rec.tcpflags.ece), int(rec.tcpflags.cwr), rec.duration/datetime.timedelta(milliseconds=1), int(rec.nhip),#index 18
-                                totalFlows,entropySip,entropyRateSip,entropyDip,entropyRateDip,entropyPacketsize,
-                                entropyRatePacketsize,entropyBiflow,entropyRateBiflow,totalicmp,totalicmprate,
-                                totalBytes,totalpackets,#31
-                                entropyBiflowSyn,entropySipSyn,entropyDipSyn,
-                                countBiflow,HigstNumberOfSyn,HigstNumberOfURGPSHFIN,totalicmpDUnreachable,
-                                self.setIsAttack(rec)])
+        if end==False:
+            for rec in self.aggregate_window["vaules"][-1]["currentRecs"]:
+                #
+                
+                arrayToAdd.append([rec.stime, rec.etime, int(rec.sip), int(rec.dip), rec.sport, rec.dport, rec.protocol, rec.packets, rec.bytes, 
+                                    int(rec.tcpflags.fin), int(rec.tcpflags.syn), int(rec.tcpflags.rst), int(rec.tcpflags.psh), int(rec.tcpflags.ack), 
+                                    int(rec.tcpflags.urg), int(rec.tcpflags.ece), int(rec.tcpflags.cwr), rec.duration/datetime.timedelta(milliseconds=1), int(rec.nhip),#index 18
+                                    totalFlows,entropySip,entropyRateSip,entropyDip,entropyRateDip,entropyPacketsize,
+                                    entropyRatePacketsize,entropyBiflow,entropyRateBiflow,totalicmp,totalicmprate,
+                                    totalBytes,totalpackets,#31
+                                    entropyBiflowSyn,entropySipSyn,entropyDipSyn,
+                                    countBiflow,HigstNumberOfSyn,HigstNumberOfURGPSHFIN,totalicmpDUnreachable,
+                                    self.setIsAttack(rec)])
+        else:
+            for window in self.aggregate_window["vaules"]:
+                for rec in window["currentRecs"]:
+                    arrayToAdd.append([rec.stime, rec.etime, int(rec.sip), int(rec.dip), rec.sport, rec.dport, rec.protocol, rec.packets, rec.bytes, 
+                                        int(rec.tcpflags.fin), int(rec.tcpflags.syn), int(rec.tcpflags.rst), int(rec.tcpflags.psh), int(rec.tcpflags.ack), 
+                                        int(rec.tcpflags.urg), int(rec.tcpflags.ece), int(rec.tcpflags.cwr), rec.duration/datetime.timedelta(milliseconds=1), int(rec.nhip),#index 18
+                                        totalFlows,entropySip,entropyRateSip,entropyDip,entropyRateDip,entropyPacketsize,
+                                        entropyRatePacketsize,entropyBiflow,entropyRateBiflow,totalicmp,totalicmprate,
+                                        totalBytes,totalpackets,#31
+                                        entropyBiflowSyn,entropySipSyn,entropyDipSyn,
+                                        countBiflow,HigstNumberOfSyn,HigstNumberOfURGPSHFIN,totalicmpDUnreachable,
+                                        self.setIsAttack(rec)])
             
 
         #TODO add this vaules into the comparison window
@@ -373,14 +402,16 @@ class Entropy:
         isAttackFlow=0
         #if rec.sensor=="isAttack": #TODO why does this not work
         #    isAttackFlow=1
-        if rec.sensor_id==3:
+        if rec.sensor_id==32532:
             isAttackFlow=1
         return isAttackFlow
 
     def removeFromSliding_window(self):
         #TODO create the data to retrun from the sliding_window, can use packets in all aggregate_window to see if aggregate_window is complete
+        #self.x+=len(self.aggregate_window["vaules"][-1]["currentRecs"])
         for x in range(1,len(self.aggregate_window["vaules"])):
-            self.aggregate_window["vaules"][-x]=self.aggregate_window["vaules"][-(x+1)]
+            self.aggregate_window["vaules"][-x]=copy.copy(self.aggregate_window["vaules"][-(x+1)])
+            #self.aggregate_window["vaules"][-x]=self.aggregate_window["vaules"][-(x+1)]
         self.aggregate_window["vaules"][0]={"sourceIP":{},"packets":0,"destinationIP":{},"bytes":0,"packetsize":{},"currentRecs":[],
                                             "biflow":{},"icmp":0,"Destination unreachable":0}
         if len(self.comparison_window["vaules"])>0:

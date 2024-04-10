@@ -71,12 +71,14 @@ class TraningOfClassification:
             Features=darecta[:,2:-1]
             labels=darecta[:,-1]
             toSave=trainingClasses[0].detect(Features,labels[0])
+            #toSave=["RandomForest",1,labels[0]]
         if toSave[1]==toSave[2]:
-            if toSave[2] ==1:
-                self.countisattack+=1
             self.countcorrect+=1
         else:
             self.countwrong+=1
+        if toSave[2] ==1:
+            self.countisattack+=1
+        
         #print(str(self.countwrong) +" "+ str(self.countcorrect) +" " +str(self.countisattack))
         #TODO save toSave in a file
 
@@ -93,11 +95,12 @@ class TraningOfClassification:
         if trainingClasses[0].typeOfFeatures =="threshold":
             result = data.items()
             fdate= list(result)
-            data=np.array(fdate, dtype=object)
+            savedata=np.array(fdate, dtype=object)
         #print(data)
-        data=np.array(data, dtype=object)
+        savedata=np.array(data, dtype=object)
         #print(data[2:])
-        np.save(trainingClasses[2],data)
+
+        np.save(trainingClasses[2],savedata)
 
     def createfilesToSaveTo(self):
         #for file in self.listOfPathToSilkFiles: 
@@ -121,14 +124,16 @@ class TraningOfClassification:
             for file in fileCollection:
                 infile = silkfile_open(file, READ)
                 #self.setDataToZero()
-                x=0
+                self.x=0
                 for rec in infile:  #TODO Handle that when No rec are for a sliding window time
-                    x+=1
+                    
                     #TODO add to entropy here
                     entropyVaules=[]
                     if keyfile in self.dicOfEntropy.keys():
                     #if entrypy not empty:
+                        
                         entropyVaules =self.dicOfEntropy[keyfile].addNewRec(rec)
+                        #self.x+=len(entropyVaules)
                     for trainingClasses in self.dicOfFileOutput.values():
                         if trainingClasses[1]==file:
                             dataToHandle=[]
@@ -146,6 +151,7 @@ class TraningOfClassification:
                                     self.saveDataTofile(file,dataToHandle,trainingClasses)
                                 elif trainingClasses[0].typeOfFeatures in ["entropy","combined"]:
                                     for rec1 in dataToHandle:
+                                        
                                         self.saveDataTofile(file,rec1,trainingClasses)
                                 elif trainingClasses[0].typeOfFeatures =="threshold":
                                     self.saveDataTofile(file,self.dicOfEntropy[keyfile].getcurrentvaules(),trainingClasses) 
@@ -161,7 +167,7 @@ class TraningOfClassification:
                 infile.close()
             for trainingClasses in self.dicOfFileOutput.values(): #TODO this does only acuount for the vaules in [-1],needs to add the vaule to all in the rec
                 if trainingClasses[0].typeOfFeatures in ["entropy","combined","threshold"]:
-                    toadd=self.dicOfEntropy[keyfile].doCalculation() #TODO change entropy
+                    toadd=self.dicOfEntropy[keyfile].doCalculation(True) #TODO change entropy
                     if trainingClasses[0].typeOfFeatures =="threshold":
                         if detectortrain=="train":
                             self.saveDataTofile(file,self.dicOfEntropy[keyfile].getcurrentvaules(),trainingClasses)
@@ -179,15 +185,15 @@ class TraningOfClassification:
                                 tempr.append(r[0:32]+[r[-1]]) 
                             
                             if detectortrain=="train":
+                                
                                 self.saveDataTofile(file,tempr[0],trainingClasses)
                             elif detectortrain=="detect":
                                 self.doDetectionOnData(tempr[0],trainingClasses)
             if keyfile in self.dicOfEntropy.keys():
+                #print(self.dicOfEntropy[keyfile].x)
                 self.dicOfEntropy[keyfile] = Entropy(self.standertimes[0],self.standertimes[1],self.standertimes[2],False)
             #entropy.resetentropy()
-            #print(x)
-            
-                
+            #print(self.x)
 
     def setIsAttack(self,rec):
         isAttackFlow=0
@@ -242,22 +248,18 @@ class TraningOfClassification:
         data =[]
         if len(toadd) !=0:
             if self.dicOfEntropy[keyfile].checkwindowcomplet():
-                #if decttionclass.typeOfFeatures =="threshold":
-                #    #data.append(r[0:2]+r[20:])
-                #    data.append(toadd[0][20:])
-                #else:
                 for temor in toadd:
                     for r in temor:
-                        #tempr=[]
-                        if decttionclass.typeOfFeatures =="entropy":
+                        if decttionclass.typeOfFeatures =="entropy": #TODO Should only one be added
                             #tempr=r[0:2]+r[19:]+r[-1]
                             #data.append(tempr)
                             data.append(r[0:2]+r[19:32]+[r[-1]])
+                            #if (r[-1] ==1):
+                            #    print("he")
                         #elif decttionclass.typeOfFeatures =="threshold":
                             #data.append(r[0:2]+r[20:])
                         else:
                             data.append(r[0:32]+[r[-1]])
-            #print(data)
         return data
         
     
@@ -278,28 +280,30 @@ KMC=Kmeans("combined","","")
 #a1=TraningOfClassification([CP],[["data/DiffrentSamplingRates/isattack100"]])
 #a1=TraningOfClassification([KME],[["data/DiffrentSamplingRates/isattack100"]])
 
-#a1=TraningOfClassification([RFF],[["data/DiffrentSamplingRates/TCP_SYN_Flodd01000"])
+a1=TraningOfClassification([RFE],[["data/DiffrentSamplingRates/TCP_SYN_Flodd01000"]])
+#a1=TraningOfClassification([RFF],[["data/DiffrentSamplingRates/TCP_SYN_Flodd01000"]])
 
 #TH=Threshold("threshold","data/Classifiers/TCP_SYN_Flodd01000threshold.pkl",
 #                          "data/Classifiers/TCP_SYN_Flodd01000threshold.npy")
 
 #a1=TraningOfClassification([TH,RFC],[["data/DiffrentSamplingRates/TCP_SYN_Flodd01000"]])
 #a1=TraningOfClassification([TH,RFF],[["data/DiffrentSamplingRates/TCP_SYN_Flodd01000"]])
-RFFC=RandomforestDetection("fields","data/Classifiers/TCP_SYN_Flodd01000RandomForestfields.pkl",
-                          "data/Classifiers/TCP_SYN_Flodd01000RandomForestfields.npy")
+#RFFC=RandomforestDetection("fields","data/Classifiers/TCP_SYN_Flodd01000RandomForestfields.pkl",
+#                          "data/Classifiers/TCP_SYN_Flodd01000RandomForestfields.npy")
 
 #TH=Threshold("fields","data/Classifiers/TCP_SYN_Flodd01000threshold.pkl",
 #                         "data/Classifiers/TCP_SYN_Flodd01000threshold.npy")
 
 #a2=TraningOfClassification([TH],[["data/DiffrentSamplingRates/TCP_SYN_Flodd01000"]],)
 
-a2=TraningOfClassification([RFFC],[["data/DiffrentSamplingRates/TCP_SYN_Flodd01000"]])
+#a2=TraningOfClassification([RFFC],[["data/DiffrentSamplingRates/TCP_SYN_Flodd01000"]])
 #a2.train()
-a2.detect()
+#a2.detect()
 
 #a1.appendTraingData()
-#a1.makeTraingData()
-#a1.train()
-#a1.detect()
-print(a2.countcorrect)
-print(a2.countwrong)
+a1.makeTraingData()
+a1.train()
+a1.detect()
+print(a1.countcorrect)
+print(a1.countwrong)
+print(a1.countisattack)

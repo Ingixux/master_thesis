@@ -14,14 +14,6 @@ class Kmeans:
         self.filepathOfClassifier= filepathOfClassifier
         self.filepathOfInput=filepathOfInput
         self.standertimes=standertimes
-
-               
-#        if typeOfFeatures in ["entropy","combined"] :
-#            self.entropy=Entropy(self.standertimes[0],self.standertimes[1],self.standertimes[2],False)
-#        elif typeOfFeatures in ["entropylimited","combinedlimited"] :
-#            self.entropy=Entropy(self.standertimes[0],self.standertimes[1],self.standertimes[2],True)
-#        else:
-#            self.entropy=None
         if filepathOfClassifier !="":
             self.loadClassfication()
 
