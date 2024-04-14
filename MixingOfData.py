@@ -353,5 +353,5 @@ ca2 =SamplingRate("1:1000")
 
 #MD = MixingOfData([ca1,sa2],"data/ModifiedAttackFiles/isattack","data/SilkFilesFromSikt/TCP_SYN_Flodd",[sa2,sa2])
 #MD = MixingOfData([ca2],"data/ModifiedAttackFiles/TCP_SYN_Flodd0","data/SilkFilesFromSikt/TCP_SYN_Flodd",[sa1,sa2])
-MD = MixingOfData([ca2],"data/ModifiedAttackFiles/TCP_SYN_Flodd0","/media/sf_share/out-S1_20110125.13",[sa1,sa2])
+MD = MixingOfData([ca2],"data/ModifiedAttackFiles/TCP_SYN_Flodd0","/media/sf_share/out-S1_20110125.12",[sa1,sa2])
 
