@@ -118,7 +118,8 @@ class AttackDataMultiplicator:
         #TODO add a description of that this needs to be inline with the silk config files.
         """
         #rec.sensor=self.dicOfFileToModifcationsClass[nameofset][1].isAttack
-        rec.sensor_id=32532
+        rec.sensor_id=self.dicOfFileToModifcationsClass[nameofset][1].isAttack 
+        #32532
         return rec
 
     def addInfoToDicToMatchBiFlows(self,whatToAdd,valueToAdd,nameofset,keyOfBiFlow,isbiflow):
@@ -275,12 +276,12 @@ class InputToAttackDataMultiplicator:
 
     def addisAttack(self,parmeters):
         try:
-            if type(parmeters["isAttack"]) != str:
+            if type(parmeters["isAttack"]) != int:
                 raise KeyError
             else:
                 self.isAttack =parmeters["isAttack"]
         except KeyError:
-            self.isAttack="isattack"
+            self.isAttack=32532
         
     def addName(self,parmeters):
         try:
