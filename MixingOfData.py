@@ -54,6 +54,8 @@ class TempRecords:
 class MixingOfData:
     #TODO add the possiblety to remove files that exits, when oping to write
     #TODO add the possiblety of having multipule inputefiles from both sikt and attack data
+    #TODO don't need that, add only the handling of no attack file,
+    #So that the system can run though the files and inculde the attacks when possible 
     """
     The class assumes that the two files inputFile1 and inputFile2 are sorted on time
     """
@@ -353,5 +355,7 @@ ca2 =SamplingRate("1:1000")
 
 #MD = MixingOfData([ca1,sa2],"data/ModifiedAttackFiles/isattack","data/SilkFilesFromSikt/TCP_SYN_Flodd",[sa2,sa2])
 #MD = MixingOfData([ca2],"data/ModifiedAttackFiles/TCP_SYN_Flodd0","data/SilkFilesFromSikt/TCP_SYN_Flodd",[sa1,sa2])
-MD = MixingOfData([ca2],"data/ModifiedAttackFiles/TCP_SYN_Flodd0","/media/sf_share/out-S1_20110125.12",[sa1,sa2])
+#MD = MixingOfData([ca2],"data/ModifiedAttackFiles/TCP_SYN_Flodd0","/media/sf_share/out-S1_20110125.12",[sa1,sa2])
+MD = MixingOfData([ca2],"data/ModifiedAttackFiles/TCP_SYN_Flodd0","outfile.rw",[sa1,sa2])
+
 

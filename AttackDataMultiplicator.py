@@ -473,4 +473,5 @@ end = datetime.datetime(2011, 1, 25, 12, 51, 0, 0)
 
 ia1 = InputToAttackDataMultiplicator({"botsize":9,"dst":["11.12.26.5"],"src":["192.168.2.2"], "nIP":["192.168.44.43","192.168.44.43"], "stratTimeOfAttack" : start , "endTimeOfAttack"  : end, "startTimeIncreasAlgorithm":"standardBasedOnBotnetsize"})
 #ia2 = InputToAttackDataMultiplicator({"botsize":1,"src":["192.168.3.3"]})
-a1=AttackDataMultiplicator([ia1],"data/GenratedAttacks/ext2ext-S0_20240125.12","TCP_SYN_Flodd")
+#a1=AttackDataMultiplicator([ia1],"data/GenratedAttacks/ext2ext-S0_20240125.12","TCP_SYN_Flodd")
+a1=AttackDataMultiplicator([ia1],"outfileattack.rw","TCP_SYN_Flodd")

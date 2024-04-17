@@ -3,3 +3,6 @@ data/ModifiedAttackFiles/*
 data/SilkFilesFromSikt/*
 data/MixDatasets/*
 data/DiffrentSamplingRates/*
+transferfiles.py
+copingTomachine.py
+readfile.py
