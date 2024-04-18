@@ -2,6 +2,7 @@ from silk import *
 import ipaddress
 import datetime
 import os
+import subprocess
 
 #rwsort --fields=stime --input-pipe=/home/kali/data/ModifiedAttackFiles/TCP_SYN_Flodd0 --output-path=/home/kali/data/ModifiedAttackFiles/sorted
 class AttackDataMultiplicator:       
@@ -54,6 +55,10 @@ class AttackDataMultiplicator:
             #self.dicOfFileToModifcationsClass["ModifiedAttackFiles/"+attack+str(x)]= ["test open ModifiedAttackFiles/"+attack+str(x),listtWithModifcationsClass[x]]
         self.modifyfile()
 
+    def sortFile(self):
+        x=subprocess.call("rm temp.rw", shell=True)
+        x=subprocess.call("rwsort --fields=stime --output-path=temp.rw "+self.filePath+"", shell=True)
+
     def modifyfile(self):
         """
         Modifiles based on the AttackDataMultiplicator object.
@@ -68,7 +73,9 @@ class AttackDataMultiplicator:
         #    self.count+=1
         self.counterUnqiueFlows =0
         #infile_r.close()
-        infile_r = silkfile_open(self.filePath, READ)
+        #infile_r = silkfile_open(self.filePath, READ)
+        self.sortFile()
+        infile_r = silkfile_open("temp.rw", READ)
         for rec in infile_r:
             isbiflow=False
             checkKeyOfBiFlow = str(rec.dip)+ str(rec.sip) + str(rec.dport) +str(rec.sport) +str(rec.protocol)
@@ -473,5 +480,5 @@ end = datetime.datetime(2011, 1, 25, 12, 51, 0, 0)
 
 ia1 = InputToAttackDataMultiplicator({"botsize":9,"dst":["11.12.26.5"],"src":["192.168.2.2"], "nIP":["192.168.44.43","192.168.44.43"], "stratTimeOfAttack" : start , "endTimeOfAttack"  : end, "startTimeIncreasAlgorithm":"standardBasedOnBotnetsize"})
 #ia2 = InputToAttackDataMultiplicator({"botsize":1,"src":["192.168.3.3"]})
-#a1=AttackDataMultiplicator([ia1],"data/GenratedAttacks/ext2ext-S0_20240125.12","TCP_SYN_Flodd")
-a1=AttackDataMultiplicator([ia1],"outfileattack.rw","TCP_SYN_Flodd")
+a1=AttackDataMultiplicator([ia1],"data/GenratedAttacks/ext2ext-S0_20240125.12","TCP_SYN_Flodd")
+#a1=AttackDataMultiplicator([ia1],"outfileattack.rw","TCP_SYN_Flodd")

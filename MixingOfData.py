@@ -54,7 +54,7 @@ class TempRecords:
 class MixingOfData:
     #TODO add the possiblety to remove files that exits, when oping to write
     #TODO add the possiblety of having multipule inputefiles from both sikt and attack data
-    #TODO don't need that, add only the handling of no attack file,
+    #TODO or add only the handling of no attack file,
     #So that the system can run though the files and inculde the attacks when possible 
     """
     The class assumes that the two files inputFile1 and inputFile2 are sorted on time
@@ -162,21 +162,26 @@ class MixingOfData:
     def getNextRecord(self):
         """
         Gathers all the next records with the same start time, and retruns them in a list
-        the dicOfFileInnput.nextRec is the next record that have a later strat time 
-        First time the function is run, both files are read, else the one with the earlist start time is read  
+        the dicOfFileInnput.nextRec is the next records that have a later start time the ones that get return 
+        First time the function is run, both files are read, and the one with the earlist start time is used as the currentStartTime
+        the nexts time it check which of the next records have the earlist start time and uses that as currentStartTime
+        After the currentStartTime is set it calleds the addNewRecWhileSameSTIME() which will find all records of both files
+        these are added to temprecords and retrun
         """
+
+        #TODO add it so that there can be more files 
         temprecords= []
         temprec=0
         if self.currentTime == 0:
             for key in self.dicOfFileInnput.keys():
-                temprec=self.dicOfFileInnput[key][1].read() # TODO check what happen if the file stops
+                temprec=self.dicOfFileInnput[key][1].read() # TODO check what happen if the file stops #TODO and is it here I belive I can move to the next file
                 self.dicOfFileInnput[key][0].addNextRec(temprec)
                 if self.currentTime == 0:
                     self.currentTime =self.dicOfFileInnput[key][0].currentStartTime
                 elif self.currentTime>self.dicOfFileInnput[key][0].currentStartTime:
                     self.currentTime =self.dicOfFileInnput[key][0].currentStartTime 
-        for x in self.addNewRecWhileSameSTIME():
-            temprecords.append(x)
+            for x in self.addNewRecWhileSameSTIME():
+                temprecords.append(x)
         if temprec==0:
             tempkey=0
             for key in self.dicOfFileInnput.keys():
@@ -194,18 +199,19 @@ class MixingOfData:
         temprecords =[]
         for key in self.dicOfFileInnput.keys():
             record = self.dicOfFileInnput[key][0].getNextRecord()
-            if record !=0:
+            if record !=0: 
                 while record.stime ==self.currentTime:
                     if self.currentTime==self.dicOfFileInnput[key][0].currentStartTime:
                         temprecords.append(TempRecords(record,self.dicOfFileInnput[key][0].maxpackets,key))
-                        temprec=self.dicOfFileInnput[key][1].read()
+                        temprec=self.dicOfFileInnput[key][1].read()#TODO Here I belive I can move to the next file
+                        #TODO how to handle that one of the files are empty
                         if temprec != None:
                             self.dicOfFileInnput[key][0].addNextRec(temprec)
                         else:
                             self.dicOfFileInnput[key][0].addNextRec(0)
                     record = self.dicOfFileInnput[key][0].getNextRecord()
                     if record==0:
-                        break
+                        break 
         return temprecords
     
     def checkIfOverCurrent(self):

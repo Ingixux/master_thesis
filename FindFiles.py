@@ -1,4 +1,3 @@
-import subprocess
 import os
 
 #rwsort --fields=stime --output-path=outfile.rw /media/sf_share/out-S1_20110125.12
@@ -109,9 +108,7 @@ class FindFiles:
         if type(start) !=Folderpathstructure or type(end) !=Folderpathstructure:
             raise ValueError("start or end is not Folderpathstructure")
         
-#    def sortFile(self,file):
-#        x=subprocess.call("rm temp.rw", shell=True)
-#        x=subprocess.call("rwsort --fields=stime --output-path=temp.rw "+file+"", shell=True)
+
 
     def findallfiles(self):
         templist=[]
