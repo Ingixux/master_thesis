@@ -2,7 +2,8 @@ data/GenratedAttacks/*
 data/ModifiedAttackFiles/*
 data/SilkFilesFromSikt/*
 data/MixDatasets/*
-data/DiffrentSamplingRates/*
+data/DiffrentSamplingRates/detect/*
+data/DiffrentSamplingRates/train/*
 transferfiles.py
 copingTomachine.py
 readfile.py

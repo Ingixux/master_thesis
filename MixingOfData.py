@@ -4,6 +4,7 @@ import datetime
 import random 
 import os
 import math
+import subprocess
 
 class TempRecords:
     def __init__(self,rec,samplingUsedToCollect,keyToFile):
@@ -57,17 +58,22 @@ class MixingOfData:
     #TODO or add only the handling of no attack file,
     #So that the system can run though the files and inculde the attacks when possible 
     """
-    The class assumes that the two files inputFile1 and inputFile2 are sorted on time
+    
     """
-    def __init__(self,listWithChaningOfSamplingRate,inputFile1,inputFile2,innput):
+    def __init__(self,listWithChaningOfSamplingRate,inputFile1,inputFile2,innput,outputTraniOrDetect):
         innput= self.checkInput(innput)
         self.dicOfFileOutput ={}
         self.dicOfFileInnput ={}
-        self.openInputFiles(inputFile1,inputFile2,innput)
+        self.dictofthelistofinputfile={"tempAttack.rw":inputFile1,"tempNormal.rw":inputFile2}
+        #self.openInputFiles(inputFile1,inputFile2,innput)
+        self.openInputFiles(innput)
         self.checkChaningOfsamplingRate(listWithChaningOfSamplingRate,innput)
+        if outputTraniOrDetect not in ["detect","train"]:
+            raise ValueError("output folder not str train or detect")
         for chaningOfSamplingRate in self.dicOfFileOutput.values():
-            namOupFile= inputFile1.split("/")[-1] 
-            pathToFile ="data/DiffrentSamplingRates/"+namOupFile+str(chaningOfSamplingRate[0].maxpackets)
+            #namOupFile= inputFile1.split("/")[-1] 
+            #TODO This doesn't handle chaningOfSamplingRate with same samplingrate
+            pathToFile ="data/DiffrentSamplingRates/"+outputTraniOrDetect+"/"+outputTraniOrDetect+str(chaningOfSamplingRate[0].maxpackets)
             if os.path.isfile(pathToFile):
                 os.remove(pathToFile)
             chaningOfSamplingRate.append(silkfile_open(pathToFile, WRITE))
@@ -75,7 +81,7 @@ class MixingOfData:
         
         self.mix()
         
-        self.closeAllFiles()
+        #self.closeAllFiles()
 
     def mix(self):
         records =1
@@ -177,7 +183,7 @@ class MixingOfData:
         """
         if self.currentTime == 0:
             for key in self.dicOfFileInnput.keys():
-                temprec=self.dicOfFileInnput[key][1].read() # TODO check what happen if the file stops #TODO and is it here I belive I can move to the next file
+                temprec=self.dicOfFileInnput[key][1].read() 
                 self.dicOfFileInnput[key][0].addNextRec(temprec)
                 if self.currentTime == 0:
                     self.currentTime =self.dicOfFileInnput[key][0].currentStartTime
@@ -209,12 +215,19 @@ class MixingOfData:
                 while record.stime ==self.currentTime:
                     if self.currentTime==self.dicOfFileInnput[key][0].currentStartTime:
                         temprecords.append(TempRecords(record,self.dicOfFileInnput[key][0].maxpackets,key))
+                        
                         temprec=self.dicOfFileInnput[key][1].read()#TODO Here I belive I can move to the next file
-                        #TODO how to handle that one of the files are empty
-                        if temprec != None:
-                            self.dicOfFileInnput[key][0].addNextRec(temprec)
+                        if temprec==None:
+                            #firstfileAttack=self.dictofthelistofinputfile[keyoffile].pop(0)
+                            #self.openNextInputFile(,key)
+                            if self.openNextInputFile(key) ==False:
+                                self.dicOfFileInnput[key][1].close() 
+                                self.dicOfFileInnput[key][0].addNextRec(0)
+                            else:
+                                temprec=self.dicOfFileInnput[key][1].read() #TODO this does not handle if the next file is empty
+                                self.dicOfFileInnput[key][0].addNextRec(temprec)
                         else:
-                            self.dicOfFileInnput[key][0].addNextRec(0)
+                            self.dicOfFileInnput[key][0].addNextRec(temprec)
                     record = self.dicOfFileInnput[key][0].getNextRecord()
                     if record==0:
                         break 
@@ -265,25 +278,70 @@ class MixingOfData:
                 innput[0] = SamplingRate("1:100")
         return innput
 
-    def openInputFiles(self,inputFile1,inputFile2,innput):
-        if len(inputFile1) ==0:
-            raise ValueError("Sorry, no input for inputFile1") 
-        else:
-            if len(inputFile2) !=0:
-                if type(inputFile2) != str:
-                    raise SyntaxError("Sorry, not valid string for the file inputFile2")
-            if type(inputFile1) != str :
-                raise SyntaxError("Sorry, not valid string for the file inputFile1") 
+    def openNextInputFile(self,keytoinputfile):#openNextInputFile(self,inputFiles,keytoinputfile):
+        """
+        This methode closes the current ative file, then it checks if there are more files to open
+        if not then retruns False
+        if there are more files to read
+        then it gets the first and, sorts it with self.sortFile
+        and then opens the self.dicOfFileInnput with new open file and return True
+        """
         
-        self.dicOfFileInnput[inputFile1]= [copy.copy(innput[0]),silkfile_open(inputFile1, READ)]
-        if len(inputFile2) !=0 :
-            self.dicOfFileInnput[inputFile2]= [copy.copy(innput[1]),silkfile_open(inputFile2, READ)]
+        if len(self.dictofthelistofinputfile[keytoinputfile]) ==0:
+            return False
         else:
-            self.inputFile2 = 0
+            nextfile=self.dictofthelistofinputfile[keytoinputfile].pop(0)
+            if type(nextfile) != str :
+                raise SyntaxError("Sorry, not valid string for the file inputFile1")
         
+        self.sortFile(keytoinputfile,nextfile)
+        self.dicOfFileInnput[keytoinputfile][1]= silkfile_open(keytoinputfile, READ)
+        return True
+
+    def openInputFiles(self,innput): #(self,inputFiles1,inputFiles2,innput)
+        """
+        This methode is run at init, and it will open the first file in list of inputFiles
+        If there are no inputFiles ERROR is trhown
+        Method will sort the file to a temp file, by using methode sortFile, these temps files will be remove the each time sortFile is called
+        The open will be saved to self.dicOfFileInnput with the key to the temp file,
+        the open files are saved in a list toghter with the correspoing SamplingRate class
+        """
+        if len(self.dictofthelistofinputfile["tempNormal.rw"]) ==0 and len(self.dictofthelistofinputfile["tempAttack.rw"]):
+            raise ValueError("Sorry, no input files") 
+        else:
+            keyoffile="tempNormal.rw"
+            if len(self.dictofthelistofinputfile[keyoffile]) !=0 :
+                firstfileNormal=self.dictofthelistofinputfile[keyoffile].pop(0)
+                if type(firstfileNormal) != str:
+                    raise SyntaxError("Sorry, not valid string for the first file inputFiles2")
+                #keyoffile="tempNormal.rw"
+                self.sortFile(keyoffile,firstfileNormal)
+                self.dicOfFileInnput[keyoffile]= [copy.copy(innput[1]),silkfile_open(keyoffile, READ)]
+            else:
+                self.inputFile2 = 0
+            keyoffile="tempAttack.rw"
+            if len(self.dictofthelistofinputfile[keyoffile]) !=0 :
+                firstfileAttack=self.dictofthelistofinputfile[keyoffile].pop(0)
+                if type(firstfileAttack) != str:
+                    raise SyntaxError("Sorry, not valid string for the first file inputFiles1")
+                keyoffile="tempAttack.rw"
+                self.sortFile(keyoffile,firstfileAttack)
+                self.dicOfFileInnput[keyoffile]= [copy.copy(innput[0]),silkfile_open(keyoffile, READ)]
+            else:
+                self.inputFile1 = 0
+
+    def sortFile(self,fileOutput,fileInput,):
+        """
+        This removes the old temp file (fileOutput),
+        then it sorts the silk file (fileInput) and opens it to temp file
+        """
+        if os.path.isfile(fileOutput):
+            x=subprocess.call("rm "+fileOutput, shell=True)#tempattack.rw
+        x=subprocess.call("rwsort --fields=stime --output-path="+fileOutput+" "+fileInput+"", shell=True)
+
     def closeInputFiles(self):
         """
-        closes innput files
+        Closes the active temp files
         """
         for set in self.dicOfFileInnput.values():
             set[1].close() 
@@ -367,7 +425,8 @@ ca2 =SamplingRate("1:1000")
 
 #MD = MixingOfData([ca1,sa2],"data/ModifiedAttackFiles/isattack","data/SilkFilesFromSikt/TCP_SYN_Flodd",[sa2,sa2])
 #MD = MixingOfData([ca2],"data/ModifiedAttackFiles/TCP_SYN_Flodd0","data/SilkFilesFromSikt/TCP_SYN_Flodd",[sa1,sa2])
-#MD = MixingOfData([ca2],"data/ModifiedAttackFiles/TCP_SYN_Flodd0","/media/sf_share/out-S1_20110125.12",[sa1,sa2])
+listofnormal=["/media/sf_share/oslo/out/2011/01/25/out-S1_20110125.12","/media/sf_share/oslo/out/2011/01/25/out-S1_20110125.13"]
+MD = MixingOfData([ca2],["data/ModifiedAttackFiles/TCP_SYN_Flodd0"],listofnormal,[sa1,sa2],"train")
 #MD = MixingOfData([ca2],"data/ModifiedAttackFiles/TCP_SYN_Flodd0","outfile.rw",[sa1,sa2])
-MD = MixingOfData([ca2],"data/ModifiedAttackFiles/TCP_SYN_Flodd0","outfile2.rw",[sa1,sa2])
+#MD = MixingOfData([ca2],["data/ModifiedAttackFiles/TCP_SYN_Flodd0"],["outfile2.rw"],[sa1,sa2])
 

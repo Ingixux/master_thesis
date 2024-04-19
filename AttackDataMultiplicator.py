@@ -56,7 +56,8 @@ class AttackDataMultiplicator:
         self.modifyfile()
 
     def sortFile(self):
-        x=subprocess.call("rm temp.rw", shell=True)
+        if os.path.isfile("temp.rw"):
+            x=subprocess.call("rm temp.rw", shell=True)
         x=subprocess.call("rwsort --fields=stime --output-path=temp.rw "+self.filePath+"", shell=True)
 
     def modifyfile(self):
