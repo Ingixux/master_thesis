@@ -183,6 +183,7 @@ class TraningOfClassification:
                         elif detectortrain=="detect":
                             self.doDetectionOnData(self.dicOfEntropy[keyfile].findThreasholds(True),trainingClasses)
                     elif len(toadd) !=0:
+                        print(len(toadd))
                         for r in toadd:
                             tempr=[]
                             if trainingClasses[0].typeOfFeatures =="entropy":
@@ -288,7 +289,7 @@ KMC=Kmeans("combined","","")
 #a1=TraningOfClassification([CP],[["data/DiffrentSamplingRates/isattack100"]])
 #a1=TraningOfClassification([KME],[["data/DiffrentSamplingRates/isattack100"]])
 
-a1=TraningOfClassification([RFE],[["data/DiffrentSamplingRates/TCP_SYN_Flodd01000"]])
+#a1=TraningOfClassification([RFE],[["data/DiffrentSamplingRates/TCP_SYN_Flodd01000"]])
 #a1=TraningOfClassification([RFF],[["data/DiffrentSamplingRates/TCP_SYN_Flodd01000"]])
 
 #TH=Threshold("threshold","data/Classifiers/TCP_SYN_Flodd01000threshold.pkl",
@@ -296,8 +297,8 @@ a1=TraningOfClassification([RFE],[["data/DiffrentSamplingRates/TCP_SYN_Flodd0100
 
 #a1=TraningOfClassification([TH,RFC],[["data/DiffrentSamplingRates/TCP_SYN_Flodd01000"]])
 #a1=TraningOfClassification([TH,RFF],[["data/DiffrentSamplingRates/TCP_SYN_Flodd01000"]])
-#RFFC=RandomforestDetection("fields","data/Classifiers/TCP_SYN_Flodd01000RandomForestfields.pkl",
-#                          "data/Classifiers/TCP_SYN_Flodd01000RandomForestfields.npy")
+RFFC=RandomforestDetection("fields","data/Classifiers/TCP_SYN_Flodd01000RandomForestfields.pkl",
+                          "data/Classifiers/TCP_SYN_Flodd01000RandomForestfields.npy")
 
 #RFEC=RandomforestDetection("entropy","data/Classifiers/TCP_SYN_Flodd01000RandomForestentropy.pkl",
 #                          "data/Classifiers/TCP_SYN_Flodd01000RandomForestentropy.npy")
@@ -307,12 +308,12 @@ a1=TraningOfClassification([RFE],[["data/DiffrentSamplingRates/TCP_SYN_Flodd0100
 
 #a2=TraningOfClassification([TH],[["data/DiffrentSamplingRates/TCP_SYN_Flodd01000"]],)
 
-#a1=TraningOfClassification([RFEC],[["data/DiffrentSamplingRates/TCP_SYN_Flodd01000"]])
+a1=TraningOfClassification([RFFC],[["data/DiffrentSamplingRates/TCP_SYN_Flodd01000"]])
 
 #a1.appendTraingData()
-a1.makeTraingData()
-a1.train()
-#a1.detect()
+#a1.makeTraingData()
+#a1.train()
+a1.detect()
 print(a1.countcorrect)
 print(a1.countwrong)
 print(a1.countisattack)

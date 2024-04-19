@@ -457,7 +457,7 @@ listOfSrc=checkUniqeIP(listOfSrc)
 
 
 start = datetime.datetime(2011, 1, 25, 12, 2, 20, 0)
-end = datetime.datetime(2011, 1, 25, 12, 51, 0, 0)
+end = datetime.datetime(2011, 1, 25, 12, 5, 0, 0)
 #print(start)
 #print(start+datetime.timedelta(microseconds=100000))
 #print(start+datetime.datetime(start.year, start.month, start.day, start.hour, start.min, start.second, 10000))
@@ -477,8 +477,8 @@ end = datetime.datetime(2011, 1, 25, 12, 51, 0, 0)
 #print(ia2.src)
 #print(ia2.botNetSize)
 
-
-ia1 = InputToAttackDataMultiplicator({"botsize":9,"dst":["11.12.26.5"],"src":["192.168.2.2"], "nIP":["192.168.44.43","192.168.44.43"], "stratTimeOfAttack" : start , "endTimeOfAttack"  : end, "startTimeIncreasAlgorithm":"standardBasedOnBotnetsize"})
+#["192.168.44.43","192.168.44.43"] #nexthop
+ia1 = InputToAttackDataMultiplicator({"botsize":90000,"dst":["116.126.2.5"],"src":["19.16.2.2"], "nIP":["0.0.0.0","0.0.0.0"], "stratTimeOfAttack" : start , "endTimeOfAttack"  : end, "startTimeIncreasAlgorithm":"standardBasedOnBotnetsize"})
 #ia2 = InputToAttackDataMultiplicator({"botsize":1,"src":["192.168.3.3"]})
 a1=AttackDataMultiplicator([ia1],"data/GenratedAttacks/ext2ext-S0_20240125.12","TCP_SYN_Flodd")
 #a1=AttackDataMultiplicator([ia1],"outfileattack.rw","TCP_SYN_Flodd")

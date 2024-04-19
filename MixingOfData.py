@@ -172,6 +172,9 @@ class MixingOfData:
         #TODO add it so that there can be more files 
         temprecords= []
         temprec=0
+        """
+        This only happens the first time calling this method. The earlist start time is set as self.currentTime.
+        """
         if self.currentTime == 0:
             for key in self.dicOfFileInnput.keys():
                 temprec=self.dicOfFileInnput[key][1].read() # TODO check what happen if the file stops #TODO and is it here I belive I can move to the next file
@@ -182,6 +185,9 @@ class MixingOfData:
                     self.currentTime =self.dicOfFileInnput[key][0].currentStartTime 
             for x in self.addNewRecWhileSameSTIME():
                 temprecords.append(x)
+        """
+        This only happens all other times this method is called
+        """
         if temprec==0:
             tempkey=0
             for key in self.dicOfFileInnput.keys():
@@ -362,6 +368,6 @@ ca2 =SamplingRate("1:1000")
 #MD = MixingOfData([ca1,sa2],"data/ModifiedAttackFiles/isattack","data/SilkFilesFromSikt/TCP_SYN_Flodd",[sa2,sa2])
 #MD = MixingOfData([ca2],"data/ModifiedAttackFiles/TCP_SYN_Flodd0","data/SilkFilesFromSikt/TCP_SYN_Flodd",[sa1,sa2])
 #MD = MixingOfData([ca2],"data/ModifiedAttackFiles/TCP_SYN_Flodd0","/media/sf_share/out-S1_20110125.12",[sa1,sa2])
-MD = MixingOfData([ca2],"data/ModifiedAttackFiles/TCP_SYN_Flodd0","outfile.rw",[sa1,sa2])
-
+#MD = MixingOfData([ca2],"data/ModifiedAttackFiles/TCP_SYN_Flodd0","outfile.rw",[sa1,sa2])
+MD = MixingOfData([ca2],"data/ModifiedAttackFiles/TCP_SYN_Flodd0","outfile2.rw",[sa1,sa2])
 

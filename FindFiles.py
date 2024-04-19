@@ -13,9 +13,9 @@ class Folderpathstructure:
         self.month=month
         self.day=day
         self.router=router
-        self.pathname=self.makepathname()
         self.startofpath=startofpath
-
+        self.pathname=self.makepathname()
+        
     def checkinput(self,inout,Year,month,day):
         if type(Year)!=int or type(month)!=int or  type(day)!=int:
             raise ValueError("year, month and day is not int")
@@ -30,7 +30,7 @@ class Folderpathstructure:
             
     
     def makepathname(self):
-        return self.router+"/"+self.inout +"/"+str(self.Year) +"/"+self.dirnumber(self.month) +"/"+self.dirnumber(self.day)
+        return self.startofpath + self.router+"/"+self.inout +"/"+str(self.Year) +"/"+self.dirnumber(self.month) +"/"+self.dirnumber(self.day)
     
     def moveToNextmonth(self):
         self.month+=1
@@ -122,11 +122,11 @@ class FindFiles:
             
 
 
-start=Folderpathstructure("in","oslo",2011,2,28)
-end=Folderpathstructure("in","oslo",2011,3,2)
+#start=Folderpathstructure("in","oslo",2011,2,28)
+#end=Folderpathstructure("in","oslo",2011,3,2)
 
-ff=FindFiles(start,end)
-print(ff.findallfiles())
+#ff=FindFiles(start,end)
+#print(ff.findallfiles())
 
 
 #print("hei")
