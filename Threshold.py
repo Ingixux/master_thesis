@@ -6,7 +6,7 @@ from Entropy import Entropy
 import statistics
 
 class Threshold:
-    def __init__(self,typeOfFeatures="threshold",filepathOfClassifier ="",filepathOfInput="",standertimes=[3,15,30]):
+    def __init__(self,typeOfFeatures="threshold",filepathOfClassifier ="",filepathOfInput=""):#standertimes=[3,15,30]
         #TODO make standertimes to datetimedelta 
         #filepathOfInput might not be nessacary nor filepathOfClassifier
         self.checkTypeOfFeatures(typeOfFeatures)
@@ -17,7 +17,6 @@ class Threshold:
                                            "totalBytes":0,"totalpackets":0,"totalicmp":0,"totalicmprate":0}
         self.filepathOfClassifier= filepathOfClassifier
         self.filepathOfInput=filepathOfInput
-        self.standertimes=standertimes
         if filepathOfClassifier !="":
             self.loadClassfication()
 
@@ -35,7 +34,7 @@ class Threshold:
         #TODO compare the threadshold with the findThreadshold vaules from the Entropy Class, put all the result in a list/dict 
         dataToSave=[]
         for key in self.threshold.keys():
-            if key != "isAtttack":
+            if key not in ["isAtttack","currenttime"]:
                 if self.threshold[key] <  arrayToDetect[key]:
                     dataToSave.append([key,1,isattck])#how to get if there is and attack
                 else:
@@ -65,18 +64,18 @@ class Threshold:
         vaules={"entropySip":[],"entropyRateSip":[],"entropyDip":[],"entropyRateDip":[],"entropyPacketsize":[],"entropyRatePacketsize":[],
                                            "entropyBiflowSyn":[],"entropySipSyn":[],"entropyDipSyn":[],"entropyBiflow":[],"entropyRateBiflow":[],
                                            "HigstNumberOfSyn":[],"HigstNumberOfURGPSHFIN":[],"countBiflow":[],"totalicmpDUnreachable":[],
-                                           "totalBytes":[],"totalpackets":[],"totalicmp":[],"totalicmprate":[],"isAtttack":0}
+                                           "totalBytes":[],"totalpackets":[],"totalicmp":[],"totalicmprate":[]}#,"isAtttack":0
         #print(trainingSet)
         for rec in trainingSet:
             temprec=dict(rec)
             for key in vaules.keys():
-                if key !="isAtttack":
+                if key not in ["isAtttack","currenttime"]:
                     vaules[key].append(temprec[key])
-                else:
-                   vaules[key]= temprec[key]
+                #else:
+                #   vaules[key]= temprec[key]
 
         for key in vaules.keys():
-            if key not in ["isAtttack","HigstNumberOfSyn","HigstNumberOfURGPSHFIN"]:
+            if key not in ["isAtttack","HigstNumberOfSyn","HigstNumberOfURGPSHFIN","currenttime"]:
                 print(key)
                 print(vaules[key])
                 self.threshold[key]=statistics.stdev(vaules[key]) #TODO consider other metrics

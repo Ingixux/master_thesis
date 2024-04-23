@@ -5,7 +5,7 @@ import os
 from Entropy import Entropy
 
 class RandomforestDetection:
-    def __init__(self,typeOfFeatures,filepathOfClassifier ="",filepathOfInput="",standertimes=[3,15,0]):
+    def __init__(self,typeOfFeatures,filepathOfClassifier ="",filepathOfInput=""):#standertimes=[3,15,0]
         #TODO make standertimes to datetimedelta 
         #filepathOfInput might not be nessacary nor filepathOfClassifier
         self.checkTypeOfFeatures(typeOfFeatures)
@@ -13,7 +13,7 @@ class RandomforestDetection:
         self.clf = RandomForestClassifier(n_estimators = 100)
         self.filepathOfClassifier= filepathOfClassifier
         self.filepathOfInput=filepathOfInput
-        self.standertimes=standertimes
+        #self.standertimes=standertimes
         if filepathOfClassifier !="":
             self.loadClassfication()
 
@@ -60,10 +60,10 @@ class RandomforestDetection:
             #trainingSet=np.load(fileOfFeatures, allow_pickle=True)
         #print(trainingSet)
         print(x)
-        trainingSet=np.array(trainingSet)
-        Features=trainingSet[:,2:-1]
-        labels=trainingSet[:,-1]
-
+        dataSet=np.array(trainingSet)
+        Features=dataSet[:,2:-1]
+        labels=dataSet[:,-1]
+        #print(Features)
         labels=labels.astype('int') 
         #print(Features)
         #print(labels)

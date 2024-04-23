@@ -5,7 +5,7 @@ import os
 from Entropy import Entropy
 
 class Kmeans:
-    def __init__(self,typeOfFeatures,filepathOfClassifier ="",filepathOfInput="",standertimes=[3,15,0]):
+    def __init__(self,typeOfFeatures,filepathOfClassifier ="",filepathOfInput=""):#standertimes=[3,15,0]
         #TODO make standertimes to datetimedelta 
         #filepathOfInput might not be nessacary nor filepathOfClassifier
         self.checkTypeOfFeatures(typeOfFeatures)
@@ -13,7 +13,7 @@ class Kmeans:
         self.clf = KMeans(n_clusters = 2)
         self.filepathOfClassifier= filepathOfClassifier
         self.filepathOfInput=filepathOfInput
-        self.standertimes=standertimes
+        #self.standertimes=standertimes
         if filepathOfClassifier !="":
             self.loadClassfication()
 

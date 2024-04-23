@@ -6,9 +6,11 @@ class GetTrafficPattern:
     def __init__(self,listoffiles):
         self.listoffiles=listoffiles
         self.dictofinfo={"sourceIP":{},"destinationIP":{},"nexthopip":{}}#{"sourceIP":{{192.168.57.11 : {"count" : 1, "nexthopip":{} }}},"destinationIP":{}}
+        self.topSourceIP=[]
+        self.topDestinationIP=[]
 
 
-    def movetroughthefiles(self):
+    def movetroughthefiles(self,TopSip,TopDip,numberofdips):
         #countx=0
         for x in range(0,len(self.listoffiles)):
             infile_r = silkfile_open(self.listoffiles[x], READ)
@@ -20,53 +22,63 @@ class GetTrafficPattern:
             infile_r.close()
         #print(countx)
         if len(self.dictofinfo["sourceIP"].keys())>len(self.dictofinfo["destinationIP"].keys()):
-            topSourceIP =self.findTopIps("sourceIP",50)
-            topDestinationIP =self.findTopIps("destinationIP",20)
-            topNexthopip =self.findTopIps("nexthopip",2)
-            choseDip=self.selectDip(topDestinationIP)
-            choseSip=self.selectSip(topSourceIP)
+            self.topSourceIP =self.findTopIps("sourceIP",TopSip)
+            self.topDestinationIP =self.findTopIps("destinationIP",TopDip)
+            #self.topNexthopip =self.findTopIps("nexthopip",2)
+            choseDip=self.getUniqueIp(numberofdips,self.topDestinationIP)
+            choseSip=self.selectSip(self.topSourceIP)
             #nexthopips= self.getnexthopip("sourceIP",choseDip)
             #nexthopips= self.getnexthopip("sourceIP",choseSip)
         else:
-            topSourceIP =self.findTopIps("sourceIP",20)
-            topDestinationIP =self.findTopIps("destinationIP",50)
-            topNexthopip =self.findTopIps("nexthopip",2)
-            choseDip=self.selectDip(topSourceIP)
-            choseSip=self.selectSip(topDestinationIP)
+            self.topSourceIP =self.findTopIps("sourceIP",TopDip)
+            self.topDestinationIP =self.findTopIps("destinationIP",TopSip)
+            #self.topNexthopip =self.findTopIps("nexthopip",2)
+            choseDip=self.getUniqueIp(numberofdips,self.topSourceIP)
+            choseSip=self.selectSip(self.topDestinationIP)
             #nexthopips= self.getnexthopip("sourceIP",choseDip)
             #nexthopips= self.getnexthopip("destinationIP",choseSip)
 
-        print(choseSip)
-        print(choseDip)
+        #print(choseSip)
+        #print(choseDip)
         #print(nexthopips)
-
+        return choseDip, choseSip
 
         #print(self.getnexthopip("sourceIP",topSourceIP[0][1]))
         #print(self.getnexthopip("destinationIP",topDestinationIP[0][1]))
 
     def getnexthopip(self,sipOrDip,ip):
-        nexthopips=[0,0]
-        if len(self.dictofinfo[sipOrDip][ip]["nexthopip"].keys())==1:
-            for nextip in self.dictofinfo[sipOrDip][ip]["nexthopip"].keys():
-                nexthopips[0] =nextip
-        else:
-            #TODO This is if there are more than one 
-            print("hei")
-        reversedip=""
-        if sipOrDip=="sourceIP":
-            reversedip="destinationIP"
-        else:
-            reversedip="sourceIP"
-        try:
-            if len(self.dictofinfo[reversedip][ip]["nexthopip"].keys())==1:
+        if len(self.dictofinfo["sourceIP"].keys())<len(self.dictofinfo["destinationIP"].keys()):
+            if sipOrDip=="sourceIP":
+                sipOrDip="destinationIP"
+            else:
+                sipOrDip="sourceIP"
+                
+        if len(self.dictofinfo["nexthopip"].keys()) <1:
+            nexthopips=[0,0]
+            if len(self.dictofinfo[sipOrDip][ip]["nexthopip"].keys())==1:
                 for nextip in self.dictofinfo[sipOrDip][ip]["nexthopip"].keys():
-                    nexthopips[1] =nextip
+                    nexthopips[0] =nextip
             else:
                 #TODO This is if there are more than one 
                 print("hei")
-        except:
-            #TODO what to add if there is no record in in the reverse direction
-            pass
+            reversedip=""
+            if sipOrDip=="sourceIP":
+                reversedip="destinationIP"
+            else:
+                reversedip="sourceIP"
+            try:
+                if len(self.dictofinfo[reversedip][ip]["nexthopip"].keys())==1:
+                    for nextip in self.dictofinfo[sipOrDip][ip]["nexthopip"].keys():
+                        nexthopips[1] =nextip
+                else:
+                    #TODO This is if there are more than one 
+                    print("hei")
+            except:
+                #TODO what to add if there is no record in in the reverse direction
+                pass
+        else:
+            for key in self.dictofinfo["nexthopip"].keys():
+                nexthopips=[key,key]
         return nexthopips
 
     def selectSip(self,listofip):
@@ -74,6 +86,15 @@ class GetTrafficPattern:
         for temp in listofip:
             templist.append(temp[1])
         return templist
+    
+    def getUniqueIp(self,numberOfSetsSips,listIPS):
+        choseIps=[]
+        tempIp=0
+        while len(choseIps) <numberOfSetsSips:
+            tempIp=self.selectDip(listIPS)
+            if tempIp not in choseIps:
+                choseIps.append(tempIp)
+        return choseIps 
 
     def selectDip(self,listofip):
         count=0
@@ -117,10 +138,12 @@ class GetTrafficPattern:
 
 
 
-start=Folderpathstructure("out","oslo",2011,1,25,"/media/sf_share/")
-end=Folderpathstructure("out","oslo",2011,1,26,"/media/sf_share/")
+#start=Folderpathstructure("out","oslo",2011,1,25,"/media/sf_share/")
+#end=Folderpathstructure("out","oslo",2011,1,26,"/media/sf_share/")
 
-ff=FindFiles(start,end)
-GT=GetTrafficPattern(ff.findallfiles())
-GT.movetroughthefiles()
+#ff=FindFiles(start,end)
+#GT=GetTrafficPattern(ff.findallfiles())
+#choseDip, choseSip=GT.movetroughthefiles(100,20,3)
+#print(GT.getnexthopip("destinationIP",choseDip))
+#print(choseSip)
 

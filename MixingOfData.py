@@ -414,10 +414,10 @@ class SamplingRate:
 
         
 
-sa1 =SamplingRate("1:1")
-sa2 =SamplingRate("1:100")
-ca1 =SamplingRate("1:500")
-ca2 =SamplingRate("1:1000")
+#sa1 =SamplingRate("1:1")
+#sa2 =SamplingRate("1:100")
+#ca1 =SamplingRate("1:500")
+#ca2 =SamplingRate("1:1000")
 
 
 #MD = MixingOfData([ca2],"data/ModifiedAttackFiles/TCP_SYN_Flodd","data/SilkFilesFromSikt/TCP_SYN_Flodd",[sa1,sa2])
@@ -425,8 +425,9 @@ ca2 =SamplingRate("1:1000")
 
 #MD = MixingOfData([ca1,sa2],"data/ModifiedAttackFiles/isattack","data/SilkFilesFromSikt/TCP_SYN_Flodd",[sa2,sa2])
 #MD = MixingOfData([ca2],"data/ModifiedAttackFiles/TCP_SYN_Flodd0","data/SilkFilesFromSikt/TCP_SYN_Flodd",[sa1,sa2])
-listofnormal=["/media/sf_share/oslo/out/2011/01/25/out-S1_20110125.12","/media/sf_share/oslo/out/2011/01/25/out-S1_20110125.13"]
-MD = MixingOfData([ca2],["data/ModifiedAttackFiles/TCP_SYN_Flodd0"],listofnormal,[sa1,sa2],"train")
+#listofnormal=["/media/sf_share/oslo/out/2011/01/25/out-S1_20110125.12","/media/sf_share/oslo/out/2011/01/25/out-S1_20110125.13"]
+#MD = MixingOfData([ca2],["data/ModifiedAttackFiles/TCP_SYN_Flodd0"],listofnormal,[sa1,sa2],"train")
 #MD = MixingOfData([ca2],"data/ModifiedAttackFiles/TCP_SYN_Flodd0","outfile.rw",[sa1,sa2])
 #MD = MixingOfData([ca2],["data/ModifiedAttackFiles/TCP_SYN_Flodd0"],["outfile2.rw"],[sa1,sa2])
+#MD = MixingOfData([ca2],["data/ModifiedAttackFiles/TCP_SYN_Flodd0"],["/media/sf_share/oslo/out/2011/01/25/out-S1_20110125.12"],[sa1,sa2],"train")
 

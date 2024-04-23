@@ -66,10 +66,16 @@ class Entropy:
                 """
                 movewindow=len(self.aggregate_window["vaules"])
             for y in range(0,movewindow):
+                #if movewindow>1:
+                toretrun.append("window")
                 toretrun.append(copy.copy(self.doCalculation(False)))
+                #if len(toretrun[-1]) !=0:
+                    #if toretrun[-1][-1][-2][0]!=0:
+                        #print("nei")
+                        #print(toretrun[-1][-1][-2][0]) 
                 if self.startcounter<len(self.aggregate_window["vaules"]):
                     self.startcounter+=1
-                
+
                 self.removeFromSliding_window()
         self.addVaules(rec)
         return toretrun
@@ -186,8 +192,7 @@ class Entropy:
         totalicmp=0
         totalicmpDUnreachable=0
 
-        thereisOneAttack=0 #TODO should this been on the whole 
-
+        thereisOneAttack=[0] #TODO should this been on the whole 
         for x in range(0,len(self.aggregate_window["vaules"])):
             totalpackets+=self.aggregate_window["vaules"][x]["packets"]
             totalBytes+=self.aggregate_window["vaules"][x]["bytes"]
@@ -195,8 +200,12 @@ class Entropy:
             totalicmp+=self.aggregate_window["vaules"][x]["icmp"]
             totalicmpDUnreachable+=self.aggregate_window["vaules"][x]["Destination unreachable"]
             for rec in self.aggregate_window["vaules"][x]["currentRecs"]:
-                if thereisOneAttack==0:
-                    thereisOneAttack=self.setIsAttack(rec)
+                isThereOneAttack =self.setIsAttack(rec)
+                if isThereOneAttack!=0:
+                    if thereisOneAttack[0]==0:
+                        thereisOneAttack[0]=isThereOneAttack
+                    elif isThereOneAttack not in thereisOneAttack:
+                        thereisOneAttack.append(isThereOneAttack)
                 if rec.tcpflags.syn==1:
                     if rec.packets >HigstNumberOfSyn:
                         HigstNumberOfSyn=rec.packets
@@ -314,6 +323,9 @@ class Entropy:
             #print(listofprobability2)
         countBiflow=len(uniqebiflowcounter)
 
+        #if thereisOneAttack[0]!=0:
+        #    print(thereisOneAttack)
+            #print(len(self.aggregate_window["vaules"][-1]["currentRecs"]))
 
         #print(self.aggregate_window["vaules"][0]["currentRecs"])
         if end==False:
@@ -327,8 +339,8 @@ class Entropy:
                                     entropyRatePacketsize,entropyBiflow,entropyRateBiflow,totalicmp,totalicmprate,
                                     totalBytes,totalpackets,#31
                                     entropyBiflowSyn,entropySipSyn,entropyDipSyn,
-                                    countBiflow,HigstNumberOfSyn,HigstNumberOfURGPSHFIN,totalicmpDUnreachable,
-                                    self.setIsAttack(rec)])
+                                    countBiflow,HigstNumberOfSyn,HigstNumberOfURGPSHFIN,totalicmpDUnreachable,thereisOneAttack,
+                                    rec.sensor_id])
         else:
             for window in self.aggregate_window["vaules"]:
                 for rec in window["currentRecs"]:
@@ -339,8 +351,8 @@ class Entropy:
                                         entropyRatePacketsize,entropyBiflow,entropyRateBiflow,totalicmp,totalicmprate,
                                         totalBytes,totalpackets,#31
                                         entropyBiflowSyn,entropySipSyn,entropyDipSyn,
-                                        countBiflow,HigstNumberOfSyn,HigstNumberOfURGPSHFIN,totalicmpDUnreachable,
-                                        self.setIsAttack(rec)])
+                                        countBiflow,HigstNumberOfSyn,HigstNumberOfURGPSHFIN,totalicmpDUnreachable,thereisOneAttack,
+                                        rec.sensor_id])
             
 
         #TODO add this vaules into the comparison window
@@ -379,10 +391,13 @@ class Entropy:
                                    "entropyRatePacketsize":entropyRatePacketsize,"entropyBiflowSyn":entropyBiflowSyn,"entropySipSyn":entropySipSyn,"entropyDipSyn":entropyDipSyn,
                                    "entropyBiflow":entropyBiflow,"entropyRateBiflow":entropyRateBiflow,"HigstNumberOfSyn":HigstNumberOfSyn,"HigstNumberOfURGPSHFIN":HigstNumberOfURGPSHFIN,
                                    "countBiflow":countBiflow,"totalicmpDUnreachable":totalicmpDUnreachable,"totalBytes":totalBytes,"totalpackets":totalpackets,"totalicmp":totalicmp,
-                                   "totalicmprate":totalicmprate, "isAtttack":thereisOneAttack}
+                                   "totalicmprate":totalicmprate, "isAtttack":thereisOneAttack, "currenttime": self.aggregate_window["currentTime"] }
         
 
         return arrayToAdd                 
+
+    
+        
 
     def entropyCal(self,listofprobability):
         #sum=0
@@ -403,7 +418,7 @@ class Entropy:
         #if rec.sensor=="isAttack": #TODO why does this not work
         #    isAttackFlow=1
         if rec.sensor_id==32532:
-            isAttackFlow=1
+            isAttackFlow=rec.sensor_id
         return isAttackFlow
 
     def removeFromSliding_window(self):
@@ -510,4 +525,4 @@ class Entropy:
                                    "entropyRatePacketsize":entropyRatePacketsize,"entropyBiflowSyn":entropyBiflowSyn,"entropySipSyn":entropySipSyn,"entropyDipSyn":entropyDipSyn,
                                    "entropyBiflow":entropyBiflow,"entropyRateBiflow":entropyRateBiflow,"HigstNumberOfSyn":HigstNumberOfSyn,"HigstNumberOfURGPSHFIN":HigstNumberOfURGPSHFIN,
                                    "countBiflow":countBiflow,"totalicmpDUnreachable":totalicmpDUnreachable,"totalBytes":totalBytes,"totalpackets":totalpackets,"totalicmp":totalicmp,
-                                   "totalicmprate":totalicmprate,"isAtttack":isattack}
+                                   "totalicmprate":totalicmprate,"isAtttack":isattack,"currenttime": self.aggregate_window["currentTime"]}
