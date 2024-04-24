@@ -1,25 +1,54 @@
 import numpy as np
 import pickle as pickle
 import os
-#from RandomforestDetection import RandomforestDetection
-#from Threshold import Threshold
-#from Kmeans import Kmeans
+from RandomforestDetection import RandomforestDetection
+from Threshold import Threshold
+from Kmeans import Kmeans
 from silk import *
 import datetime
 from Entropy import Entropy
 #import copy
 
 class TraningOfClassification:
-    #TODO decide who I want to handle training and testing from same file adn diffrentfiles
     """
-    This Class can handle file for the classifers, but it will be the same classifer vaules for all the file
+    This Class is used for both traning and classifying
+    The input to this class is a list of TrainingClasses, 
+    this is the different classifying class's, which currently is Kmeans, Threshold and RandomforestDetection
+    Next is listOfPathToSilkFiles. One element is a list which with a collection of files. 
+    One collection of files are considered on unit, when doing detection and traning
+    Each first file of the collections need to have a unqiue path name. 
+    It is also assumed that the files in the collection is arragned on time 
+    and the earliset being the first (This only imporant when a silding window is used).
+    Standertimes is the times of the sliding window. 
+    self.dicOfFileOutput is a dictionary, which have all the combinations of files and classfiter class
+    The key is the the name of the classifying class's and the path of the first file in the collection of files.
+    There is one key/entry in self.dicOfFileOutput for each combinabtion of one collection of files and one classifying class
+    The vaules of the keys is a list, where the first elemenet is a the classfiter class, 
+    the second element is the path of the first file in the collection of files, which this uses as input,
+    third is the element is the open file of the output is stored (either the traning file or the result file)
+    self.dicOfEntropy strores the slinding window 
+    There is only one slinding window pr collection of files.
+    If there are no classfiter class that uses a slinding window, then this dictionary is empty
+
+    Methodes used for the outside
+    addNewFiles:
+        This changes the collection of files which are used as the input for the traning or detection
+    makeTraingData:
+        This moves through all the collection of files, and makes traning data file (in the .npy format), for each entry in self.dicOfFileOutput 
+        this is the input used by the classifying class's under traning, this will overwirte old traning files
+    removeTrainingFiles:
+        This removes the traning files that where created under the traning prosses (the files created with makeTraingData or appendTraingData)
+    appendTraingData:
+        This appends data to a traning data (.npy file). This is used to add to files created with makeTraingData
+    train:
+        This calles the traning method of the classifying class's which uses a traning file (.npy format)
+        This will create a classifier which is stored in a plk file format
+    detect:
+        This moves through all the collection of files, and calles the detect method of the classifying class's on each record in the files
+        This saves the result of the cassifiing, in the format:
+            name of method used, prediction result, label, which attack are present, time of the record
     """
     def __init__(self, listOfTrainingClasses,listOfPathToSilkFiles,standertimes=[3,15,30]):
-        
-        #self.listOfTrainingClasses=listOfTrainingClasses
-        self.countcorrect=0
-        self.countwrong=0
-        self.countisattack=0
         self.listOfPathToSilkFiles=listOfPathToSilkFiles
         self.listOfTrainingClasses=listOfTrainingClasses
         self.dicOfFileOutput ={}
@@ -41,6 +70,14 @@ class TraningOfClassification:
                 os.remove(pathToFile)
     
     def makeDicOfFileOutput(self):
+        """
+        This metode goes through the list of classifying class's 
+        and adds the first file of each collections in listOfTrainingClassesas the key to self.dicOfFileOutput together with the name of classifying class's 
+        To the key it addes a list with a copy of the classifying class's and the path of the first 
+        This creates one key/entry in self.dicOfFileOutput for each combinabtion of one collection of files and one classifying class
+        This also starts slidling windows if there the classifying class's uses this first file of the collection
+        There is only one sliding window for each collection of files
+        """
         for TrainingClasses in self.listOfTrainingClasses:
             for fileCollection in self.listOfPathToSilkFiles:
                 keyfile =fileCollection[0]
@@ -59,8 +96,7 @@ class TraningOfClassification:
                         trainingClasses.append(open("data/Classifiers/result/"+nameoffile+trainingClasses[0].name+".npy", "wb"))
                     else:
                         trainingClasses[2]=open("data/Classifiers/result/"+nameoffile+trainingClasses[0].name+".npy", "wb")
-
-
+        
     def createfilesToSaveTo(self):
         #for file in self.listOfPathToSilkFiles: 
         for fileCollection in self.listOfPathToSilkFiles:
@@ -107,13 +143,9 @@ class TraningOfClassification:
         toSave=[]
         if trainingClasses[0].typeOfFeatures =="threshold":
             data["isAtttack"]=self.setIsAttack(data["isAtttack"][0])
-            toSave=trainingClasses[0].detect(data,data["isAtttack"])#TODO add the isattack feature
+            toSave=trainingClasses[0].detect(data,data["isAtttack"])
             attaks=data["isAtttack"]
-            #for x in toSave:
-            #    if x[1]==x[2]:
-            #        self.countcorrect+=1
-            #    else:
-            #        self.countwrong+=1
+            time=data["currenttime"]
         else:
             toPredict=[]
             if trainingClasses[0].typeOfFeatures =="entropy":
@@ -122,6 +154,7 @@ class TraningOfClassification:
             else:
                 label=self.setIsAttack(data[-1])
                 attaks=[data[-1]]
+            time=[data[0]]
             toPredict.append(data)
             darecta=np.array(toPredict, dtype=object)
 
@@ -129,18 +162,8 @@ class TraningOfClassification:
             #labels=darecta[:,-1]
             toSave=trainingClasses[0].detect(Feature,label)
             #toSave=["RandomForest",1,labels[0]]
-        toSave+=[attaks]
-        #if toSave[1]==toSave[2]:
-        #    self.countcorrect+=1
-        #else:
-        #    self.countwrong+=1
-        #if toSave[2] ==1:
-        #    self.countisattack+=1
-
-
+        toSave+=[attaks] +time #DONE? not tested TODO also save the time
         self.saveDataToCollect(toSave,trainingClasses[2])
-        #print(str(self.countwrong) +" "+ str(self.countcorrect) +" " +str(self.countisattack))
-        #TODO save toSave in a file, used sensor_id to get the attack it detected
 
     def detect(self):
         self.createfilesForResult()
@@ -381,16 +404,11 @@ class TraningOfClassification:
 #TH=Threshold("threshold","data/Classifiers/TCP_SYN_Flodd01000threshold.pkl",
 #                          "data/Classifiers/TCP_SYN_Flodd01000threshold.npy")
 
+#KMFC=Kmeans("fields","","data/Classifiers/train800KMeansfields.npy")
+
 #a1=TraningOfClassification([TH,RFC],[["data/DiffrentSamplingRates/TCP_SYN_Flodd01000"]])
 #a1=TraningOfClassification([TH,RFF],[["data/DiffrentSamplingRates/TCP_SYN_Flodd01000"]])
-#RFFC=RandomforestDetection("fields","data/Classifiers/TCP_SYN_Flodd01000RandomForestfields.pkl",
-#                          "data/Classifiers/TCP_SYN_Flodd01000RandomForestfields.npy")
 
-#RFEC=RandomforestDetection("entropy","data/Classifiers/TCP_SYN_Flodd01000RandomForestentropy.pkl",
-#                          "data/Classifiers/TCP_SYN_Flodd01000RandomForestentropy.npy")
-
-#TH=Threshold("fields","data/Classifiers/TCP_SYN_Flodd01000threshold.pkl",
-#                         "data/Classifiers/TCP_SYN_Flodd01000threshold.npy")
 
 #a2=TraningOfClassification([TH],[["data/DiffrentSamplingRates/TCP_SYN_Flodd01000"]],)
 
@@ -398,10 +416,30 @@ class TraningOfClassification:
 #a1=TraningOfClassification([RFE],[["data/DiffrentSamplingRates/TCP_SYN_Flodd01000"]])
 #a1=TraningOfClassification([RFE],[["data/DiffrentSamplingRates/train/train1000"]])
 
+
 #a1.appendTraingData()
 #a1.makeTraingData()
 #a1.train()
+
+#KMF=Kmeans("fields","","")
+#TH=Threshold("threshold","","")
+#RFE=RandomforestDetection("entropy","","")
+
+#listofsmaplingrates =["800","1600"] #TODO add the new sampling rates
+#listoffilestrain=[]
+#listoffilesdetect=[]
+#for smaplingrates in listofsmaplingrates:
+#    listoffilestrain.append(["data/DiffrentSamplingRates/train/train"+smaplingrates])
+#    listoffilesdetect.append(["data/DiffrentSamplingRates/detect/detect"+smaplingrates])
+
+#a1=TraningOfClassification([RFE,TH,KMF],listoffilestrain)
+#a1.makeTraingData()
+#a1.train()
+#a1.removeTrainingFiles()
+#a1.addNewFiles(listoffilesdetect)
+
+#KMFC=Kmeans("fields","data/Classifiers/train1600KMeansfields.pkl","")
+#RFEC=RandomforestDetection("entropy","data/Classifiers/train1600KRandomforestDetectionfields.pkl","")
+#THC=Threshold("fields","data/Classifiers/train1600Threshold.pkl", "")
+#a1=TraningOfClassification([KMFC],[["data/DiffrentSamplingRates/train1600"]])
 #a1.detect()
-#print(a1.countcorrect)
-#print(a1.countwrong)
-#print(a1.countisattack)

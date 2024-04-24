@@ -422,15 +422,18 @@ class InputToAttackDataMultiplicator:
         return tempsrc
     
     def checkListOfIPs(self,listOfSrc):
-        tempsrc = listOfSrc.copy()
+        #tempsrc = listOfSrc.copy()
         tempnew=[]
+        #print(listOfSrc)
         for ip in listOfSrc:
             if type(ip) == IPv4Addr:
-                tempsrc.remove(ip)
+                #tempsrc.remove(ip)
                 tempnew.append(str(ip))
-            elif not self.isIP(ip):
-                tempsrc.remove(ip)
-        return tempsrc+tempnew
+            elif self.isIP(ip):
+                tempnew.append(ip)
+                #tempsrc.remove(ip)
+        #tempsrc+
+        return tempnew
     
     def isIP(self,ip):
         try:

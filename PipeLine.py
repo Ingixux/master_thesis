@@ -24,18 +24,19 @@ for ip in choseDip:
 
 print("Traffic Pattern recived")
 #AttackDataMultiplicator (o)
-#TODO NEED to add handling of silkip as input 
 #TODO NEED more isAttack
-ia1 = InputToAttackDataMultiplicator({"botsize":90000,"dst":choseDip[0],"src":choseSip, "nIP":nexthopip[0], "isAttack":32532, "botnet_rotation_algorithm":"standard",
+
+
+ia1 = InputToAttackDataMultiplicator({"botsize":90000,"dst":[choseDip[0]],"src":choseSip, "nIP":nexthopip[0], "isAttack":32532, "botnet_rotation_algorithm":"standard",
                                     "TT1":datetime.timedelta(microseconds=10000),"TT2":datetime.timedelta(microseconds=10000),"TBA":datetime.timedelta(microseconds=10000),
                                       "stratTimeOfAttack" : datetime.datetime(2011, 1, 25, 12, 2, 20, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 12, 5, 0, 0), "startTimeIncreasAlgorithm":"standardBasedOnBotnetsize"})
-ia2 = InputToAttackDataMultiplicator({"botsize":90000,"dst":choseDip[1],"src":choseSip, "nIP":nexthopip[1], "isAttack":32532,"botnet_rotation_algorithm":"standard",
+ia2 = InputToAttackDataMultiplicator({"botsize":90000,"dst":[choseDip[1]],"src":choseSip, "nIP":nexthopip[1], "isAttack":32532,"botnet_rotation_algorithm":"standard",
                                       "TT1":datetime.timedelta(microseconds=10000),"TT2":datetime.timedelta(microseconds=10000),"TBA":datetime.timedelta(microseconds=10000),
                                       "stratTimeOfAttack" : datetime.datetime(2011, 1, 25, 12, 2, 20, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 12, 5, 0, 0), "startTimeIncreasAlgorithm":"standardBasedOnBotnetsize"})
-ia3 = InputToAttackDataMultiplicator({"botsize":90000,"dst":choseDip[2],"src":choseSip, "nIP":nexthopip[2], "isAttack":32532,"botnet_rotation_algorithm":"standard",
+ia3 = InputToAttackDataMultiplicator({"botsize":90000,"dst":[choseDip[2]],"src":choseSip, "nIP":nexthopip[2], "isAttack":32532,"botnet_rotation_algorithm":"standard",
                                       "TT1":datetime.timedelta(microseconds=10000),"TT2":datetime.timedelta(microseconds=10000),"TBA":datetime.timedelta(microseconds=10000),
                                       "stratTimeOfAttack" : datetime.datetime(2011, 1, 25, 13, 2, 20, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 5, 0, 0), "startTimeIncreasAlgorithm":"standardBasedOnBotnetsize"})
-"""
+
 
 #listofFiles =["data/GenratedAttacks/ext2ext-S0_20240125.12"]
 a1=AttackDataMultiplicator([ia1,ia2],"data/GenratedAttacks/ext2ext-S0_20240125.12","TCP_SYN_Flodd1")
@@ -76,14 +77,14 @@ KMF=Kmeans("fields","","")
 KME=Kmeans("entropy","","")
 KMC=Kmeans("combined","","")
 
-listofsmaplingrates =["800","1600"]
+listofsmaplingrates =["800","1600"] #TODO add the new sampling rates
 listoffilestrain=[]
 listoffilesdetect=[]
 for smaplingrates in listofsmaplingrates:
-    listoffilestrain.append("data/DiffrentSamplingRates/train/train"+smaplingrates)
-    listoffilesdetect.append("data/DiffrentSamplingRates/detect/detect"+smaplingrates)
+    listoffilestrain.append(["data/DiffrentSamplingRates/train/train"+smaplingrates])
+    listoffilesdetect.append(["data/DiffrentSamplingRates/detect/detect"+smaplingrates])
 
-a1=TraningOfClassification([RFE,TH,KMF],[listoffilestrain])
+a1=TraningOfClassification([RFE,TH,KMF],listoffilestrain)
 
 
 #a2=TraningOfClassification([RFE,TH,KMF],[["data/DiffrentSamplingRates/detect/detect1000"]])
@@ -96,8 +97,7 @@ print("Traning done")
 
 a1.removeTrainingFiles()#DONE? not tested#TODO have something to remove the traningfiles that are no longer needed
 a1.addNewFiles(listoffilesdetect)#DONE? not tested #TODO  have something to add new files
+"""
 a1.detect()
 print("setup done")
-
-
 """

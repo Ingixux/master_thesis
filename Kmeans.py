@@ -60,15 +60,15 @@ class Kmeans:
                     data=np.load(fileOfFeatures, allow_pickle=True)
                     trainingSet.append(data)
             #except EOFError:
-            except (EOFError): #EOFError
+            except (pickle.UnpicklingError, EOFError): #EOFError
             #except (pickle.UnpicklingError, EOFError): #TODO This is not optimal, entropy and fleids create diffrent EOFError
                 pass
         #"""
             #trainingSet=np.load(fileOfFeatures, allow_pickle=True)
             #trainingSet=np.load(fileOfFeatures, allow_pickle=True)
-        trainingSet=np.array(trainingSet)
+        dataSet=np.array(trainingSet)
         #print(trainingSet[:,2:])
-        Features=trainingSet[:,2:-1]
+        Features=dataSet[:,2:-1]
         #labels=trainingSet[:,-1]
 
         #labels=labels.astype('int') 
@@ -77,7 +77,7 @@ class Kmeans:
         #print(Features)
         #self.clf=self.clf.fit(Features,labels)
         self.clf=self.clf.fit(Features)
-        self.makeattackcluster(trainingSet)
+        self.makeattackcluster(dataSet)
         self.saveClassifier()
 
     def loadClassfication(self):
@@ -99,11 +99,11 @@ class Kmeans:
             self.flib=0
         else:
             self.flib=1
-        print(dataset[:,-1])
-        print(len(lables))
-        print(correct)
-        print(correct/len(lables))
-        print(predictions)
+        #print(dataset[:,-1])
+        #print(len(lables))
+        #print(correct)
+        #print(correct/len(lables))
+        #print(predictions)
         #print("hei")
         
     def findattackcluster(self,prediction):

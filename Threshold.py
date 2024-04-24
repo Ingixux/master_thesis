@@ -57,7 +57,7 @@ class Threshold:
             #except EOFError:
             except (pickle.UnpicklingError, EOFError): #TODO This is not optimal, entropy and fleids create diffrent EOFError
                 pass
-        print(len(trainingSet))
+        #print(len(trainingSet))
         trainingSet=np.array(trainingSet)
         #print(trainingSet)
 
@@ -76,12 +76,12 @@ class Threshold:
 
         for key in vaules.keys():
             if key not in ["isAtttack","HigstNumberOfSyn","HigstNumberOfURGPSHFIN","currenttime"]:
-                print(key)
-                print(vaules[key])
+                #print(key)
+                #print(vaules[key])
                 self.threshold[key]=statistics.stdev(vaules[key]) #TODO consider other metrics
             elif key in ["HigstNumberOfSyn","HigstNumberOfURGPSHFIN"]: #TODO this should only look at a small number of vaules (most will be low)
-                print(key)
-                print(vaules[key])
+                #print(key)
+                #print(vaules[key])
                 self.threshold[key]=statistics.mean(vaules[key])
 
             

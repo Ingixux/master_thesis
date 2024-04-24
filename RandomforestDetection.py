@@ -59,7 +59,7 @@ class RandomforestDetection:
             #trainingSet=np.load(fileOfFeatures, allow_pickle=True)
             #trainingSet=np.load(fileOfFeatures, allow_pickle=True)
         #print(trainingSet)
-        print(x)
+        #print(x)
         dataSet=np.array(trainingSet)
         Features=dataSet[:,2:-1]
         labels=dataSet[:,-1]
