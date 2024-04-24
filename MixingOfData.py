@@ -55,19 +55,30 @@ class TempRecords:
 class MixingOfData:
     """
     This Class is used to mix two sources of input files (inputFile1 , inputFile2) and 
-    Create outpuf iles with diffrent sampling rate
+    Create output files with diffrent sampling rate
     This class takes as input :
-        listWithChaningOfSamplingRate
-
+        listWithChaningOfSamplingRate:
+            This is the list of the SamplingRate of the output files, each element will create a new output file
+            The elements is of the SamplingRate Class 
         inputFile1:
-
+            Is a list files to be mixed, all elements are assusmed to have the same sampling rate, 
+            (standard so is this the attack fiels)
+            It is assumed that they are in stored on time with the first elemenet being the earlist file in inputFile1
         inputFile2:
-
+            Is a list files to be mixed, all elements are assusmed to have the same sampling rate, 
+            (standard so is this the normal fiels)
+            It is assumed that they are in stored on time with the first elemenet being the earlist file in inputFile2
         innput:
-            
+            This is the sampling rate which the input files have. The elements are of the SamplingRate Class.
+            The first element is sampling rate of the files in inputFile1,
+            The second element is sampling rate of the files in inputFile2.
         outputTraniOrDetect:
             Telles the program to either save the data in detect or train folder of data/DiffrentSamplingRates/
-
+    
+    self.dicOfFileOutput ={}
+    self.dicOfFileInnput ={}
+    self.dictofthelistofinputfile
+    self.currentTime=
     """
     def __init__(self,listWithChaningOfSamplingRate,inputFile1,inputFile2,innput,outputTraniOrDetect):
         innput= self.checkInput(innput)
@@ -278,13 +289,13 @@ class MixingOfData:
 
     def checkInput(self,innput):
         if len(innput) >2 or type(innput) != list:
-            innput ==[SamplingRate("1:100"),SamplingRate("1:1")] 
+            innput =[SamplingRate("1:1"),SamplingRate("1:100")] 
         else:
             if len(innput) >1:
                 if type(innput[1])!=SamplingRate:
-                    innput[1] = SamplingRate("1:1")
+                    innput[1] = SamplingRate("1:100")
             if type(innput[0])!=SamplingRate:
-                innput[0] = SamplingRate("1:100")
+                innput[0] = SamplingRate("1:1")
         return innput
 
     def openNextInputFile(self,keytoinputfile):#openNextInputFile(self,inputFiles,keytoinputfile):

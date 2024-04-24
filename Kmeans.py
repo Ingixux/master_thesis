@@ -11,14 +11,26 @@ class Kmeans:
         self.checkTypeOfFeatures(typeOfFeatures)
         self.setname()
         self.clf = KMeans(n_clusters = 2)
-        self.filepathOfClassifier= filepathOfClassifier
+        #self.filepathOfClassifier= filepathOfClassifier
+        #self.filepathOfClassifierflip =filepathOfClassifier.split(".")[-1] +"flip.pkl"
+        self.x=0
+        
         self.filepathOfInput=filepathOfInput
-        #self.standertimes=standertimes
+        self.flip=0
         if filepathOfClassifier !="":
+            self.setFilepathOfClassifier(filepathOfClassifier)
             self.loadClassfication()
+        else:
+            self.filepathOfClassifier= ""
+            self.filepathOfClassifierflip =""
+
 
 #    def resetentropy(self):
 #        self.entropy=Entropy(self.standertimes[0],self.standertimes[1],self.standertimes[2],False)    
+
+    def setFilepathOfClassifier(self, path):
+        self.filepathOfClassifier=path
+        self.filepathOfClassifierflip=path.split(".")[-1] +"flip.pkl"
 
     def checkTypeOfFeatures(self,typeOfFeatures):
         allowedtypeOfFeatures=["fields","entropy","combined","entropylimited","combinedlimited"]
@@ -31,8 +43,10 @@ class Kmeans:
         self.name =self.classifier +self.typeOfFeatures
 
     def detect(self,arrayToDetect,isattack):
+        
         prediction=self.findattackcluster(self.clf.predict(arrayToDetect)[0])
-        return ["KMeans",prediction,isattack]
+        return [prediction,isattack]
+        #return ["KMeans",prediction,isattack]
     
     #def setfilepathOfInput(self,file):
     #    if os.path.isfile(file):
@@ -82,9 +96,11 @@ class Kmeans:
 
     def loadClassfication(self):
         self.clf= pickle.load(open(self.filepathOfClassifier, 'rb')) 
+        self.flip= pickle.load(open(self.filepathOfClassifierflip, 'rb')) 
 
     def saveClassifier(self):
         pickle.dump(self.clf, open(self.filepathOfClassifier, 'wb'))
+        pickle.dump(self.flip, open(self.filepathOfClassifierflip, 'wb'))
 
     def makeattackcluster(self,dataset):
         #print(dataset)
@@ -96,9 +112,9 @@ class Kmeans:
             if lables[x]==predictions[x]:
                 correct+=1
         if correct/len(lables) >0.5:
-            self.flib=0
+            self.flip=0
         else:
-            self.flib=1
+            self.flip=1
         #print(dataset[:,-1])
         #print(len(lables))
         #print(correct)
@@ -107,7 +123,7 @@ class Kmeans:
         #print("hei")
         
     def findattackcluster(self,prediction):
-        if self.flib==1:
+        if self.flip==1:
             if prediction==1:
                 return 0
             else:
@@ -118,6 +134,8 @@ class Kmeans:
     def makecopy(self):
         kmeans = Kmeans(self.typeOfFeatures)
         kmeans.filepathOfClassifier =self.filepathOfClassifier
+        kmeans.filepathOfClassifierflip =self.filepathOfClassifierflip
         kmeans.filepathOfInput = self.filepathOfInput
         kmeans.clf =self.clf 
+        kmeans.flip=self.flip
         return kmeans

@@ -18,7 +18,10 @@ class RandomforestDetection:
             self.loadClassfication()
 
     #def resetentropy(self):
-    #    self.entropy=Entropy(self.standertimes[0],self.standertimes[1],self.standertimes[2],False)    
+    #    self.entropy=Entropy(self.standertimes[0],self.standertimes[1],self.standertimes[2],False)  
+
+    def setFilepathOfClassifier(self, path):
+        self.filepathOfClassifier=path  
 
     def checkTypeOfFeatures(self,typeOfFeatures):
         allowedtypeOfFeatures=["fields","entropy","combined","entropylimited","combinedlimited"]
@@ -31,7 +34,8 @@ class RandomforestDetection:
         self.name =self.classifier +self.typeOfFeatures
 
     def detect(self,arrayToDetect,isattack):
-        return ["RandomForest",self.clf.predict(arrayToDetect)[0],isattack]
+        return [self.clf.predict(arrayToDetect)[0],isattack]
+        #return ["RandomForest",self.clf.predict(arrayToDetect)[0],isattack]
 
     def train(self):
     #def train(self,typeOfFeatures):

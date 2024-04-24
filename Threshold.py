@@ -2,7 +2,7 @@ from sklearn.ensemble import RandomForestClassifier
 import numpy as np
 import pickle as pickle
 import os
-from Entropy import Entropy
+#from Entropy import Entropy
 import statistics
 
 class Threshold:
@@ -20,6 +20,9 @@ class Threshold:
         if filepathOfClassifier !="":
             self.loadClassfication()
 
+    def setFilepathOfClassifier(self, path):
+        self.filepathOfClassifier=path
+
     def checkTypeOfFeatures(self,typeOfFeatures):
         allowedtypeOfFeatures=["threshold"]
         if typeOfFeatures not in allowedtypeOfFeatures:
@@ -36,10 +39,12 @@ class Threshold:
         for key in self.threshold.keys():
             if key not in ["isAtttack","currenttime"]:
                 if self.threshold[key] <  arrayToDetect[key]:
-                    dataToSave.append([key,1,isattck])#how to get if there is and attack
+                    #dataToSave.append([key,1,isattck])#how to get if there is and attack
+                    dataToSave.append([key,1])
                 else:
-                    dataToSave.append([key,0,isattck])
-        return dataToSave
+                    #dataToSave.append([key,0,isattck])
+                    dataToSave.append([key,0])
+        return [dataToSave]+[isattck]
 
     def train(self):
         if self.filepathOfInput =="" or type(self.filepathOfInput)!=str:

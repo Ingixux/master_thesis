@@ -49,6 +49,7 @@ class IDS:
             name of method used, prediction result, label, which attack are present, time of the record
     """
     def __init__(self, listOfTrainingClasses,listOfPathToSilkFiles,standertimes=[3,15,30]):
+        self.x=0
         self.listOfPathToSilkFiles=listOfPathToSilkFiles
         self.listOfTrainingClasses=listOfTrainingClasses
         self.dicOfFileOutput ={}
@@ -111,7 +112,9 @@ class IDS:
                         trainingClasses.append(open("data/Classifiers/"+nameoffile+trainingClasses[0].name+".npy", "wb"))
                     else:
                         trainingClasses[2]=open("data/Classifiers/"+nameoffile+trainingClasses[0].name+".npy", "wb")
-                    trainingClasses[0].filepathOfClassifier="data/Classifiers/"+nameoffile+trainingClasses[0].name+".pkl"
+
+                    trainingClasses[0].setFilepathOfClassifier("data/Classifiers/"+nameoffile+trainingClasses[0].name+".pkl")
+                    #trainingClasses[0].filepathOfClassifier="data/Classifiers/"+nameoffile+trainingClasses[0].name+".pkl"
 
     def makeTraingData(self):
         self.createfilesToSaveTo()
@@ -140,6 +143,7 @@ class IDS:
             self.closeFiles(trainingClasses[2])
 
     def doDetectionOnData(self,data,trainingClasses):
+        
         toSave=[]
         if trainingClasses[0].typeOfFeatures =="threshold":
             data["isAtttack"]=self.setIsAttack(data["isAtttack"][0])
@@ -154,15 +158,17 @@ class IDS:
             else:
                 label=self.setIsAttack(data[-1])
                 attaks=[data[-1]]
-            time=[data[0]]
+            time=data[0]
             toPredict.append(data)
             darecta=np.array(toPredict, dtype=object)
 
             Feature=darecta[:,2:-1]
             #labels=darecta[:,-1]
+            self.x+=1
             toSave=trainingClasses[0].detect(Feature,label)
             #toSave=["RandomForest",1,labels[0]]
-        toSave+=[attaks] +time #DONE? not tested TODO also save the time
+        toSave+=[attaks] +[time] 
+        #print(toSave)
         self.saveDataToCollect(toSave,trainingClasses[2])
 
     def detect(self):
@@ -217,9 +223,9 @@ class IDS:
             for file in fileCollection:
                 infile = silkfile_open(file, READ)
                 #self.setDataToZero()
-                self.x=0
+                #
                 for rec in infile:  #TODO Handle that when No rec are for a sliding window time
-                    
+                    #self.x+=1
                     #TODO add to entropy here
                     slidingWindowVaules=[]
                     if keyfile in self.dicOfSlidingWindow.keys():
@@ -286,11 +292,15 @@ class IDS:
                                 elif detectortrain=="detect":
                                     #self.doDetectionOnData([r[0:32]+[r[-1]]],trainingClasses)
                                     self.doDetectionOnData(r[0:-2]+[r[-1]],trainingClasses)
+                #print(trainingClasses[0].x)
             if keyfile in self.dicOfSlidingWindow.keys():
                 #print(self.dicOfSlidingWindow[keyfile].x)
                 self.dicOfSlidingWindow[keyfile] = SlidingWindow(self.standertimes[0],self.standertimes[1],self.standertimes[2],False)
             #entropy.resetentropy()
             #print(self.x)
+            
+
+            
 
 
 
@@ -438,8 +448,9 @@ class IDS:
 #a1.removeTrainingFiles()
 #a1.addNewFiles(listoffilesdetect)
 
-#KMFC=Kmeans("fields","data/Classifiers/train1600KMeansfields.pkl","")
-#RFEC=RandomforestDetection("entropy","data/Classifiers/train1600KRandomforestDetectionfields.pkl","")
-#THC=Threshold("fields","data/Classifiers/train1600Threshold.pkl", "")
-#a1=IDS([KMFC],[["data/DiffrentSamplingRates/train1600"]])
-#a1.detect()
+KMFC=Kmeans("fields","data/Classifiers/train1600KMeansfields.pkl","")
+RFEC=RandomforestDetection("entropy","data/Classifiers/train1600RandomForestentropy.pkl","")
+THC=Threshold("threshold","data/Classifiers/train1600threshold.pkl", "")
+#a1=IDS([KMFC],[["data/DiffrentSamplingRates/detect/detect1600"]])
+a1=IDS([THC],[["data/DiffrentSamplingRates/detect/detect1600"]])
+a1.detect()

@@ -32,10 +32,10 @@ ia1 = InputToAttackDataMultiplicator({"botsize":90000,"dst":[choseDip[0]],"src":
                                       "stratTimeOfAttack" : datetime.datetime(2011, 1, 25, 12, 2, 20, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 12, 5, 0, 0), "startTimeIncreasAlgorithm":"standardBasedOnBotnetsize"})
 ia2 = InputToAttackDataMultiplicator({"botsize":90000,"dst":[choseDip[1]],"src":choseSip, "nIP":nexthopip[1], "isAttack":32532,"botnet_rotation_algorithm":"standard",
                                       "TT1":datetime.timedelta(microseconds=10000),"TT2":datetime.timedelta(microseconds=10000),"TBA":datetime.timedelta(microseconds=10000),
-                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 25, 12, 2, 20, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 12, 5, 0, 0), "startTimeIncreasAlgorithm":"standardBasedOnBotnetsize"})
-ia3 = InputToAttackDataMultiplicator({"botsize":90000,"dst":[choseDip[2]],"src":choseSip, "nIP":nexthopip[2], "isAttack":32532,"botnet_rotation_algorithm":"standard",
+                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 25, 12, 17, 20, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 12, 23, 0, 0), "startTimeIncreasAlgorithm":"standardBasedOnBotnetsize"})
+ia3 = InputToAttackDataMultiplicator({"botsize":60000,"dst":[choseDip[2]],"src":choseSip, "nIP":nexthopip[2], "isAttack":32532,"botnet_rotation_algorithm":"standard",
                                       "TT1":datetime.timedelta(microseconds=10000),"TT2":datetime.timedelta(microseconds=10000),"TBA":datetime.timedelta(microseconds=10000),
-                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 25, 13, 2, 20, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 5, 0, 0), "startTimeIncreasAlgorithm":"standardBasedOnBotnetsize"})
+                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 25, 13, 40, 20, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 42, 0, 0), "startTimeIncreasAlgorithm":"standardBasedOnBotnetsize"})
 
 
 #listofFiles =["data/GenratedAttacks/ext2ext-S0_20240125.12"]
