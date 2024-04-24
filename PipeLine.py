@@ -4,15 +4,15 @@ import datetime
 from GetTrafficPattern import GetTrafficPattern
 from FindFiles import FindFiles,Folderpathstructure
 from MixingOfData import MixingOfData, SamplingRate
-from Traning import TraningOfClassification
+from IDS import IDS
 from RandomforestDetection import RandomforestDetection
 from Threshold import Threshold
 from Kmeans import Kmeans
 
 startoffile="/media/sf_share/" #TODO this needs to fit with Sikt
 
-start=Folderpathstructure("out","oslo",2011,1,25,startoffile)#TODO this needs to fit with the dates I want
-end=Folderpathstructure("out","oslo",2011,1,26,startoffile)#TODO this needs to fit with the dates I want
+start=Folderpathstructure("out","oslo",2011,1,24,startoffile)#TODO this needs to fit with the dates I want
+end=Folderpathstructure("out","oslo",2011,1,25,startoffile)#TODO this needs to fit with the dates I want
 
 ff=FindFiles(start,end)
 GT=GetTrafficPattern(ff.findallfiles())
@@ -61,8 +61,8 @@ ff=FindFiles(start,end)
 MD = MixingOfData([ca1,ca2],listofattackfilestrain,ff.findallfiles(),[sa1,sa2],"train")
 
 #detect
-start=Folderpathstructure("out","oslo",2011,1,25,startoffile)#TODO this needs to fit with the dates I want
-end=Folderpathstructure("out","oslo",2011,1,26,startoffile)#TODO this needs to fit with the dates I want
+start=Folderpathstructure("out","oslo",2011,1,26,startoffile)#TODO this needs to fit with the dates I want
+end=Folderpathstructure("out","oslo",2011,1,27,startoffile)#TODO this needs to fit with the dates I want
 ff=FindFiles(start,end)
 
 MD = MixingOfData([ca1,ca2],listofattackfilesdetect,ff.findallfiles(),[sa1,sa2],"detect")
@@ -84,10 +84,10 @@ for smaplingrates in listofsmaplingrates:
     listoffilestrain.append(["data/DiffrentSamplingRates/train/train"+smaplingrates])
     listoffilesdetect.append(["data/DiffrentSamplingRates/detect/detect"+smaplingrates])
 
-a1=TraningOfClassification([RFE,TH,KMF],listoffilestrain)
+a1=IDS([RFE,TH,KMF],listoffilestrain)
 
 
-#a2=TraningOfClassification([RFE,TH,KMF],[["data/DiffrentSamplingRates/detect/detect1000"]])
+#a2=IDS([RFE,TH,KMF],[["data/DiffrentSamplingRates/detect/detect1000"]])
 #
 
 

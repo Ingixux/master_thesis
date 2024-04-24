@@ -120,7 +120,6 @@ class AttackDataMultiplicator:
         self.addInfoToDicToMatchBiFlows("dport",rec.dport,nameofset,keyOfBiFlow,isbiflow)
         return rec
     
-
     def modifyIsattack(self,rec,nameofset,keyOfBiFlow,isbiflow):
         """
         #TODO add a description of that this needs to be inline with the silk config files.
@@ -449,19 +448,7 @@ class InputToAttackDataMultiplicator:
             return False
         else:
             return True
-    
-def checkUniqeIP(ips):
-    """
-    Used to check that the ips are unique
-    """
-    tempIps=[]
-    for ip in ips:
-        if not ip in tempIps:
-            tempIps.append(ip)
-    return tempIps
-        
-#listOfSrc=["192.168.56.11","192.168.56.12","192.168.56.13", "192.168.56.13"]
-#listOfSrc=checkUniqeIP(listOfSrc)
+
 
 
 #start = datetime.datetime(2011, 1, 25, 12, 2, 20, 0)

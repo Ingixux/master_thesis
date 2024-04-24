@@ -53,12 +53,21 @@ class TempRecords:
             return self.rec
 
 class MixingOfData:
-    #TODO add the possiblety to remove files that exits, when oping to write
-    #TODO add the possiblety of having multipule inputefiles from both sikt and attack data
-    #TODO or add only the handling of no attack file,
-    #So that the system can run though the files and inculde the attacks when possible 
     """
-    
+    This Class is used to mix two sources of input files (inputFile1 , inputFile2) and 
+    Create outpuf iles with diffrent sampling rate
+    This class takes as input :
+        listWithChaningOfSamplingRate
+
+        inputFile1:
+
+        inputFile2:
+
+        innput:
+            
+        outputTraniOrDetect:
+            Telles the program to either save the data in detect or train folder of data/DiffrentSamplingRates/
+
     """
     def __init__(self,listWithChaningOfSamplingRate,inputFile1,inputFile2,innput,outputTraniOrDetect):
         innput= self.checkInput(innput)

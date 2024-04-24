@@ -2,7 +2,7 @@ from sklearn.ensemble import RandomForestClassifier
 import numpy as np
 import pickle as pickle
 import os
-from Entropy import Entropy
+#from Entropy import Entropy
 
 class RandomforestDetection:
     def __init__(self,typeOfFeatures,filepathOfClassifier ="",filepathOfInput=""):#standertimes=[3,15,0]

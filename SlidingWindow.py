@@ -2,7 +2,7 @@ import datetime
 import numpy as np
 import copy
 
-class Entropy:
+class SlidingWindow:
     def __init__(self,sliding_window_interval,aggregate_window_duration,comparison_window_interval,limited):
         self.sliding_window_interval =sliding_window_interval
         self.aggregate_window_duration=aggregate_window_duration
