@@ -52,15 +52,17 @@ class GetTrafficPattern:
                 sipOrDip="destinationIP"
             else:
                 sipOrDip="sourceIP"
-                
-        if len(self.dictofinfo["nexthopip"].keys()) <1:
+        if len(self.dictofinfo["nexthopip"].keys()) >1:
             nexthopips=[0,0]
             if len(self.dictofinfo[sipOrDip][ip]["nexthopip"].keys())==1:
                 for nextip in self.dictofinfo[sipOrDip][ip]["nexthopip"].keys():
                     nexthopips[0] =nextip
             else:
-                #TODO This is if there are more than one 
-                print("hei")
+                mostip=0
+                for keysip,valuesnexhop in self.dictofinfo[sipOrDip][ip]["nexthopip"].items():
+                    if valuesnexhop>mostip:
+                        nexthopips[0] =keysip
+                        mostip=valuesnexhop
             reversedip=""
             if sipOrDip=="sourceIP":
                 reversedip="destinationIP"
@@ -68,14 +70,16 @@ class GetTrafficPattern:
                 reversedip="sourceIP"
             try:
                 if len(self.dictofinfo[reversedip][ip]["nexthopip"].keys())==1:
-                    for nextip in self.dictofinfo[sipOrDip][ip]["nexthopip"].keys():
+                    for nextip in self.dictofinfo[reversedip][ip]["nexthopip"].keys():
                         nexthopips[1] =nextip
                 else:
-                    #TODO This is if there are more than one 
-                    print("hei")
+                    mostip=0
+                    for keysip,valuesnexhop in self.dictofinfo[reversedip][ip]["nexthopip"].items():
+                        if valuesnexhop>mostip:
+                            nexthopips[1] =keysip
+                            mostip=valuesnexhop
             except:
-                #TODO what to add if there is no record in in the reverse direction
-                pass
+                nexthopips[1]=nexthopips[0]
         else:
             for key in self.dictofinfo["nexthopip"].keys():
                 nexthopips=[key,key]
@@ -90,10 +94,16 @@ class GetTrafficPattern:
     def getUniqueIp(self,numberOfSetsSips,listIPS):
         choseIps=[]
         tempIp=0
-        while len(choseIps) <numberOfSetsSips:
-            tempIp=self.selectDip(listIPS)
-            if tempIp not in choseIps:
-                choseIps.append(tempIp)
+        if numberOfSetsSips>=len(listIPS):
+            choseIps=listIPS
+        else:
+            while len(choseIps) <numberOfSetsSips:
+                tempIp=self.selectDip(listIPS)
+                if tempIp not in choseIps:
+                    choseIps.append(tempIp)
+                    for ips in listIPS:
+                        if tempIp == ips[1]:
+                            listIPS.remove(ips)
         return choseIps 
 
     def selectDip(self,listofip):
@@ -110,8 +120,9 @@ class GetTrafficPattern:
         
 
     def findTopIps(self,sipOrDip,size):
-        #countx=0
         listoftop=[]
+        if size > len(self.dictofinfo[sipOrDip]):
+            size=len(self.dictofinfo[sipOrDip])
         for x in range(0,size):
             listoftop.append([0,None])
         for key,ipset in self.dictofinfo[sipOrDip].items():
@@ -143,7 +154,9 @@ class GetTrafficPattern:
 
 #ff=FindFiles(start,end)
 #GT=GetTrafficPattern(ff.findallfiles())
+#GT=GetTrafficPattern(["data/DiffrentSamplingRates/train/train1000"])
 #choseDip, choseSip=GT.movetroughthefiles(100,20,3)
-#print(GT.getnexthopip("destinationIP",choseDip))
+#print(GT.getnexthopip("destinationIP",choseDip[0]))#IPv4Addr("192.168.56.11")choseDip[0]
+#print(GT.getnexthopip("destinationIP",IPv4Addr("116.126.2.5")))#IPv4Addr("192.168.56.11")choseDip[0]
 #print(choseSip)
 

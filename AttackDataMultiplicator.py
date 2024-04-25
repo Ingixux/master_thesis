@@ -450,7 +450,6 @@ class InputToAttackDataMultiplicator:
             return True
 
 
-
 #start = datetime.datetime(2011, 1, 25, 12, 2, 20, 0)
 #end = datetime.datetime(2011, 1, 25, 12, 5, 0, 0)
 #print(start)
@@ -473,7 +472,7 @@ class InputToAttackDataMultiplicator:
 #print(ia2.botNetSize)
 
 #["192.168.44.43","192.168.44.43"] #nexthop
-#ia1 = InputToAttackDataMultiplicator({"botsize":90000,"dst":["116.126.2.5"],"src":["19.16.2.2"], "nIP":["0.0.0.0","0.0.0.0"], "stratTimeOfAttack" : start , "endTimeOfAttack"  : end, "startTimeIncreasAlgorithm":"standardBasedOnBotnetsize"})
+#ia1 = InputToAttackDataMultiplicator({"botsize":90000,"dst":["116.126.2.5"],"src":["19.16.2.2"], "nIP":["1.1.1.1","4.5.6.7"], "stratTimeOfAttack" : start , "endTimeOfAttack"  : end, "startTimeIncreasAlgorithm":"standardBasedOnBotnetsize"})
 #ia2 = InputToAttackDataMultiplicator({"botsize":1,"src":["192.168.3.3"]})
 #a1=AttackDataMultiplicator([ia1],"data/GenratedAttacks/ext2ext-S0_20240125.12","TCP_SYN_Flodd")
 #a1=AttackDataMultiplicator([ia1],"outfileattack.rw","TCP_SYN_Flodd")
