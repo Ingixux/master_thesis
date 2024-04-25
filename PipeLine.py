@@ -64,7 +64,7 @@ sa2 =SamplingRate("1:100")
 
 listSamplingratesToMake=[]
 for samplingrate in samplingratesToMake:
-    listSamplingratesToMake.apppend(SamplingRate(samplingrate))
+    listSamplingratesToMake.append(SamplingRate(samplingrate))
 
 
 
