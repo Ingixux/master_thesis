@@ -6,9 +6,7 @@ import os
 import statistics
 
 class Threshold:
-    def __init__(self,typeOfFeatures="threshold",filepathOfClassifier ="",filepathOfInput=""):#standertimes=[3,15,30]
-        #TODO make standertimes to datetimedelta 
-        #filepathOfInput might not be nessacary nor filepathOfClassifier
+    def __init__(self,typeOfFeatures="threshold",filepathOfClassifier ="",filepathOfInput=""):
         self.checkTypeOfFeatures(typeOfFeatures)
         self.setname()
         self.threshold ={"entropySip":0,"entropyRateSip":0,"entropyDip":0,"entropyRateDip":0,"entropyPacketsize":0,"entropyRatePacketsize":0,

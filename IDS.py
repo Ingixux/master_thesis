@@ -48,13 +48,14 @@ class IDS:
         This saves the result of the cassifiing, in the format:
             name of method used, prediction result, label, which attack are present, time of the record
     """
-    def __init__(self, listOfTrainingClasses,listOfPathToSilkFiles,standertimes=[3,15,30]):
+    def __init__(self, listOfTrainingClasses,listOfPathToSilkFiles,standertimes=[120,600,1200]):#standertimes=[3,15,30]
         self.x=0
         self.listOfPathToSilkFiles=listOfPathToSilkFiles
         self.listOfTrainingClasses=listOfTrainingClasses
         self.dicOfFileOutput ={}
         self.dicOfSlidingWindow ={}
         self.standertimes=standertimes
+        self.fileAggregatedData=None
         if not self.dicOfFileOutput:
             self.makeDicOfFileOutput()
 
@@ -66,9 +67,10 @@ class IDS:
 
     def removeTrainingFiles(self):
         for trainingClasses in self.dicOfFileOutput.values():
-            pathToFile=trainingClasses[0].filepathOfInput
-            if os.path.isfile(pathToFile):
-                os.remove(pathToFile)
+            if trainingClasses[0].name != "threshold":
+                pathToFile=trainingClasses[0].filepathOfInput
+                if os.path.isfile(pathToFile):
+                    os.remove(pathToFile)
     
     def makeDicOfFileOutput(self):
         """
@@ -79,7 +81,8 @@ class IDS:
         This also starts slidling windows if there the classifying class's uses this first file of the collection
         There is only one sliding window for each collection of files
         """
-        for TrainingClasses in self.listOfTrainingClasses:
+        for TrainingClasses in self.listOfTrainingClasses: #TODO TrainingClasses not the best name as this as a different source, from the other uses the name
+            #mayby change all other insatnces of TrainingClasses to TrainingClassesset
             for fileCollection in self.listOfPathToSilkFiles:
                 keyfile =fileCollection[0]
                 if TrainingClasses.typeOfFeatures in ["entropy","combined","threshold"]:
@@ -97,6 +100,9 @@ class IDS:
                         trainingClasses.append(open("data/Classifiers/result/"+nameoffile+trainingClasses[0].name+".npy", "wb"))
                     else:
                         trainingClasses[2]=open("data/Classifiers/result/"+nameoffile+trainingClasses[0].name+".npy", "wb")
+                if trainingClasses[0].name=="threshold" and self.fileAggregatedData ==None:
+                    self.fileAggregatedData=open("data/Classifiers/result/fileAggregatedData.npy", "wb")
+
         
     def createfilesToSaveTo(self):
         #for file in self.listOfPathToSilkFiles: 
@@ -176,14 +182,25 @@ class IDS:
         self.getDataFromSilkFile("detect")
         for trainingClasses in self.dicOfFileOutput.values():
             self.closeFiles(trainingClasses[2])
+        self.fileAggregatedData.close()
+        self.fileAggregatedData ==None
+
 
     def train(self):
         for trainingClasses in self.dicOfFileOutput.values():
             trainingClasses[0].train()
 
 
+    def saveAggregatedDatTofile(self,data):
+        data["isAtttack"]=self.setIsAttack(data["isAtttack"][0])
+        result = data.items()
+        fdate= list(result)
+        savedata=np.array(fdate, dtype=object)
+        np.save(self.fileAggregatedData,savedata)
+
+
+
     def saveDataTofile(self,file,data,trainingClasses):
-        
         if trainingClasses[0].typeOfFeatures =="threshold":
             data["isAtttack"]=self.setIsAttack(data["isAtttack"][0])
             result = data.items()
@@ -263,16 +280,18 @@ class IDS:
                                         self.doDetectionOnData(rec1,trainingClasses)
                                 elif trainingClasses[0].typeOfFeatures in ["threshold"]:
                                     self.doDetectionOnData(self.dicOfSlidingWindow[keyfile].findThreasholds(False),trainingClasses)
+                                    self.saveAggregatedDatTofile(self.dicOfSlidingWindow[keyfile].getcurrentvaules()) 
                 infile.close()
             for trainingClasses in self.dicOfFileOutput.values(): #TODO this does only acuount for the vaules in [-1],needs to add the vaule to all in the rec
                 if trainingClasses[0].typeOfFeatures in ["entropy","combined","threshold"]:
-                    toadd=self.dicOfSlidingWindow[keyfile].doCalculation(True) #TODO change entropy
+                    toadd=self.dicOfSlidingWindow[keyfile].doCalculation(True) #TODO change entropy  
                     if trainingClasses[0].typeOfFeatures =="threshold":
                         if detectortrain=="train":
                             self.saveDataTofile(file,self.dicOfSlidingWindow[keyfile].getcurrentvaules(),trainingClasses)
                             #self.saveDataTofile(file,trainingClasses[0].entropy.findThreasholds(True),trainingClasses)
                         elif detectortrain=="detect":
                             self.doDetectionOnData(self.dicOfSlidingWindow[keyfile].findThreasholds(True),trainingClasses)
+                            self.saveAggregatedDatTofile(self.dicOfSlidingWindow[keyfile].getcurrentvaules())     
                     elif len(toadd) !=0:
                         #print(len(toadd))
                         if trainingClasses[0].typeOfFeatures =="entropy":
@@ -448,9 +467,9 @@ class IDS:
 #a1.removeTrainingFiles()
 #a1.addNewFiles(listoffilesdetect)
 
-KMFC=Kmeans("fields","data/Classifiers/train1600KMeansfields.pkl","")
-RFEC=RandomforestDetection("entropy","data/Classifiers/train1600RandomForestentropy.pkl","")
-THC=Threshold("threshold","data/Classifiers/train1600threshold.pkl", "")
+#KMFC=Kmeans("fields","data/Classifiers/train1600KMeansfields.pkl","")
+#RFEC=RandomforestDetection("entropy","data/Classifiers/train1600RandomForestentropy.pkl","")
+#THC=Threshold("threshold","data/Classifiers/train1600threshold.pkl", "")
 #a1=IDS([KMFC],[["data/DiffrentSamplingRates/detect/detect1600"]])
-a1=IDS([THC],[["data/DiffrentSamplingRates/detect/detect1600"]])
-a1.detect()
+#a1=IDS([RFEC,THC],[["data/DiffrentSamplingRates/detect/detect800"]])
+#a1.detect()

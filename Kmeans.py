@@ -5,14 +5,10 @@ import os
 #from Entropy import Entropy
 
 class Kmeans:
-    def __init__(self,typeOfFeatures,filepathOfClassifier ="",filepathOfInput=""):#standertimes=[3,15,0]
-        #TODO make standertimes to datetimedelta 
-        #filepathOfInput might not be nessacary nor filepathOfClassifier
+    def __init__(self,typeOfFeatures,filepathOfClassifier ="",filepathOfInput=""):
         self.checkTypeOfFeatures(typeOfFeatures)
         self.setname()
         self.clf = KMeans(n_clusters = 2)
-        #self.filepathOfClassifier= filepathOfClassifier
-        #self.filepathOfClassifierflip =filepathOfClassifier.split(".")[-1] +"flip.pkl"
         self.x=0
         
         self.filepathOfInput=filepathOfInput
@@ -23,10 +19,7 @@ class Kmeans:
         else:
             self.filepathOfClassifier= ""
             self.filepathOfClassifierflip =""
-
-
-#    def resetentropy(self):
-#        self.entropy=Entropy(self.standertimes[0],self.standertimes[1],self.standertimes[2],False)    
+  
 
     def setFilepathOfClassifier(self, path):
         self.filepathOfClassifier=path

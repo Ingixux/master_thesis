@@ -5,20 +5,15 @@ import os
 #from Entropy import Entropy
 
 class RandomforestDetection:
-    def __init__(self,typeOfFeatures,filepathOfClassifier ="",filepathOfInput=""):#standertimes=[3,15,0]
-        #TODO make standertimes to datetimedelta 
-        #filepathOfInput might not be nessacary nor filepathOfClassifier
+    def __init__(self,typeOfFeatures,filepathOfClassifier ="",filepathOfInput=""):
         self.checkTypeOfFeatures(typeOfFeatures)
         self.setname()
         self.clf = RandomForestClassifier(n_estimators = 100)
         self.filepathOfClassifier= filepathOfClassifier
         self.filepathOfInput=filepathOfInput
-        #self.standertimes=standertimes
         if filepathOfClassifier !="":
             self.loadClassfication()
 
-    #def resetentropy(self):
-    #    self.entropy=Entropy(self.standertimes[0],self.standertimes[1],self.standertimes[2],False)  
 
     def setFilepathOfClassifier(self, path):
         self.filepathOfClassifier=path  
@@ -38,10 +33,6 @@ class RandomforestDetection:
         #return ["RandomForest",self.clf.predict(arrayToDetect)[0],isattack]
 
     def train(self):
-    #def train(self,typeOfFeatures):
-        #allowedtypeOfFeatures=["fields","entropy","combined"]
-        #if typeOfFeatures not in allowedtypeOfFeatures:
-        #    raise ValueError("no allowed type of training type")
         if self.filepathOfInput =="" or type(self.filepathOfInput)!=str:
             raise ValueError("no vaule input file for training")
         if not os.path.isfile(self.filepathOfInput):

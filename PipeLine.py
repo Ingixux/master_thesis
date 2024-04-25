@@ -10,9 +10,24 @@ from Threshold import Threshold
 from Kmeans import Kmeans
 
 startoffile="/media/sf_share/" #TODO this needs to fit with Sikt
+systemid="oslo"
+inorout="out"
 
-start=Folderpathstructure("out","oslo",2011,1,24,startoffile)#TODO this needs to fit with the dates I want
-end=Folderpathstructure("out","oslo",2011,1,25,startoffile)#TODO this needs to fit with the dates I want
+#TODO these needs to fit with the dates I want
+trafficpatternStart=[2011,1,24]
+trafficpatternEnd=[2011,1,25]
+
+traningDaysStart=[2011,1,24]
+traningDaysEnd=[2011,1,25]
+
+detectDaysStart=[2011,1,26]
+detectDaysEnd=[2011,1,27]
+
+samplingratesToMake=["1:800","1:1600"]
+#TODO add more of the ca I want, this is the sampling rate output
+
+start=Folderpathstructure(inorout,systemid,trafficpatternStart[0],trafficpatternStart[1],trafficpatternStart[2],startoffile)
+end=Folderpathstructure(inorout,systemid,trafficpatternEnd[0],trafficpatternEnd[1],trafficpatternEnd[2],startoffile)
 
 ff=FindFiles(start,end)
 GT=GetTrafficPattern(ff.findallfiles())
@@ -46,26 +61,29 @@ print("attacks modified")
 
 sa1 =SamplingRate("1:1")
 sa2 =SamplingRate("1:100")
-ca1 =SamplingRate("1:800")
-ca2 =SamplingRate("1:1600")
-#TODO add more of the ca I want, this is the sampling rate output
+
+listSamplingratesToMake=[]
+for samplingrate in samplingratesToMake:
+    listSamplingratesToMake.apppend(SamplingRate(samplingrate))
+
+
 
 listofattackfilestrain=["data/ModifiedAttackFiles/TCP_SYN_Flodd10","data/ModifiedAttackFiles/TCP_SYN_Flodd11"]
 listofattackfilesdetect=["data/ModifiedAttackFiles/TCP_SYN_Flodd20"]
 
 
 #train
-start=Folderpathstructure("out","oslo",2011,1,25,startoffile)#TODO this needs to fit with the dates I want
-end=Folderpathstructure("out","oslo",2011,1,26,startoffile)#TODO this needs to fit with the dates I want
+start=Folderpathstructure(inorout,systemid,trafficpatternStart[0],trafficpatternStart[1],trafficpatternStart[2],startoffile)
+end=Folderpathstructure(inorout,systemid,traningDaysEnd[0],traningDaysEnd[1],traningDaysEnd[2],startoffile)
 ff=FindFiles(start,end)
-MD = MixingOfData([ca1,ca2],listofattackfilestrain,ff.findallfiles(),[sa1,sa2],"train")
+MD = MixingOfData([listSamplingratesToMake],listofattackfilestrain,ff.findallfiles(),[sa1,sa2],"train")
 
 #detect
-start=Folderpathstructure("out","oslo",2011,1,26,startoffile)#TODO this needs to fit with the dates I want
-end=Folderpathstructure("out","oslo",2011,1,27,startoffile)#TODO this needs to fit with the dates I want
+start=Folderpathstructure(inorout,systemid,detectDaysStart[0],detectDaysStart[1],detectDaysStart[2],startoffile)
+end=Folderpathstructure(inorout,systemid,detectDaysEnd[0],detectDaysEnd[1],detectDaysEnd[2],startoffile)
 ff=FindFiles(start,end)
 
-MD = MixingOfData([ca1,ca2],listofattackfilesdetect,ff.findallfiles(),[sa1,sa2],"detect")
+MD = MixingOfData([listSamplingratesToMake],listofattackfilesdetect,ff.findallfiles(),[sa1,sa2],"detect")
 
 print("Data mixed")
 
@@ -77,27 +95,24 @@ KMF=Kmeans("fields","","")
 KME=Kmeans("entropy","","")
 KMC=Kmeans("combined","","")
 
-listofsmaplingrates =["800","1600"] #TODO add the new sampling rates
 listoffilestrain=[]
 listoffilesdetect=[]
-for smaplingrates in listofsmaplingrates:
-    listoffilestrain.append(["data/DiffrentSamplingRates/train/train"+smaplingrates])
-    listoffilesdetect.append(["data/DiffrentSamplingRates/detect/detect"+smaplingrates])
+for smaplingrates in listSamplingratesToMake:
+    listoffilestrain.append(["data/DiffrentSamplingRates/train/train"+smaplingrates.maxpackets])
+    listoffilesdetect.append(["data/DiffrentSamplingRates/detect/detect"+smaplingrates.maxpackets])
 
 a1=IDS([RFE,TH,KMF],listoffilestrain)
 
 
-#a2=IDS([RFE,TH,KMF],[["data/DiffrentSamplingRates/detect/detect1000"]])
-#
+
 
 
 a1.makeTraingData()
 a1.train()
 print("Traning done")
 
-a1.removeTrainingFiles()#DONE? not tested#TODO have something to remove the traningfiles that are no longer needed
-a1.addNewFiles(listoffilesdetect)#DONE? not tested #TODO  have something to add new files
-"""
+a1.removeTrainingFiles()
+a1.addNewFiles(listoffilesdetect)
+
 a1.detect()
 print("setup done")
-"""
