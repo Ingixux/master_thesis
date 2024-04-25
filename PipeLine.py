@@ -23,6 +23,18 @@ traningDaysEnd=[2011,1,25]
 detectDaysStart=[2011,1,26]
 detectDaysEnd=[2011,1,27]
 
+
+"""
+trafficpatternStart=[2024,2,5]
+trafficpatternEnd=[2024,2,6]
+
+traningDaysStart=[2024,2,5]
+traningDaysEnd=[2024,2,6]
+
+detectDaysStart=[2024,2,6]
+detectDaysEnd=[2024,2,7]
+"""
+
 samplingratesToMake=["1:800","1:1600"]
 #TODO add more of the ca I want, this is the sampling rate output
 
@@ -64,7 +76,7 @@ sa2 =SamplingRate("1:100")
 
 listSamplingratesToMake=[]
 for samplingrate in samplingratesToMake:
-    listSamplingratesToMake.apppend(SamplingRate(samplingrate))
+    listSamplingratesToMake.append(SamplingRate(samplingrate))
 
 
 
