@@ -159,4 +159,5 @@ class GetTrafficPattern:
 #print(GT.getnexthopip("destinationIP",choseDip[0]))#IPv4Addr("192.168.56.11")choseDip[0]
 #print(GT.getnexthopip("destinationIP",IPv4Addr("116.126.2.5")))#IPv4Addr("192.168.56.11")choseDip[0]
 #print(choseSip)
+#print(choseDip)
 

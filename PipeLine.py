@@ -9,22 +9,11 @@ from RandomforestDetection import RandomforestDetection
 from Threshold import Threshold
 from Kmeans import Kmeans
 
-startoffile="/media/sf_share/" #TODO this needs to fit with Sikt
-systemid="oslo"
-inorout="out"
-
-#TODO these needs to fit with the dates I want
-trafficpatternStart=[2011,1,24]
-trafficpatternEnd=[2011,1,25]
-
-traningDaysStart=[2011,1,24]
-traningDaysEnd=[2011,1,25]
-
-detectDaysStart=[2011,1,26]
-detectDaysEnd=[2011,1,27]
+startoffile="/media/sf_share/" #TODO Må endres til path til deres Silk data. 
+systemid="oslo" #TODO Må endres til ruteren som skal brukes som kilde av data
+inorout="out" #TODO Må endres til å passe mappe strukturen til dere
 
 
-"""
 trafficpatternStart=[2024,2,5]
 trafficpatternEnd=[2024,2,6]
 
@@ -33,10 +22,10 @@ traningDaysEnd=[2024,2,6]
 
 detectDaysStart=[2024,2,6]
 detectDaysEnd=[2024,2,7]
-"""
+
 
 samplingratesToMake=["1:800","1:1600"]
-#TODO add more of the ca I want, this is the sampling rate output
+
 
 start=Folderpathstructure(inorout,systemid,trafficpatternStart[0],trafficpatternStart[1],trafficpatternStart[2],startoffile)
 end=Folderpathstructure(inorout,systemid,trafficpatternEnd[0],trafficpatternEnd[1],trafficpatternEnd[2],startoffile)
@@ -51,7 +40,6 @@ for ip in choseDip:
 
 print("Traffic Pattern recived")
 #AttackDataMultiplicator (o)
-#TODO NEED more isAttack
 
 
 ia1 = InputToAttackDataMultiplicator({"botsize":90000,"dst":[choseDip[0]],"src":choseSip, "nIP":nexthopip[0], "isAttack":32532, "botnet_rotation_algorithm":"standard",
@@ -68,7 +56,6 @@ ia3 = InputToAttackDataMultiplicator({"botsize":60000,"dst":[choseDip[2]],"src":
 #listofFiles =["data/GenratedAttacks/ext2ext-S0_20240125.12"]
 a1=AttackDataMultiplicator([ia1,ia2],"data/GenratedAttacks/ext2ext-S0_20240125.12","TCP_SYN_Flodd1")
 a1=AttackDataMultiplicator([ia3],"data/GenratedAttacks/ext2ext-S0_20240125.12","TCP_SYN_Flodd2")
-#TODO add one AttackDataMultiplicator for each modified attack I want, this will depend on how many attack I create 
 print("attacks modified")
 
 sa1 =SamplingRate("1:1")
@@ -88,14 +75,14 @@ listofattackfilesdetect=["data/ModifiedAttackFiles/TCP_SYN_Flodd20"]
 start=Folderpathstructure(inorout,systemid,trafficpatternStart[0],trafficpatternStart[1],trafficpatternStart[2],startoffile)
 end=Folderpathstructure(inorout,systemid,traningDaysEnd[0],traningDaysEnd[1],traningDaysEnd[2],startoffile)
 ff=FindFiles(start,end)
-MD = MixingOfData([listSamplingratesToMake],listofattackfilestrain,ff.findallfiles(),[sa1,sa2],"train")
+MD = MixingOfData(listSamplingratesToMake,listofattackfilestrain,ff.findallfiles(),[sa1,sa2],"train")
 
 #detect
 start=Folderpathstructure(inorout,systemid,detectDaysStart[0],detectDaysStart[1],detectDaysStart[2],startoffile)
 end=Folderpathstructure(inorout,systemid,detectDaysEnd[0],detectDaysEnd[1],detectDaysEnd[2],startoffile)
 ff=FindFiles(start,end)
 
-MD = MixingOfData([listSamplingratesToMake],listofattackfilesdetect,ff.findallfiles(),[sa1,sa2],"detect")
+MD = MixingOfData(listSamplingratesToMake,listofattackfilesdetect,ff.findallfiles(),[sa1,sa2],"detect")
 
 print("Data mixed")
 
@@ -110,8 +97,8 @@ KMC=Kmeans("combined","","")
 listoffilestrain=[]
 listoffilesdetect=[]
 for smaplingrates in listSamplingratesToMake:
-    listoffilestrain.append(["data/DiffrentSamplingRates/train/train"+smaplingrates.maxpackets])
-    listoffilesdetect.append(["data/DiffrentSamplingRates/detect/detect"+smaplingrates.maxpackets])
+    listoffilestrain.append(["data/DiffrentSamplingRates/train/train"+str(smaplingrates.maxpackets)])
+    listoffilesdetect.append(["data/DiffrentSamplingRates/detect/detect"+str(smaplingrates.maxpackets)])
 
 a1=IDS([RFE,TH,KMF],listoffilestrain)
 

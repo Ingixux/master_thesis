@@ -4,9 +4,9 @@ import numpy as np
 
 trainingSet=[]
 x=0
-with open("data/Classifiers/result/detect800RandomForestentropy.npy", "rb") as fileOfFeatures:
+#with open("data/Classifiers/result/detect1600RandomForestentropy.npy", "rb") as fileOfFeatures:
 #with open("data/Classifiers/result/detect800KMeansfields.npy", "rb") as fileOfFeatures:
-#with open("data/Classifiers/result/detect800threshold.npy", "rb") as fileOfFeatures:
+with open("data/Classifiers/result/detect800threshold.npy", "rb") as fileOfFeatures:
     try:
         while True:
             #print(trainingSet)
@@ -29,8 +29,8 @@ Attackwrong=0
 normalcorrect=0
 normalwrong=0
 
-#what="Threshold"
-what="Kmeans"
+what="Threshold"
+#what="Kmeans"
 if what !="Threshold":
     for element in dataSet:
         if element[0]==element[1]:
