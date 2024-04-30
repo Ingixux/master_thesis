@@ -4,7 +4,7 @@ import datetime
 import os
 import subprocess
 
-#rwsort --fields=stime --input-pipe=/home/kali/data/ModifiedAttackFiles/TCP_SYN_Flodd0 --output-path=/home/kali/data/ModifiedAttackFiles/sorted
+#rw --fields=stime --input-pipe=/home/kali/data/ModifiedAttackFiles/TCP_SYN_Flodd0 --output-path=/home/kali/data/ModifiedAttackFiles/sorted
 class AttackDataMultiplicator:       
  
     #TODO create a file assoted with the attack where informaation about the attack is stored (start time, endtime, botsize, sourceip?, dst ip, nhip)

@@ -53,6 +53,12 @@ ia3 = InputToAttackDataMultiplicator({"botsize":60000,"dst":[choseDip[2]],"src":
                                       "stratTimeOfAttack" : datetime.datetime(2011, 1, 25, 13, 40, 20, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 42, 0, 0), "startTimeIncreasAlgorithm":"standardBasedOnBotnetsize"})
 
 
+#low rate, this will make each botnet start a bit later, so it will look more like a pulse like
+ia3 = InputToAttackDataMultiplicator({"botsize":60000,"dst":[choseDip[2]],"src":choseSip, "nIP":nexthopip[2], "isAttack":32532,"botnet_rotation_algorithm":"standard",
+                                      "TT1":datetime.timedelta(microseconds=10000),"TT2":datetime.timedelta(microseconds=10000),"TBA":datetime.timedelta(microseconds=10000),
+                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 25, 13, 40, 20, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 42, 0, 0), "startTimeIncreasAlgorithm":"standard"})
+
+
 #listofFiles =["data/GenratedAttacks/ext2ext-S0_20240125.12"]
 a1=AttackDataMultiplicator([ia1,ia2],"data/GenratedAttacks/ext2ext-S0_20240125.12","TCP_SYN_Flodd1")
 a1=AttackDataMultiplicator([ia3],"data/GenratedAttacks/ext2ext-S0_20240125.12","TCP_SYN_Flodd2")
@@ -76,14 +82,14 @@ listofattackfilesdetect=["data/ModifiedAttackFiles/TCP_SYN_Flodd20"]
 start=Folderpathstructure(inorout,systemid,trafficpatternStart[0],trafficpatternStart[1],trafficpatternStart[2],startoffile)
 end=Folderpathstructure(inorout,systemid,traningDaysEnd[0],traningDaysEnd[1],traningDaysEnd[2],startoffile)
 ff=FindFiles(start,end)
-MD = MixingOfData([listSamplingratesToMake],listofattackfilestrain,ff.findallfiles(),[sa1,sa2],"train")
+MD = MixingOfData(listSamplingratesToMake,listofattackfilestrain,ff.findallfiles(),[sa1,sa2],"train")
 
 #detect
 start=Folderpathstructure(inorout,systemid,detectDaysStart[0],detectDaysStart[1],detectDaysStart[2],startoffile)
 end=Folderpathstructure(inorout,systemid,detectDaysEnd[0],detectDaysEnd[1],detectDaysEnd[2],startoffile)
 ff=FindFiles(start,end)
 
-MD = MixingOfData([listSamplingratesToMake],listofattackfilesdetect,ff.findallfiles(),[sa1,sa2],"detect")
+MD = MixingOfData(listSamplingratesToMake,listofattackfilesdetect,ff.findallfiles(),[sa1,sa2],"detect")
 
 print("Data mixed")
 

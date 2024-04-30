@@ -361,29 +361,32 @@ class SlidingWindow:
         These are not part of the fields for RF:
         entropyBiflowSyn,entropySipSyn,entropyDipSyn,countBiflow,HigstNumberOfSyn,HigstNumberOfURGPSHFIN,totalicmpDUnreachable,
 
-        Threshold entropy:
+        Not Threshold:
+            Total Flows #TODO add to Threshold
+
+        Used in both:
             entropySip,
             entropyRateSip,
             entropyDip
             entropyRateDip
             entropyPacketsize,
             entropyRatePacketsize
-            entropyBiflowSyn,
-            entropySipSyn,
-            entropyDipSyn,
             entropyBiflow,
             entropyRateBiflow,
-        
-
-        Threshold:
-            HigstNumberOfSyn
-            HigstNumberOfURGPSHFIN
-            countBiflow
-            totalicmpDUnreachable
             totalBytes
             totalpackets
             totalicmp
             totalicmprate
+        
+
+        Threshold: #TODO add all to 
+            HigstNumberOfSyn
+            HigstNumberOfURGPSHFIN
+            countBiflow
+            totalicmpDUnreachable
+            entropyBiflowSyn,
+            entropySipSyn,
+            entropyDipSyn,
         
         
         """
@@ -461,14 +464,16 @@ class SlidingWindow:
         TotalentropyDipSyn=0
         totalentropyBiflow=0
         totalentropyRateBiflow=0
-        HigstNumberOfSyn=0#self.vaulesToCompare["HigstNumberOfSyn"] #this should only compare this value
-        HigstNumberOfURGPSHFIN=0#self.vaulesToCompare["HigstNumberOfURGPSHFIN"] #this should only compare this value
+        #HigstNumberOfSyn=0#self.vaulesToCompare["HigstNumberOfSyn"] #this should only compare this value
+        #HigstNumberOfURGPSHFIN=0#self.vaulesToCompare["HigstNumberOfURGPSHFIN"] #this should only compare this value
         TotalcountBiflow=0
         totaltotalicmpDUnreachable=0
         countTotalBytes=0 #this should look at the change
         countTotalpackets=0#this should look at the change
         countTotalicmp=0#this should look at the change
         countTotalicmprate=0#this should look at the change
+        countHigstNumberOfSyn=0
+        countHigstNumberOfURGPSHFIN=0
         
 
         if end:
@@ -495,10 +500,14 @@ class SlidingWindow:
             countTotalpackets+=self.comparison_window["vaules"][x]["totalpackets"]
             countTotalicmp+=self.comparison_window["vaules"][x]["totalicmp"]
             countTotalicmprate+=self.comparison_window["vaules"][x]["totalicmprate"]
-            if self.comparison_window["vaules"][x]["HigstNumberOfSyn"]>HigstNumberOfSyn: 
-                HigstNumberOfSyn=self.comparison_window["vaules"][x]["HigstNumberOfSyn"]            
-            if self.comparison_window["vaules"][x]["HigstNumberOfURGPSHFIN"]>HigstNumberOfURGPSHFIN: 
-                HigstNumberOfURGPSHFIN=self.comparison_window["vaules"][x]["HigstNumberOfURGPSHFIN"]
+
+
+            countHigstNumberOfSyn+=self.comparison_window["vaules"][x]["HigstNumberOfSyn"]
+            countHigstNumberOfURGPSHFIN+=self.comparison_window["vaules"][x]["HigstNumberOfURGPSHFIN"]
+            #if self.comparison_window["vaules"][x]["HigstNumberOfSyn"]>HigstNumberOfSyn: 
+            #    HigstNumberOfSyn=self.comparison_window["vaules"][x]["HigstNumberOfSyn"]            
+            #if self.comparison_window["vaules"][x]["HigstNumberOfURGPSHFIN"]>HigstNumberOfURGPSHFIN: 
+            #    HigstNumberOfURGPSHFIN=self.comparison_window["vaules"][x]["HigstNumberOfURGPSHFIN"]
 
         lenght =len(self.comparison_window["vaules"])
         entropySip=abs((totalentropySip/(lenght-1))-self.comparison_window["vaules"][0]["entropySip"] )
@@ -520,9 +529,12 @@ class SlidingWindow:
         totalicmp=abs((countTotalicmp/(lenght-1))-self.comparison_window["vaules"][0]["totalicmp"] )
         totalicmprate=abs((countTotalicmprate/(lenght-1))-self.comparison_window["vaules"][0]["totalicmprate"] )
 
+        totalHigstNumberOfSyn=abs((countHigstNumberOfSyn/(lenght-1))-self.comparison_window["vaules"][0]["HigstNumberOfSyn"] )
+        totalHigstNumberOfURGPSHFIN=abs((countHigstNumberOfURGPSHFIN/(lenght-1))-self.comparison_window["vaules"][0]["HigstNumberOfURGPSHFIN"] )
+
 
         return {"entropySip":entropySip,"entropyRateSip":entropyRateSip,"entropyDip":entropyDip,"entropyRateDip":entropyRateDip,"entropyPacketsize":entropyPacketsize,
                                    "entropyRatePacketsize":entropyRatePacketsize,"entropyBiflowSyn":entropyBiflowSyn,"entropySipSyn":entropySipSyn,"entropyDipSyn":entropyDipSyn,
-                                   "entropyBiflow":entropyBiflow,"entropyRateBiflow":entropyRateBiflow,"HigstNumberOfSyn":HigstNumberOfSyn,"HigstNumberOfURGPSHFIN":HigstNumberOfURGPSHFIN,
+                                   "entropyBiflow":entropyBiflow,"entropyRateBiflow":entropyRateBiflow,"HigstNumberOfSyn":totalHigstNumberOfSyn,"HigstNumberOfURGPSHFIN":totalHigstNumberOfURGPSHFIN,
                                    "countBiflow":countBiflow,"totalicmpDUnreachable":totalicmpDUnreachable,"totalBytes":totalBytes,"totalpackets":totalpackets,"totalicmp":totalicmp,
                                    "totalicmprate":totalicmprate,"isAtttack":isattack,"currenttime": self.aggregate_window["currentTime"]}
