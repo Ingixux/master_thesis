@@ -15,7 +15,8 @@ class Threshold:
                                            "totalBytes":0,"totalpackets":0,"totalicmp":0,"totalicmprate":0}
         self.filepathOfClassifier= filepathOfClassifier
         self.filepathOfInput=filepathOfInput
-        #self.r =6
+        self.r =6
+        #self.r =1
         if filepathOfClassifier !="":
             self.loadClassfication()
 
@@ -37,7 +38,7 @@ class Threshold:
         dataToSave=[]
         for key in self.threshold.keys():
             if key not in ["isAtttack","currenttime"]:
-                if self.threshold[key] <  arrayToDetect[key]:
+                if self.threshold[key]*self.r < arrayToDetect[key]:
                 #if self.threshold[key]*self.r <  arrayToDetect[key]:
                     #dataToSave.append([key,1,isattck])#how to get if there is and attack
                     dataToSave.append([key,1])
@@ -69,7 +70,7 @@ class Threshold:
         vaules={"entropySip":[],"entropyRateSip":[],"entropyDip":[],"entropyRateDip":[],"entropyPacketsize":[],"entropyRatePacketsize":[],
                                            "entropyBiflowSyn":[],"entropySipSyn":[],"entropyDipSyn":[],"entropyBiflow":[],"entropyRateBiflow":[],
                                            "HigstNumberOfSyn":[],"HigstNumberOfURGPSHFIN":[],"countBiflow":[],"totalicmpDUnreachable":[],
-                                           "totalBytes":[],"totalpackets":[],"totalicmp":[],"totalicmprate":[]}#,"isAtttack":0
+                                           "totalBytes":[],"totalpackets":[],"totalicmp":[],"totalicmprate":[],"totalflows":[]}#,"isAtttack":0
         #print(trainingSet)
         for rec in trainingSet:
             temprec=dict(rec)

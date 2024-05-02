@@ -18,7 +18,7 @@ class SlidingWindow:
         self.vaulesToCompare={"entropySip":0,"entropyRateSip":0,"entropyDip":0,"entropyRateDip":0,"entropyPacketsize":0,"entropyRatePacketsize":0,
                                            "entropyBiflowSyn":0,"entropySipSyn":0,"entropyDipSyn":0,"entropyBiflow":0,"entropyRateBiflow":0,
                                            "HigstNumberOfSyn":0,"HigstNumberOfURGPSHFIN":0,"countBiflow":0,"totalicmpDUnreachable":0,
-                                           "totalBytes":0,"totalpackets":0,"totalicmp":0,"totalicmprate":0,"isAtttack":0}
+                                           "totalBytes":0,"totalpackets":0,"totalicmp":0,"totalicmprate":0,"isAtttack":0,"totalflows":0}
         self.aggregate_window={"currentTime":0,"earlistTime":0,"interval":datetime.timedelta(microseconds=aggregate_window_duration*50000),"vaules":[]}
         #self.comparison_window={"currentTime":0,"currentRecs":[],"earlistTime":0,"interval":comparison_window_interval,"vaules":[]}
         #TODO compare the current vaule to the avgarge of the diffrent vaules, that is in the comparison_window
@@ -394,7 +394,7 @@ class SlidingWindow:
                                    "entropyRatePacketsize":entropyRatePacketsize,"entropyBiflowSyn":entropyBiflowSyn,"entropySipSyn":entropySipSyn,"entropyDipSyn":entropyDipSyn,
                                    "entropyBiflow":entropyBiflow,"entropyRateBiflow":entropyRateBiflow,"HigstNumberOfSyn":HigstNumberOfSyn,"HigstNumberOfURGPSHFIN":HigstNumberOfURGPSHFIN,
                                    "countBiflow":countBiflow,"totalicmpDUnreachable":totalicmpDUnreachable,"totalBytes":totalBytes,"totalpackets":totalpackets,"totalicmp":totalicmp,
-                                   "totalicmprate":totalicmprate, "isAtttack":thereisOneAttack, "currenttime": self.aggregate_window["currentTime"] }
+                                   "totalicmprate":totalicmprate, "isAtttack":thereisOneAttack, "currenttime": self.aggregate_window["currentTime"], "totalflows":totalFlows }
         
 
         return arrayToAdd                 
@@ -420,7 +420,7 @@ class SlidingWindow:
         isAttackFlow=0
         #if rec.sensor=="isAttack": #TODO why does this not work
         #    isAttackFlow=1
-        if rec.sensor_id==32532:
+        if rec.sensor_id in [32531,32532,32533,32534,32535,32536,32537,32538]:
             isAttackFlow=rec.sensor_id
         return isAttackFlow
 
@@ -474,6 +474,7 @@ class SlidingWindow:
         countTotalicmprate=0#this should look at the change
         countHigstNumberOfSyn=0
         countHigstNumberOfURGPSHFIN=0
+        counttotalFlows=0
         
 
         if end:
@@ -500,6 +501,7 @@ class SlidingWindow:
             countTotalpackets+=self.comparison_window["vaules"][x]["totalpackets"]
             countTotalicmp+=self.comparison_window["vaules"][x]["totalicmp"]
             countTotalicmprate+=self.comparison_window["vaules"][x]["totalicmprate"]
+            counttotalFlows+self.comparison_window["vaules"][x]["totalflows"]
 
 
             countHigstNumberOfSyn+=self.comparison_window["vaules"][x]["HigstNumberOfSyn"]
@@ -528,6 +530,7 @@ class SlidingWindow:
         totalpackets=abs((countTotalpackets/(lenght-1))-self.comparison_window["vaules"][0]["totalpackets"] )
         totalicmp=abs((countTotalicmp/(lenght-1))-self.comparison_window["vaules"][0]["totalicmp"] )
         totalicmprate=abs((countTotalicmprate/(lenght-1))-self.comparison_window["vaules"][0]["totalicmprate"] )
+        changeFromAverageTotalflows=abs((counttotalFlows/(lenght-1))-self.comparison_window["vaules"][0]["totalflows"] )
 
         totalHigstNumberOfSyn=abs((countHigstNumberOfSyn/(lenght-1))-self.comparison_window["vaules"][0]["HigstNumberOfSyn"] )
         totalHigstNumberOfURGPSHFIN=abs((countHigstNumberOfURGPSHFIN/(lenght-1))-self.comparison_window["vaules"][0]["HigstNumberOfURGPSHFIN"] )
@@ -537,4 +540,4 @@ class SlidingWindow:
                                    "entropyRatePacketsize":entropyRatePacketsize,"entropyBiflowSyn":entropyBiflowSyn,"entropySipSyn":entropySipSyn,"entropyDipSyn":entropyDipSyn,
                                    "entropyBiflow":entropyBiflow,"entropyRateBiflow":entropyRateBiflow,"HigstNumberOfSyn":totalHigstNumberOfSyn,"HigstNumberOfURGPSHFIN":totalHigstNumberOfURGPSHFIN,
                                    "countBiflow":countBiflow,"totalicmpDUnreachable":totalicmpDUnreachable,"totalBytes":totalBytes,"totalpackets":totalpackets,"totalicmp":totalicmp,
-                                   "totalicmprate":totalicmprate,"isAtttack":isattack,"currenttime": self.aggregate_window["currentTime"]}
+                                   "totalicmprate":totalicmprate,"isAtttack":isattack,"currenttime": self.aggregate_window["currentTime"],"totalflows":changeFromAverageTotalflows}

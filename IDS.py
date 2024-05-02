@@ -224,7 +224,7 @@ class IDS:
         #if rec.sensor=="isAttack": #TODO why does this not work
         #    isAttackFlow=1
         #if rec.sensor_id==3:
-        if sensor_id==32532:
+        if sensor_id in [32531,32532,32533,32534,32535,32536,32537,32538]:
             isAttackFlow=1
         return isAttackFlow
 
@@ -297,9 +297,11 @@ class IDS:
                         if trainingClasses[0].typeOfFeatures =="entropy":
                             if detectortrain=="train":
                                 #print([toadd[0][0:2]+toadd[0][19:32]+[toadd[0][-2]]])
-                                self.saveDataTofile(file,toadd[0][0:2]+toadd[0][19:32]+[toadd[0][-2]],trainingClasses)
+                                #self.saveDataTofile(file,toadd[0][0:2]+toadd[0][19:32]+[toadd[0][-2]],trainingClasses)
+                                self.saveDataTofile(file,toadd[0][0:2]+toadd[0][19:-2]+[toadd[0][-2]],trainingClasses)
                             elif detectortrain=="detect":
-                                self.doDetectionOnData(toadd[0][0:2]+toadd[0][19:32]+[toadd[0][-2]],trainingClasses)
+                                #self.doDetectionOnData(toadd[0][0:2]+toadd[0][19:32]+[toadd[0][-2]],trainingClasses)
+                                self.doDetectionOnData(toadd[0][0:2]+toadd[0][19:-2]+[toadd[0][-2]],trainingClasses)
                         else:
                             for r in toadd:
                                 #tempr=[]
@@ -376,7 +378,8 @@ class IDS:
                             elif toadd[x+1] == "window" or len(toadd[x+1])==0:
                                     pass
                             else:
-                                data.append(toadd[x+1][0][0:2]+toadd[x+1][0][19:32]+[toadd[x+1][0][-2]])
+                                #data.append(toadd[x+1][0][0:2]+toadd[x+1][0][19:32]+[toadd[x+1][0][-2]])
+                                data.append(toadd[x+1][0][0:2]+toadd[x+1][0][19:-2]+[toadd[x+1][0][-2]])
                     #if (len(toadd[0]) > 2):
                     #    for x in range(0,len(toadd[0])):
                     #        if toadd[x] == "window":
