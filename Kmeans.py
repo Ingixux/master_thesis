@@ -44,7 +44,22 @@ class Kmeans:
     #def setfilepathOfInput(self,file):
     #    if os.path.isfile(file):
     #        os.remove(file)
-    #    self.filepathOfInput=file
+    #    self.filepathOfInput=
+    
+    def trainWithinput(self,trainingSet):
+        dataSet=np.array(trainingSet)
+        #print(trainingSet[:,2:])
+        Features=dataSet[:,2:-1]
+        #labels=trainingSet[:,-1]
+
+        #labels=labels.astype('int') 
+        #print(Features)
+        #print(labels)
+        #print(Features)
+        #self.clf=self.clf.fit(Features,labels)
+        self.clf=self.clf.fit(Features)
+        self.makeattackcluster(dataSet)
+        self.saveClassifier()
 
     def train(self):
     #def train(self,typeOfFeatures):

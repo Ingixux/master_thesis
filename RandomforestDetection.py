@@ -32,6 +32,18 @@ class RandomforestDetection:
         return [self.clf.predict(arrayToDetect)[0],isattack]
         #return ["RandomForest",self.clf.predict(arrayToDetect)[0],isattack]
 
+    def trainWithinput(self,trainingSet):
+        dataSet=np.array(trainingSet)
+        Features=dataSet[:,2:-1]
+        labels=dataSet[:,-1]
+        #print(Features)
+        labels=labels.astype('int') 
+        #print(Features)
+        #print(labels)
+        #print(Features)
+        self.clf=self.clf.fit(Features,labels)
+        self.saveClassifier()
+
     def train(self):
         if self.filepathOfInput =="" or type(self.filepathOfInput)!=str:
             raise ValueError("no vaule input file for training")

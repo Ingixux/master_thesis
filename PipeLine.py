@@ -9,8 +9,11 @@ from RandomforestDetection import RandomforestDetection
 from Threshold import Threshold
 from Kmeans import Kmeans
 
+print(datetime.datetime.now())
+
 startoffile="/media/sf_share/" #TODO this needs to fit with Sikt
-systemid="oslo"
+#systemid="oslo"
+systemid="eplemost"
 inorout="out"
 
 #TODO these needs to fit with the dates I want
@@ -28,19 +31,20 @@ samplingratesToMake=["1:100","1:400","1:800","1:1600","1:3200","1:6400","1:12800
 
 start=Folderpathstructure(inorout,systemid,trafficpatternStart[0],trafficpatternStart[1],trafficpatternStart[2],startoffile)
 end=Folderpathstructure(inorout,systemid,trafficpatternEnd[0],trafficpatternEnd[1],trafficpatternEnd[2],startoffile)
-
+"""
 ff=FindFiles(start,end)
 GT=GetTrafficPattern(ff.findallfiles())
 choseDip, choseSip=GT.movetroughthefiles(500,320,32)
 nexthopip ={}
 for ip in choseDip:
-    nexthopip[choseDip]=GT.getnexthopip("destinationIP",choseDip)
+    nexthopip[ip]=GT.getnexthopip("destinationIP",choseDip)
 
 
 
 
 
 print("Traffic Pattern recived")
+print(datetime.datetime.now())
 #AttackDataMultiplicator (o)
 #TODO NEED more isAttack 
 #TODO What to do with sourceip
@@ -63,44 +67,44 @@ xmasbotsrc=[choseSip[280:290],choseSip[290:300],choseSip[300:310],choseSip[310:3
 
 slowread1 = InputToAttackDataMultiplicator({"botsize":673,"dst":[choseDip[0]],"src":slowreadbotsrc[0], "nIP":nexthopip[choseDip[0]], "isAttack":32533,"botnet_rotation_algorithm":"standard",
                                       "TT1":datetime.timedelta(microseconds=10000),"TT2":datetime.timedelta(microseconds=10000),"TBA":datetime.timedelta(microseconds=227000),
-                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 25, 13, 40, 20, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 42, 0, 0), "startTimeIncreasAlgorithm":"standard"})
+                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 9, 13, 21, 41, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 42, 0, 0), "startTimeIncreasAlgorithm":"standard"})#time done
 slowread2 = InputToAttackDataMultiplicator({"botsize":349,"dst":[choseDip[1]],"src":slowreadbotsrc[1], "nIP":nexthopip[choseDip[1]], "isAttack":32533,"botnet_rotation_algorithm":"standard",
                                       "TT1":datetime.timedelta(microseconds=10000),"TT2":datetime.timedelta(microseconds=10000),"TBA":datetime.timedelta(microseconds=395000),
-                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 25, 13, 40, 20, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 42, 0, 0), "startTimeIncreasAlgorithm":"standard"})
+                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 30, 17, 27, 11, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 42, 0, 0), "startTimeIncreasAlgorithm":"standard"})#time done
 slowread3 = InputToAttackDataMultiplicator({"botsize":481,"dst":[choseDip[2]],"src":slowreadbotsrc[2], "nIP":nexthopip[choseDip[2]], "isAttack":32533,"botnet_rotation_algorithm":"standard",
                                       "TT1":datetime.timedelta(microseconds=10000),"TT2":datetime.timedelta(microseconds=10000),"TBA":datetime.timedelta(microseconds=295000),
                                       "stratTimeOfAttack" : datetime.datetime(2011, 1, 3, 12, 50, 51, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 3, 12, 50, 52, 0), "startTimeIncreasAlgorithm":"standard"})#TIME DONE
 slowread4 = InputToAttackDataMultiplicator({"botsize":565,"dst":[choseDip[3]],"src":slowreadbotsrc[3], "nIP":nexthopip[choseDip[3]], "isAttack":32533,"botnet_rotation_algorithm":"standard",
                                       "TT1":datetime.timedelta(microseconds=10000),"TT2":datetime.timedelta(microseconds=10000),"TBA":datetime.timedelta(microseconds=261000),
-                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 25, 13, 40, 20, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 42, 0, 0), "startTimeIncreasAlgorithm":"standard"})
+                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 17, 11, 49, 59, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 42, 0, 0), "startTimeIncreasAlgorithm":"standard"})#time done
 
 #slowread attackid = 32534
 slowloris1 = InputToAttackDataMultiplicator({"botsize":330,"dst":[choseDip[4]],"src":slowlorisbotsrc[0], "nIP":nexthopip[choseDip[4]], "isAttack":32534,"botnet_rotation_algorithm":"standard",
                                       "TT1":datetime.timedelta(microseconds=10000),"TT2":datetime.timedelta(microseconds=10000),"TBA":datetime.timedelta(microseconds=571000),
-                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 25, 13, 40, 20, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 42, 0, 0), "startTimeIncreasAlgorithm":"standard"})
+                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 13, 5, 55, 14, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 13, 5, 55, 14, 0), "startTimeIncreasAlgorithm":"standard"})#time done
 slowloris2 = InputToAttackDataMultiplicator({"botsize":430,"dst":[choseDip[5]],"src":slowlorisbotsrc[1], "nIP":nexthopip[choseDip[5]], "isAttack":32534,"botnet_rotation_algorithm":"standard",
                                       "TT1":datetime.timedelta(microseconds=10000),"TT2":datetime.timedelta(microseconds=10000),"TBA":datetime.timedelta(microseconds=763000),
-                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 25, 13, 40, 20, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 42, 0, 0), "startTimeIncreasAlgorithm":"standard"})
+                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 23, 15, 46, 9, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 42, 0, 0), "startTimeIncreasAlgorithm":"standard"})#time done
 slowloris3 = InputToAttackDataMultiplicator({"botsize":530,"dst":[choseDip[6]],"src":slowlorisbotsrc[2], "nIP":nexthopip[choseDip[6]], "isAttack":32534,"botnet_rotation_algorithm":"standard",
                                       "TT1":datetime.timedelta(microseconds=10000),"TT2":datetime.timedelta(microseconds=10000),"TBA":datetime.timedelta(microseconds=784000),
                                       "stratTimeOfAttack" : datetime.datetime(2011, 1, 6, 8, 4, 25, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 42, 0, 0), "startTimeIncreasAlgorithm":"standard"})#time done
 slowloris4 = InputToAttackDataMultiplicator({"botsize":456,"dst":[choseDip[7]],"src":slowlorisbotsrc[3], "nIP":nexthopip[choseDip[7]], "isAttack":32534,"botnet_rotation_algorithm":"standard",
                                       "TT1":datetime.timedelta(microseconds=10000),"TT2":datetime.timedelta(microseconds=10000),"TBA":datetime.timedelta(microseconds=736000),
-                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 25, 13, 40, 20, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 42, 0, 0), "startTimeIncreasAlgorithm":"standard"})
+                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 25, 21, 20, 49, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 42, 0, 0), "startTimeIncreasAlgorithm":"standard"})#time done
 
 #slowread attackid = 32535
 ruby1 = InputToAttackDataMultiplicator({"botsize":301,"dst":[choseDip[8]],"src":rubybotsrc[0], "nIP":nexthopip[choseDip[8]], "isAttack":32535,"botnet_rotation_algorithm":"standard",
                                       "TT1":datetime.timedelta(microseconds=10000),"TT2":datetime.timedelta(microseconds=10000),"TBA":datetime.timedelta(microseconds=1356000),
-                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 25, 13, 40, 20, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 42, 0, 0), "startTimeIncreasAlgorithm":"standard"})
+                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 10, 19, 56, 16, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 42, 0, 0), "startTimeIncreasAlgorithm":"standard"})#time done
 ruby2 = InputToAttackDataMultiplicator({"botsize":439,"dst":[choseDip[9]],"src":rubybotsrc[1], "nIP":nexthopip[choseDip[9]], "isAttack":32535,"botnet_rotation_algorithm":"standard",
                                       "TT1":datetime.timedelta(microseconds=10000),"TT2":datetime.timedelta(microseconds=10000),"TBA":datetime.timedelta(microseconds=941000),
-                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 25, 13, 40, 20, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 42, 0, 0), "startTimeIncreasAlgorithm":"standard"})
+                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 24, 10, 1, 12, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 42, 0, 0), "startTimeIncreasAlgorithm":"standard"})#time done
 ruby3 = InputToAttackDataMultiplicator({"botsize":633,"dst":[choseDip[10]],"src":rubybotsrc[2], "nIP":nexthopip[choseDip[10]], "isAttack":32535,"botnet_rotation_algorithm":"standard",
                                       "TT1":datetime.timedelta(microseconds=10000),"TT2":datetime.timedelta(microseconds=10000),"TBA":datetime.timedelta(microseconds=1118000),
-                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 25, 13, 40, 20, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 42, 0, 0), "startTimeIncreasAlgorithm":"standard"})
+                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 12, 12, 10, 56, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 42, 0, 0), "startTimeIncreasAlgorithm":"standard"})#time done
 ruby4 = InputToAttackDataMultiplicator({"botsize":555,"dst":[choseDip[11]],"src":rubybotsrc[3], "nIP":nexthopip[choseDip[11]], "isAttack":32535,"botnet_rotation_algorithm":"standard",
                                       "TT1":datetime.timedelta(microseconds=10000),"TT2":datetime.timedelta(microseconds=10000),"TBA":datetime.timedelta(microseconds=687000),
-                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 25, 13, 40, 20, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 42, 0, 0), "startTimeIncreasAlgorithm":"standard"})
+                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 27, 18, 20, 18, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 42, 0, 0), "startTimeIncreasAlgorithm":"standard"})#time done
 
 #pingflood attackid = 32531
 pingflood1 = InputToAttackDataMultiplicator({"botsize":302,"dst":[choseDip[12]],"src":pingfloodbotsrc[0], "nIP":nexthopip[choseDip[12]], "isAttack":32531,"botnet_rotation_algorithm":"standard",
@@ -108,43 +112,43 @@ pingflood1 = InputToAttackDataMultiplicator({"botsize":302,"dst":[choseDip[12]],
                                       "stratTimeOfAttack" : datetime.datetime(2011, 1, 5, 11, 13, 22, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 42, 0, 0), "startTimeIncreasAlgorithm":"standard"})#time done
 pingflood2 = InputToAttackDataMultiplicator({"botsize":401,"dst":[choseDip[13]],"src":pingfloodbotsrc[1], "nIP":nexthopip[choseDip[13]], "isAttack":32531,"botnet_rotation_algorithm":"standard",
                                       "TT1":datetime.timedelta(microseconds=10000),"TT2":datetime.timedelta(microseconds=10000),"TBA":datetime.timedelta(microseconds=105000),
-                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 25, 13, 40, 20, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 42, 0, 0), "startTimeIncreasAlgorithm":"standard"})
+                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 22, 14, 13, 6, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 42, 0, 0), "startTimeIncreasAlgorithm":"standard"})#time done
 pingflood3 = InputToAttackDataMultiplicator({"botsize":355,"dst":[choseDip[14]],"src":pingfloodbotsrc[2], "nIP":nexthopip[choseDip[14]], "isAttack":32531,"botnet_rotation_algorithm":"standard",
                                       "TT1":datetime.timedelta(microseconds=10000),"TT2":datetime.timedelta(microseconds=10000),"TBA":datetime.timedelta(microseconds=507000),
-                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 25, 13, 40, 20, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 42, 0, 0), "startTimeIncreasAlgorithm":"standard"})
+                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 11, 9, 53, 5, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 42, 0, 0), "startTimeIncreasAlgorithm":"standard"})#time done
 pingflood4 = InputToAttackDataMultiplicator({"botsize":421,"dst":[choseDip[15]],"src":pingfloodbotsrc[3], "nIP":nexthopip[choseDip[15]], "isAttack":32531,"botnet_rotation_algorithm":"standard",
                                       "TT1":datetime.timedelta(microseconds=10000),"TT2":datetime.timedelta(microseconds=10000),"TBA":datetime.timedelta(microseconds=356000),
-                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 25, 13, 40, 20, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 42, 0, 0), "startTimeIncreasAlgorithm":"standard"})
+                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 26, 19, 8, 18, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 42, 0, 0), "startTimeIncreasAlgorithm":"standard"})#time done
 
 
 #blacknurse attackid = 32532
 blacknurse1 = InputToAttackDataMultiplicator({"botsize":456,"dst":[choseDip[16]],"src":blacknursebotsrc[0], "nIP":nexthopip[choseDip[16]], "isAttack":32532,"botnet_rotation_algorithm":"standard",
                                       "TT1":datetime.timedelta(microseconds=10000),"TT2":datetime.timedelta(microseconds=10000),"TBA":datetime.timedelta(microseconds=526000),
-                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 25, 13, 40, 20, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 42, 0, 0), "startTimeIncreasAlgorithm":"standard"})
+                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 15, 21, 37, 3, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 42, 0, 0), "startTimeIncreasAlgorithm":"standard"})#time done
 blacknurse2 = InputToAttackDataMultiplicator({"botsize":321,"dst":[choseDip[17]],"src":blacknursebotsrc[1], "nIP":nexthopip[choseDip[17]], "isAttack":32532,"botnet_rotation_algorithm":"standard",
                                       "TT1":datetime.timedelta(microseconds=10000),"TT2":datetime.timedelta(microseconds=10000),"TBA":datetime.timedelta(microseconds=934000),
-                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 25, 13, 40, 20, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 42, 0, 0), "startTimeIncreasAlgorithm":"standard"})
+                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 19, 5, 15, 25, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 42, 0, 0), "startTimeIncreasAlgorithm":"standard"})#time done
 blacknurse3 = InputToAttackDataMultiplicator({"botsize":395,"dst":[choseDip[18]],"src":blacknursebotsrc[2], "nIP":nexthopip[choseDip[18]], "isAttack":32532,"botnet_rotation_algorithm":"standard",
                                       "TT1":datetime.timedelta(microseconds=10000),"TT2":datetime.timedelta(microseconds=10000),"TBA":datetime.timedelta(microseconds=33873000),
-                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 25, 13, 40, 20, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 42, 0, 0), "startTimeIncreasAlgorithm":"standard"})
+                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 8, 8, 32, 2, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 42, 0, 0), "startTimeIncreasAlgorithm":"standard"})#time done
 blacknurse4 = InputToAttackDataMultiplicator({"botsize":296,"dst":[choseDip[19]],"src":blacknursebotsrc[3], "nIP":nexthopip[choseDip[19]], "isAttack":32532,"botnet_rotation_algorithm":"standard",
                                       "TT1":datetime.timedelta(microseconds=10000),"TT2":datetime.timedelta(microseconds=10000),"TBA":datetime.timedelta(microseconds=51891000),
-                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 25, 13, 40, 20, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 42, 0, 0), "startTimeIncreasAlgorithm":"standard"})
+                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 29, 20, 4, 48, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 42, 0, 0), "startTimeIncreasAlgorithm":"standard"})#time done
 
 
 #xmas attackid = 32536
 xmas1 = InputToAttackDataMultiplicator({"botsize":732,"dst":[choseDip[20]],"src":xmasbotsrc[0], "nIP":nexthopip[choseDip[20]], "isAttack":32536, "botnet_rotation_algorithm":"standard",
                                     "TT1":datetime.timedelta(microseconds=10000),"TT2":datetime.timedelta(microseconds=10000),"TBA":datetime.timedelta(microseconds=37000),
-                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 25, 12, 2, 20, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 12, 5, 0, 0), "startTimeIncreasAlgorithm":"standardBasedOnBotnetsize"})
+                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 14, 13, 36, 10, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 12, 5, 0, 0), "startTimeIncreasAlgorithm":"standardBasedOnBotnetsize"})#time done
 xmas2 = InputToAttackDataMultiplicator({"botsize":429,"dst":[choseDip[21]],"src":xmasbotsrc[1], "nIP":nexthopip[choseDip[21]], "isAttack":32536,"botnet_rotation_algorithm":"standard",
                                       "TT1":datetime.timedelta(microseconds=10000),"TT2":datetime.timedelta(microseconds=10000),"TBA":datetime.timedelta(microseconds=48000),
-                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 25, 12, 17, 20, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 12, 23, 0, 0), "startTimeIncreasAlgorithm":"standardBasedOnBotnetsize"})
+                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 25, 17, 29, 49, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 12, 23, 0, 0), "startTimeIncreasAlgorithm":"standardBasedOnBotnetsize"})#time done
 xmas3 = InputToAttackDataMultiplicator({"botsize":915,"dst":[choseDip[22]],"src":xmasbotsrc[2], "nIP":nexthopip[choseDip[22]], "isAttack":32536,"botnet_rotation_algorithm":"standard",
                                       "TT1":datetime.timedelta(microseconds=10000),"TT2":datetime.timedelta(microseconds=10000),"TBA":datetime.timedelta(microseconds=36000),
                                       "stratTimeOfAttack" : datetime.datetime(2011, 1, 7, 11, 5, 49, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 42, 0, 0), "startTimeIncreasAlgorithm":"standardBasedOnBotnetsize"})#time done
 xmas4 = InputToAttackDataMultiplicator({"botsize":613,"dst":[choseDip[23]],"src":xmasbotsrc[3], "nIP":nexthopip[choseDip[23]], "isAttack":32536,"botnet_rotation_algorithm":"standard",
                                       "TT1":datetime.timedelta(microseconds=10000),"TT2":datetime.timedelta(microseconds=10000),"TBA":datetime.timedelta(microseconds=46000),
-                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 25, 13, 40, 20, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 42, 0, 0), "startTimeIncreasAlgorithm":"standardBasedOnBotnetsize"})
+                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 18, 17, 45, 37, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 42, 0, 0), "startTimeIncreasAlgorithm":"standardBasedOnBotnetsize"})#time done
 
 #udpflood attackid = 32537
 udpflood1 = InputToAttackDataMultiplicator({"botsize":1047,"dst":[choseDip[24]],"src":udpfloodbotsrc[0], "nIP":nexthopip[choseDip[24]], "isAttack":32537, "botnet_rotation_algorithm":"standard",
@@ -152,28 +156,28 @@ udpflood1 = InputToAttackDataMultiplicator({"botsize":1047,"dst":[choseDip[24]],
                                       "stratTimeOfAttack" : datetime.datetime(2011, 1, 4, 13, 45, 8, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 12, 5, 0, 0), "startTimeIncreasAlgorithm":"standardBasedOnBotnetsize"})#time done
 udpflood2 = InputToAttackDataMultiplicator({"botsize":689,"dst":[choseDip[25]],"src":udpfloodbotsrc[1], "nIP":nexthopip[choseDip[25]], "isAttack":32537,"botnet_rotation_algorithm":"standard",
                                       "TT1":datetime.timedelta(microseconds=10000),"TT2":datetime.timedelta(microseconds=10000),"TBA":datetime.timedelta(microseconds=21000),
-                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 25, 12, 17, 20, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 12, 23, 0, 0), "startTimeIncreasAlgorithm":"standardBasedOnBotnetsize"})
+                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 18, 5, 54, 27, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 12, 23, 0, 0), "startTimeIncreasAlgorithm":"standardBasedOnBotnetsize"})#time done
 udpflood3 = InputToAttackDataMultiplicator({"botsize":915,"dst":[choseDip[26]],"src":udpfloodbotsrc[2], "nIP":nexthopip[choseDip[26]], "isAttack":32537,"botnet_rotation_algorithm":"standard",
                                       "TT1":datetime.timedelta(microseconds=10000),"TT2":datetime.timedelta(microseconds=10000),"TBA":datetime.timedelta(microseconds=25000),
                                       "stratTimeOfAttack" : datetime.datetime(2011, 1, 7, 5, 33, 26, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 42, 0, 0), "startTimeIncreasAlgorithm":"standardBasedOnBotnetsize"})#time done
 udpflood4 = InputToAttackDataMultiplicator({"botsize":613,"dst":[choseDip[27]],"src":udpfloodbotsrc[3], "nIP":nexthopip[choseDip[27]], "isAttack":32537,"botnet_rotation_algorithm":"standard",
                                       "TT1":datetime.timedelta(microseconds=10000),"TT2":datetime.timedelta(microseconds=10000),"TBA":datetime.timedelta(microseconds=63000),
-                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 25, 13, 40, 20, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 42, 0, 0), "startTimeIncreasAlgorithm":"standardBasedOnBotnetsize"})
+                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 28, 8, 0, 40, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 42, 0, 0), "startTimeIncreasAlgorithm":"standardBasedOnBotnetsize"})#time done
 
 
 #synflood attackid = 32538
 synflood1 = InputToAttackDataMultiplicator({"botsize":1047,"dst":[choseDip[28]],"src":synfloodbotsrc[0], "nIP":nexthopip[choseDip[28]], "isAttack":32538, "botnet_rotation_algorithm":"standard",
                                     "TT1":datetime.timedelta(microseconds=10000),"TT2":datetime.timedelta(microseconds=10000),"TBA":datetime.timedelta(microseconds=29000),
-                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 25, 12, 2, 20, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 12, 5, 0, 0), "startTimeIncreasAlgorithm":"standardBasedOnBotnetsize"})
+                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 14, 11, 19, 48, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 12, 5, 0, 0), "startTimeIncreasAlgorithm":"standardBasedOnBotnetsize"})#time done
 synflood2 = InputToAttackDataMultiplicator({"botsize":689,"dst":[choseDip[29]],"src":synfloodbotsrc[1], "nIP":nexthopip[choseDip[29]], "isAttack":32538,"botnet_rotation_algorithm":"standard",
                                       "TT1":datetime.timedelta(microseconds=10000),"TT2":datetime.timedelta(microseconds=10000),"TBA":datetime.timedelta(microseconds=20000),
-                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 25, 12, 17, 20, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 12, 23, 0, 0), "startTimeIncreasAlgorithm":"standardBasedOnBotnetsize"})
+                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 20, 4, 1, 7, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 12, 23, 0, 0), "startTimeIncreasAlgorithm":"standardBasedOnBotnetsize"})#time done
 synflood3 = InputToAttackDataMultiplicator({"botsize":915,"dst":[choseDip[30]],"src":synfloodbotsrc[2], "nIP":nexthopip[choseDip[30]], "isAttack":32538,"botnet_rotation_algorithm":"standard",
                                       "TT1":datetime.timedelta(microseconds=10000),"TT2":datetime.timedelta(microseconds=10000),"TBA":datetime.timedelta(microseconds=36000),
-                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 25, 13, 40, 20, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 42, 0, 0), "startTimeIncreasAlgorithm":"standardBasedOnBotnetsize"})
+                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 16, 14, 36, 6, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 42, 0, 0), "startTimeIncreasAlgorithm":"standardBasedOnBotnetsize"})#time done
 synflood4 = InputToAttackDataMultiplicator({"botsize":613,"dst":[choseDip[31]],"src":synfloodbotsrc[3], "nIP":nexthopip[choseDip[31]], "isAttack":32538,"botnet_rotation_algorithm":"standard",
                                       "TT1":datetime.timedelta(microseconds=10000),"TT2":datetime.timedelta(microseconds=10000),"TBA":datetime.timedelta(microseconds=31000),
-                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 25, 13, 40, 20, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 42, 0, 0), "startTimeIncreasAlgorithm":"standardBasedOnBotnetsize"})
+                                      "stratTimeOfAttack" : datetime.datetime(2011, 1, 21, 20, 2, 46, 0) , "endTimeOfAttack"  : datetime.datetime(2011, 1, 25, 13, 42, 0, 0), "startTimeIncreasAlgorithm":"standardBasedOnBotnetsize"})#time done
 
 
 
@@ -221,20 +225,28 @@ a32=AttackDataMultiplicator([synflood4],"data/GenratedAttacks/synflood4.rw","syn
 
 #TODO add one AttackDataMultiplicator for each modified attack I want, this will depend on how many attack I create 
 print("attacks modified")
-
+print(datetime.datetime.now())
+"""
 sa1 =SamplingRate("1:1")
 sa2 =SamplingRate("1:100")
 
 listSamplingratesToMake=[]
 for samplingrate in samplingratesToMake:
     listSamplingratesToMake.append(SamplingRate(samplingrate))
+"""
 
 
-
-listofattackfilestrain=["data/ModifiedAttackFiles/ruby10","data/ModifiedAttackFiles/ruby30","data/ModifiedAttackFiles/slowread10","data/ModifiedAttackFiles/slowread30","data/ModifiedAttackFiles/slowloris10","data/ModifiedAttackFiles/slowloris30"
-                        ]#these need to be stored with the earilset at index 0
-listofattackfilesdetect=["data/ModifiedAttackFiles/ruby20","data/ModifiedAttackFiles/ruby40","data/ModifiedAttackFiles/slowread20","data/ModifiedAttackFiles/slowread40","data/ModifiedAttackFiles/slowloris20","data/ModifiedAttackFiles/slowloris40"
-                         ] #these need to be stored with the earilset at index 0
+listofattackfilestrain=["data/ModifiedAttackFiles/slowread30","data/ModifiedAttackFiles/udpflood10","data/ModifiedAttackFiles/pingflood10",
+    "data/ModifiedAttackFiles/slowloris30","data/ModifiedAttackFiles/udpflood30","data/ModifiedAttackFiles/xmas30",
+    "data/ModifiedAttackFiles/blacknurse30","data/ModifiedAttackFiles/slowread10","data/ModifiedAttackFiles/ruby10",
+    "data/ModifiedAttackFiles/pingflood30","data/ModifiedAttackFiles/ruby30","data/ModifiedAttackFiles/slowloris10","data/ModifiedAttackFiles/synflood10",
+    "data/ModifiedAttackFiles/xmas10","data/ModifiedAttackFiles/blacknurse10","data/ModifiedAttackFiles/synflood10"]#these need to be stored with the earilset at index 0
+listofattackfilesdetect=["data/ModifiedAttackFiles/slowread40","data/ModifiedAttackFiles/udpflood20","data/ModifiedAttackFiles/xmas40",
+                         "data/ModifiedAttackFiles/blacknurse20","data/ModifiedAttackFiles/synflood20","data/ModifiedAttackFiles/synflood40",
+                         "data/ModifiedAttackFiles/pingflood20","data/ModifiedAttackFiles/slowloris20","data/ModifiedAttackFiles/ruby20",
+                         "data/ModifiedAttackFiles/xmas20","data/ModifiedAttackFiles/slowloris40","data/ModifiedAttackFiles/pingflood40",
+                         "data/ModifiedAttackFiles/ruby40","data/ModifiedAttackFiles/udpflood40","data/ModifiedAttackFiles/blacknurse40",
+                         "data/ModifiedAttackFiles/slowread20"] #these need to be stored with the earilset at index 0
 
 
 #train
@@ -242,7 +254,8 @@ start=Folderpathstructure(inorout,systemid,trafficpatternStart[0],trafficpattern
 end=Folderpathstructure(inorout,systemid,traningDaysEnd[0],traningDaysEnd[1],traningDaysEnd[2],startoffile)
 ff=FindFiles(start,end)
 MD = MixingOfData(listSamplingratesToMake,listofattackfilestrain,ff.findallfiles(),[sa1,sa2],"train")
-
+print("Traning mixed")
+print(datetime.datetime.now())
 #detect
 start=Folderpathstructure(inorout,systemid,detectDaysStart[0],detectDaysStart[1],detectDaysStart[2],startoffile)
 end=Folderpathstructure(inorout,systemid,detectDaysEnd[0],detectDaysEnd[1],detectDaysEnd[2],startoffile)
@@ -250,7 +263,9 @@ ff=FindFiles(start,end)
 
 MD = MixingOfData(listSamplingratesToMake,listofattackfilesdetect,ff.findallfiles(),[sa1,sa2],"detect")
 
-print("Data mixed")
+print("detecting mixed")
+"""
+print(datetime.datetime.now())
 
 RFF=RandomforestDetection("fields","","")
 RFE=RandomforestDetection("entropy","","")
@@ -263,8 +278,8 @@ KMC=Kmeans("combined","","")
 listoffilestrain=[]
 listoffilesdetect=[]
 for smaplingrates in listSamplingratesToMake:
-    listoffilestrain.append([startoffile+"data/DiffrentSamplingRates/train/train"+smaplingrates.maxpackets])
-    listoffilesdetect.append([startoffile+"data/DiffrentSamplingRates/detect/detect"+smaplingrates.maxpackets])
+    listoffilestrain.append([startoffile+"data/DiffrentSamplingRates/train/train"+str(smaplingrates.maxpackets)])
+    listoffilesdetect.append([startoffile+"data/DiffrentSamplingRates/detect/detect"+str(smaplingrates.maxpackets)])
 
 a1=IDS([RFF,RFE,RFC,TH,KMF,KME,KMC],listoffilestrain)
 
@@ -272,12 +287,15 @@ a1=IDS([RFF,RFE,RFC,TH,KMF,KME,KMC],listoffilestrain)
 
 
 
-a1.makeTraingData()
-a1.train()
+#a1.makeTraingData()
+#a1.train()
+a1.makeAndTrainAtsameTime()
 print("Traning done")
+print(datetime.datetime.now())
 
 a1.removeTrainingFiles()
 a1.addNewFiles(listoffilesdetect)
 
 a1.detect()
 print("setup done")
+print(datetime.datetime.now())

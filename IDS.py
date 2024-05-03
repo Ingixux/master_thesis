@@ -126,6 +126,8 @@ class IDS:
                     keyfilesave=file+trainingClasses[0].typeOfFeatures
                     if keyfilesave not in self.dicOftraningfiletosave.keys():
                         self.dicOftraningfiletosave[keyfilesave]=(open("data/Classifiers/"+nameoffile+trainingClasses[0].typeOfFeatures+".npy", "wb"))
+                    elif self.dicOftraningfiletosave[keyfilesave]==None:
+                        self.dicOftraningfiletosave[keyfilesave]=(open("data/Classifiers/"+nameoffile+trainingClasses[0].typeOfFeatures+".npy", "wb"))
                     #trainingClasses[2]="NO LONGER USED here!! used to save result" #TODO
                     trainingClasses[0].setFilepathOfClassifier("data/Classifiers/"+nameoffile+trainingClasses[0].name+".pkl")
                     #trainingClasses[0].filepathOfClassifier="data/Classifiers/"+nameoffile+trainingClasses[0].name+".pkl"
@@ -133,7 +135,7 @@ class IDS:
     def makeTraingData(self):
         self.dicOftraningfiletosave={}
         self.createfilesToSaveTo()
-        self.getDataFromSilkFile("train")
+        self.getDataFromSilkFile("train",False)
         for file in self.dicOftraningfiletosave.values():
             file.close()
         #for trainingClasses in self.dicOfFileOutput.values():
@@ -153,9 +155,9 @@ class IDS:
                     trainingClasses[2]=(open(trainingClasses[0].filepathOfInput, "ab"))
 
             
-    def appendTraingData(self):
+    def appendTraingData(self): #TODO This does not longer works percekt, after having only one file pr typeof fatur
         self.openFilesToSaveTo()
-        self.getDataFromSilkFile("train")
+        self.getDataFromSilkFile("train",False)
         for trainingClasses in self.dicOfFileOutput.values():
             self.closeFiles(trainingClasses[2])
 
@@ -190,34 +192,51 @@ class IDS:
 
     def detect(self):
         self.createfilesForResult()
-        self.getDataFromSilkFile("detect")
+        self.getDataFromSilkFile("detect",False)
         for trainingClasses in self.dicOfFileOutput.values():
             self.closeFiles(trainingClasses[2])
         self.fileAggregatedData.close()
         self.fileAggregatedData ==None
 
     def readFromTraningfiles(self, file):
-        #TOOD put the reading of files here
-        return
+        trainingSet=[]
+        #x=0
+        with open(file, "rb") as fileOfFeatures:
+            try:
+                while True:
+                    #print(trainingSet)
+                    #print(fileOfFeatures)
+                    data=np.load(fileOfFeatures, allow_pickle=True)
+                    trainingSet.append(data)
+                    #x+=1
+            #except EOFError:
+            except (pickle.UnpicklingError, EOFError): #TODO This is not optimal, entropy and fleids create diffrent EOFError
+                pass
+        return trainingSet
 
     def trainwithkeyfile(self,keyfile):
+
         for trainingClasses in self.dicOfFileOutput.values():
             if trainingClasses[1] ==keyfile:
                 if trainingClasses[0].typeOfFeatures == "threshold":
                     trainingClasses[0].train()
         self.starttraing(keyfile,"fields")
-        self.starttraing(keyfile,"entropy")
-        self.starttraing(keyfile,"combined")
-        self.removeTrainingFilesWithKeyfile(keyfile,"entropy")
         self.removeTrainingFilesWithKeyfile(keyfile,"fields")
+        self.starttraing(keyfile,"entropy")
+        self.removeTrainingFilesWithKeyfile(keyfile,"entropy")
+        self.starttraing(keyfile,"combined")
         self.removeTrainingFilesWithKeyfile(keyfile,"combined")
 
 
     def removeTrainingFilesWithKeyfile(self,keyfile,typeOfFeature):
         for trainingClasses in self.dicOfFileOutput.values():
             if trainingClasses[1] ==keyfile:
-                if trainingClasses[0].name == typeOfFeature:
+                if trainingClasses[0].typeOfFeatures == typeOfFeature:
                     pathToFile=trainingClasses[0].filepathOfInput
+                    keyfilesave =keyfile+typeOfFeature
+                    if self.dicOftraningfiletosave[keyfilesave]!=None:
+                        self.dicOftraningfiletosave[keyfilesave].close()
+                        self.dicOftraningfiletosave[keyfilesave]=None
                     if os.path.isfile(pathToFile):
                         os.remove(pathToFile)
 
@@ -229,13 +248,18 @@ class IDS:
                     if trainingClasses[0].typeOfFeatures == typeOfFeature:
                         if len(readfile)==0:
                             readfile=self.readFromTraningfiles(trainingClasses[0].filepathOfInput)
-                        trainingClasses[0].trainWithinput()
-
+                        trainingClasses[0].trainWithinput(readfile)
 
     def train(self):
         for trainingClasses in self.dicOfFileOutput.values():
             trainingClasses[0].train()
 
+    def makeAndTrainAtsameTime(self):
+        self.dicOftraningfiletosave={}
+        self.createfilesToSaveTo()
+        self.getDataFromSilkFile("train",True)
+        #for file in self.dicOftraningfiletosave.values():
+        #    file.close()
 
     def saveAggregatedDatTofile(self,data):
         data["isAtttack"]=self.setIsAttack(data["isAtttack"][0])
@@ -256,13 +280,13 @@ class IDS:
             data[-1]=self.setIsAttack(data[-1])
             savedata=np.array(data, dtype=object)
         else:
-            #print(data)
             data[-1]=self.setIsAttack(data[-1][0])
             savedata=np.array(data, dtype=object)
         #print(savedata)
         #savedata=np.array(data, dtype=object)
         #print(data[2:])
         #np.save(trainingClasses[2],savedata)
+        
         np.save(file,savedata)
 
     def setIsAttack(self,sensor_id):
@@ -280,7 +304,7 @@ class IDS:
         np.save(file,savedata)
 
 
-    def getDataFromSilkFile(self,detectortrain):
+    def getDataFromSilkFile(self,detectortrain,alsotrain):
         for fileCollection in self.listOfPathToSilkFiles:
             keyfile =fileCollection[0]
             for file in fileCollection:
@@ -311,10 +335,12 @@ class IDS:
                         if len(dataEntrpy)>0:
                             if "entropy" in self.active:
                                 keyfilesave =keyfile+"entropy"
-                                self.saveDataTofile(self.dicOftraningfiletosave[keyfilesave],dataEntrpy,"entropy")
+                                for rec1 in dataEntrpy:
+                                    self.saveDataTofile(self.dicOftraningfiletosave[keyfilesave],rec1,"entropy")
                             if "combined" in self.active:
                                 keyfilesave = keyfile+"combined"
-                                self.saveDataTofile(self.dicOftraningfiletosave[keyfilesave],datacombind,"combined")
+                                for rec1 in datacombind:
+                                    self.saveDataTofile(self.dicOftraningfiletosave[keyfilesave],rec1,"combined")
                             if "threshold" in self.active:
                                 keyfilesave =keyfile+"threshold"
                                 self.saveDataTofile(self.dicOftraningfiletosave[keyfilesave],self.dicOfSlidingWindow[keyfile].getcurrentvaules(),"threshold") 
@@ -322,7 +348,7 @@ class IDS:
                         for trainingClasses in self.dicOfFileOutput.values():
                             if trainingClasses[1]==keyfile:
                                 if trainingClasses[0].typeOfFeatures =="fields":
-                                    self.doDetectionOnData(dataToHandle,trainingClasses)
+                                    self.doDetectionOnData(datafields,trainingClasses)
                                 elif len(dataEntrpy)>0:
                                     if trainingClasses[0].typeOfFeatures =="entropy":
                                         for rec1 in dataEntrpy:
@@ -362,6 +388,8 @@ class IDS:
             if keyfile in self.dicOfSlidingWindow.keys():
                 #print(self.dicOfSlidingWindow[keyfile].x)
                 self.dicOfSlidingWindow[keyfile] = SlidingWindow(self.standertimes[0],self.standertimes[1],self.standertimes[2],False)
+            if alsotrain:
+                self.trainwithkeyfile(keyfile)
 
 
     #def setDataToZero(self):
@@ -428,13 +456,13 @@ class IDS:
 
     
 
-RFF=RandomforestDetection("fields","","")
-RFE=RandomforestDetection("entropy","","")
-RFC=RandomforestDetection("combined","","")
-TH=Threshold("threshold","","")
-KMF=Kmeans("fields","","")
-KME=Kmeans("entropy","","")
-KMC=Kmeans("combined","","")
+#RFF=RandomforestDetection("fields","","")
+#RFE=RandomforestDetection("entropy","","")
+#RFC=RandomforestDetection("combined","","")
+#TH=Threshold("threshold","","")
+#KMF=Kmeans("fields","","")
+#KME=Kmeans("entropy","","")
+#KMC=Kmeans("combined","","")
 
 #a1=IDS([RF],[["data/DiffrentSamplingRates/TCP_SYN_Flodd500"]])
 #a1=IDS([RF,EP],[["data/DiffrentSamplingRates/isattack100"]])
@@ -471,23 +499,26 @@ KMC=Kmeans("combined","","")
 #TH=Threshold("threshold","","")
 #RFE=RandomforestDetection("entropy","","")
 
-listofsmaplingrates =["800","1600"] #TODO add the new sampling rates
-listoffilestrain=[]
-listoffilesdetect=[]
-for smaplingrates in listofsmaplingrates:
-    listoffilestrain.append(["data/DiffrentSamplingRates/train/train"+smaplingrates])
-    listoffilesdetect.append(["data/DiffrentSamplingRates/detect/detect"+smaplingrates])
+#listofsmaplingrates =["800","1600"] #TODO add the new sampling rates
+#listoffilestrain=[]
+#listoffilesdetect=[]
+#for smaplingrates in listofsmaplingrates:
+#    listoffilestrain.append(["data/DiffrentSamplingRates/train/train"+smaplingrates])
+#    listoffilesdetect.append(["data/DiffrentSamplingRates/detect/detect"+smaplingrates])
 
-a1=IDS([RFE,TH,KMF,KMC],listoffilestrain)
-a1.makeTraingData()#TODO make a fucntion that can make and train at the same time, this will remove traning files before the next once are created
+#a1=IDS([RFE,TH,KMF,KMC],listoffilestrain)
+#a1.makeAndTrainAtsameTime()
+#a1.makeTraingData()#TODO make a fucntion that can make and train at the same time, this will remove traning files before the next once are created
 #a1.train()
 #a1.removeTrainingFiles()
 #a1.addNewFiles(listoffilesdetect)
 #a1.detect()
 
 #KMFC=Kmeans("fields","data/Classifiers/train1600KMeansfields.pkl","")
+#KMCC=Kmeans("combined","data/Classifiers/train1600KMeanscombined.pkl","")
+#RFEC=RandomforestDetection("entropy","data/Classifiers/train1600RandomForestentropy.pkl","")
 #RFEC=RandomforestDetection("entropy","data/Classifiers/train1600RandomForestentropy.pkl","")
 #THC=Threshold("threshold","data/Classifiers/train1600threshold.pkl", "")
 #a1=IDS([KMFC],[["data/DiffrentSamplingRates/detect/detect1600"]])
-#a1=IDS([RFEC,THC],[["data/DiffrentSamplingRates/detect/detect800"]])
+#a1=IDS([RFEC,THC,KMFC,KMCC],[["data/DiffrentSamplingRates/detect/detect800"]])
 #a1.detect()

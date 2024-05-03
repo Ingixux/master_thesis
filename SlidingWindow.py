@@ -30,7 +30,7 @@ class SlidingWindow:
             self.comparison_window["vaules"].append({"entropySip":0,"entropyRateSip":0,"entropyDip":0,"entropyRateDip":0,"entropyPacketsize":0,"entropyRatePacketsize":0,
                                            "entropyBiflowSyn":0,"entropySipSyn":0,"entropyDipSyn":0,"entropyBiflow":0,"entropyRateBiflow":0,
                                            "HigstNumberOfSyn":0,"HigstNumberOfURGPSHFIN":0,"countBiflow":0,"totalicmpDUnreachable":0,
-                                           "totalBytes":0,"totalpackets":0,"totalicmp":0,"totalicmprate":0})
+                                           "totalBytes":0,"totalpackets":0,"totalicmp":0,"totalicmprate":0,"totalflows":0})
 
         #for x in range(0,int(comparison_window_interval/sliding_window_interval)-(aggregate_window_duration/sliding_window_interval)):
         #    self.comparison_window["vaules"].append({"sourceIP":{},"packets":0,"destinationIP":{}})

@@ -5,6 +5,7 @@ import numpy as np
 trainingSet=[]
 x=0
 with open("data/Classifiers/result/detect800RandomForestentropy.npy", "rb") as fileOfFeatures:
+#with open("data/Classifiers/result/detect800KMeanscombined.npy", "rb") as fileOfFeatures:
 #with open("data/Classifiers/result/detect800KMeansfields.npy", "rb") as fileOfFeatures:
 #with open("data/Classifiers/result/detect800threshold.npy", "rb") as fileOfFeatures:
     try:
@@ -73,7 +74,8 @@ else:
                 "totalBytes":{"Attackcorrect":0,"Attackwrong":0,"normalcorrect":0,"normalwrong":0},
                 "totalpackets":{"Attackcorrect":0,"Attackwrong":0,"normalcorrect":0,"normalwrong":0},
                 "totalicmp":{"Attackcorrect":0,"Attackwrong":0,"normalcorrect":0,"normalwrong":0},
-                "totalicmprate":{"Attackcorrect":0,"Attackwrong":0,"normalcorrect":0,"normalwrong":0}}
+                "totalicmprate":{"Attackcorrect":0,"Attackwrong":0,"normalcorrect":0,"normalwrong":0},
+                "totalflows":{"Attackcorrect":0,"Attackwrong":0,"normalcorrect":0,"normalwrong":0}}
 
 
     for element in dataSet:
