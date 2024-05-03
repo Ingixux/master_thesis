@@ -196,6 +196,41 @@ class IDS:
         self.fileAggregatedData.close()
         self.fileAggregatedData ==None
 
+    def readFromTraningfiles(self, file):
+        #TOOD put the reading of files here
+        return
+
+    def trainwithkeyfile(self,keyfile):
+        for trainingClasses in self.dicOfFileOutput.values():
+            if trainingClasses[1] ==keyfile:
+                if trainingClasses[0].typeOfFeatures == "threshold":
+                    trainingClasses[0].train()
+        self.starttraing(keyfile,"fields")
+        self.starttraing(keyfile,"entropy")
+        self.starttraing(keyfile,"combined")
+        self.removeTrainingFilesWithKeyfile(keyfile,"entropy")
+        self.removeTrainingFilesWithKeyfile(keyfile,"fields")
+        self.removeTrainingFilesWithKeyfile(keyfile,"combined")
+
+
+    def removeTrainingFilesWithKeyfile(self,keyfile,typeOfFeature):
+        for trainingClasses in self.dicOfFileOutput.values():
+            if trainingClasses[1] ==keyfile:
+                if trainingClasses[0].name == typeOfFeature:
+                    pathToFile=trainingClasses[0].filepathOfInput
+                    if os.path.isfile(pathToFile):
+                        os.remove(pathToFile)
+
+    def starttraing(self,keyfile,typeOfFeature):
+        readfile=[]
+        if typeOfFeature in self.active:
+            for trainingClasses in self.dicOfFileOutput.values():
+                if trainingClasses[1] ==keyfile:
+                    if trainingClasses[0].typeOfFeatures == typeOfFeature:
+                        if len(readfile)==0:
+                            readfile=self.readFromTraningfiles(trainingClasses[0].filepathOfInput)
+                        trainingClasses[0].trainWithinput()
+
 
     def train(self):
         for trainingClasses in self.dicOfFileOutput.values():
@@ -327,98 +362,6 @@ class IDS:
             if keyfile in self.dicOfSlidingWindow.keys():
                 #print(self.dicOfSlidingWindow[keyfile].x)
                 self.dicOfSlidingWindow[keyfile] = SlidingWindow(self.standertimes[0],self.standertimes[1],self.standertimes[2],False)
-                                
-
-
-
-
-                                     
-
-
-
-                for rec in infile:  #TODO Handle that when No rec are for a sliding window time
-                    #self.x+=1
-                    #TODO add to entropy here
-                    slidingWindowVaules=[]
-                    if keyfile in self.dicOfSlidingWindow.keys():
-                    #if entrypy not empty:
-                        
-                        slidingWindowVaules =self.dicOfSlidingWindow[keyfile].addNewRec(rec)
-                        #self.x+=len(slidingWindowVaules)
-                    for trainingClasses in self.dicOfFileOutput.values():
-                        if trainingClasses[1]==keyfile: #TODO file is wrong but works with one file
-                            dataToHandle=[]
-                            if trainingClasses[0].typeOfFeatures =="fields":
-                                dataToHandle= self.createNetlfowFeilds(rec)
-                            elif trainingClasses[0].typeOfFeatures in ["entropy","combined","threshold"]:
-                                #dataToHandle=self.createNetlfowEntropy(rec,trainingClasses[0])
-                                dataToHandle=self.createNetlfowEntropy(slidingWindowVaules,trainingClasses[0],keyfile)
-                            #print(dataToHandle)
-                            if detectortrain=="train" and len(dataToHandle)>0:
-                                #print(dataToHandle)
-                                if trainingClasses[0].typeOfFeatures =="fields":
-                                    #if dataToHandle[-1]==1:
-                                    #    print(x)
-                                    self.saveDataTofile(file,dataToHandle,trainingClasses)
-                                elif trainingClasses[0].typeOfFeatures in ["entropy","combined"]:
-                                    for rec1 in dataToHandle:
-                                        
-                                        self.saveDataTofile(file,rec1,trainingClasses)
-                                elif trainingClasses[0].typeOfFeatures =="threshold":
-                                    self.saveDataTofile(file,self.dicOfSlidingWindow[keyfile].getcurrentvaules(),trainingClasses) 
-                                    #self.saveDataTofile(file,trainingClasses[0].entropy.findThreasholds(False),trainingClasses) 
-                            elif detectortrain=="detect" and len(dataToHandle)>0:
-                                if trainingClasses[0].typeOfFeatures =="fields":
-                                    self.doDetectionOnData(dataToHandle,trainingClasses)
-                                elif trainingClasses[0].typeOfFeatures in ["entropy","combined"]:
-                                    for rec1 in dataToHandle:
-                                        self.doDetectionOnData(rec1,trainingClasses)
-                                elif trainingClasses[0].typeOfFeatures in ["threshold"]:
-                                    self.doDetectionOnData(self.dicOfSlidingWindow[keyfile].findThreasholds(False),trainingClasses)
-                                    self.saveAggregatedDatTofile(self.dicOfSlidingWindow[keyfile].getcurrentvaules()) 
-                infile.close()
-            for trainingClasses in self.dicOfFileOutput.values(): 
-                #TODO something about keyfile
-                if trainingClasses[0].typeOfFeatures in ["entropy","combined","threshold"]:
-                    toadd=self.dicOfSlidingWindow[keyfile].doCalculation(True) #TODO change entropy  
-                    if trainingClasses[0].typeOfFeatures =="threshold":
-                        if detectortrain=="train":
-                            self.saveDataTofile(file,self.dicOfSlidingWindow[keyfile].getcurrentvaules(),trainingClasses)
-                            #self.saveDataTofile(file,trainingClasses[0].entropy.findThreasholds(True),trainingClasses)
-                        elif detectortrain=="detect":
-                            self.doDetectionOnData(self.dicOfSlidingWindow[keyfile].findThreasholds(True),trainingClasses)
-                            self.saveAggregatedDatTofile(self.dicOfSlidingWindow[keyfile].getcurrentvaules())     
-                    elif len(toadd) !=0:
-                        #print(len(toadd))
-                        if trainingClasses[0].typeOfFeatures =="entropy":
-                            if detectortrain=="train":
-                                #print([toadd[0][0:2]+toadd[0][19:32]+[toadd[0][-2]]])
-                                #self.saveDataTofile(file,toadd[0][0:2]+toadd[0][19:32]+[toadd[0][-2]],trainingClasses)
-                                self.saveDataTofile(file,toadd[0][0:2]+toadd[0][19:-2]+[toadd[0][-2]],trainingClasses)
-                            elif detectortrain=="detect":
-                                #self.doDetectionOnData(toadd[0][0:2]+toadd[0][19:32]+[toadd[0][-2]],trainingClasses)
-                                self.doDetectionOnData(toadd[0][0:2]+toadd[0][19:-2]+[toadd[0][-2]],trainingClasses)
-                        else:
-                            for r in toadd:
-                                #tempr=[]
-                                #tempr.append(r[0:32]+[r[-1]]) 
-
-                                if detectortrain=="train":
-                                    #self.saveDataTofile(file,[r[0:32]+[r[-1]]],trainingClasses)
-                                    self.saveDataTofile(file,r[0:-2]+[r[-1]],trainingClasses)
-                                elif detectortrain=="detect":
-                                    #self.doDetectionOnData([r[0:32]+[r[-1]]],trainingClasses)
-                                    self.doDetectionOnData(r[0:-2]+[r[-1]],trainingClasses)
-                #print(trainingClasses[0].x)
-            if keyfile in self.dicOfSlidingWindow.keys():
-                #print(self.dicOfSlidingWindow[keyfile].x)
-                self.dicOfSlidingWindow[keyfile] = SlidingWindow(self.standertimes[0],self.standertimes[1],self.standertimes[2],False)
-            #entropy.resetentropy()
-            #print(self.x)
-            
-
-            
-
 
 
     #def setDataToZero(self):
