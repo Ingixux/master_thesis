@@ -31,7 +31,7 @@ samplingratesToMake=["1:100","1:400","1:800","1:1600","1:3200","1:6400","1:12800
 
 start=Folderpathstructure(inorout,systemid,trafficpatternStart[0],trafficpatternStart[1],trafficpatternStart[2],startoffile)
 end=Folderpathstructure(inorout,systemid,trafficpatternEnd[0],trafficpatternEnd[1],trafficpatternEnd[2],startoffile)
-"""
+
 ff=FindFiles(start,end)
 GT=GetTrafficPattern(ff.findallfiles())
 choseDip, choseSip=GT.movetroughthefiles(500,320,32)
@@ -226,14 +226,14 @@ a32=AttackDataMultiplicator([synflood4],"data/GenratedAttacks/synflood4.rw","syn
 #TODO add one AttackDataMultiplicator for each modified attack I want, this will depend on how many attack I create 
 print("attacks modified")
 print(datetime.datetime.now())
-"""
+
 sa1 =SamplingRate("1:1")
 sa2 =SamplingRate("1:100")
 
 listSamplingratesToMake=[]
 for samplingrate in samplingratesToMake:
     listSamplingratesToMake.append(SamplingRate(samplingrate))
-"""
+
 
 
 listofattackfilestrain=["data/ModifiedAttackFiles/slowread30","data/ModifiedAttackFiles/udpflood10","data/ModifiedAttackFiles/pingflood10",
@@ -264,9 +264,9 @@ ff=FindFiles(start,end)
 MD = MixingOfData(listSamplingratesToMake,listofattackfilesdetect,ff.findallfiles(),[sa1,sa2],"detect")
 
 print("detecting mixed")
-"""
-print(datetime.datetime.now())
 
+print(datetime.datetime.now())
+"""
 RFF=RandomforestDetection("fields","","")
 RFE=RandomforestDetection("entropy","","")
 RFC=RandomforestDetection("combined","","")
@@ -299,3 +299,4 @@ a1.addNewFiles(listoffilesdetect)
 a1.detect()
 print("setup done")
 print(datetime.datetime.now())
+"""

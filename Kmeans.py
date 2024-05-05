@@ -23,7 +23,7 @@ class Kmeans:
 
     def setFilepathOfClassifier(self, path):
         self.filepathOfClassifier=path
-        self.filepathOfClassifierflip=path.split(".")[-1] +"flip.pkl"
+        self.filepathOfClassifierflip=path.split(".")[0] +"flip.pkl"
 
     def checkTypeOfFeatures(self,typeOfFeatures):
         allowedtypeOfFeatures=["fields","entropy","combined","entropylimited","combinedlimited"]
@@ -36,7 +36,8 @@ class Kmeans:
         self.name =self.classifier +self.typeOfFeatures
 
     def detect(self,arrayToDetect,isattack):
-        prediction=self.findattackcluster(self.clf.predict(np.array(arrayToDetect, dtype=np.float32))[0])
+        #prediction=self.findattackcluster(self.clf.predict(np.array(arrayToDetect, dtype=np.float32))[0])
+        prediction=self.findattackcluster(self.clf.predict(np.array(arrayToDetect))[0])
         return [prediction,isattack]
         #return ["KMeans",prediction,isattack]
     
@@ -48,7 +49,8 @@ class Kmeans:
     def trainWithinput(self,trainingSet,labels):
         #print(trainingSet)
         #dataSet=np.array(trainingSet)
-        dataSet=np.array(trainingSet,dtype=np.float32)
+        #dataSet=np.array(trainingSet,dtype=np.float32)
+        dataSet=np.array(trainingSet,dtype=object)
         #for x in dataSet:
         #    print(x)
         #print(trainingSet[:,2:])
@@ -57,19 +59,23 @@ class Kmeans:
         if self.typeOfFeatures== "fields":
             #print(dataSet[:])
             Features=dataSet[:,:16]
+            #print(Features)
             #Features=trainingSet[:,:19]
         elif self.typeOfFeatures== "entropy":
             Features=dataSet[:,:-1]
         else:
-            Features=dataSet[:,:-2]
+            Features=dataSet[:,:]
+            #Features=dataSet[:,:-2]
+            #print(Features)
             #Features=trainingSet[:,:-1]
         #labels=trainingSet[:,-1]
-
         #labels=labels.astype('int') 
         #print(Features)
         #print(labels)
         #print(Features)
         #self.clf=self.clf.fit(Features,labels)
+        #print(labels)
+        #labels=np.array(labels,dtype=np.int8)
         self.clf = KMeans(n_clusters = 2)
         self.clf=self.clf.fit(Features)
         self.makeattackcluster(Features,labels)
@@ -108,6 +114,7 @@ class Kmeans:
         #Features=dataSet[:,:-1]
         Features=dataSet[:,:-1]
         labels=trainingSet[:,-1]
+        
 
         #labels=labels.astype('int') 
         #print(Features)
@@ -147,12 +154,7 @@ class Kmeans:
             self.flip=0
         else:
             self.flip=1
-        #print(dataset[:,-1])
-        #print(len(lables))
-        #print(correct)
-        #print(correct/len(lables))
-        #print(predictions)
-        #print("hei")
+
         
     def findattackcluster(self,prediction):
         if self.flip==1:

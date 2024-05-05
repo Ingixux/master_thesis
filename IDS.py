@@ -173,6 +173,7 @@ class IDS:
 
     def doDetectionOnData(self,data,trainingClasses):
         toSave=[]
+        #print(data)
         if trainingClasses[0].typeOfFeatures =="threshold":
             data["isAtttack"]=self.setIsAttack(data["isAtttack"][0])
             toSave=trainingClasses[0].detect(data,data["isAtttack"])
@@ -180,35 +181,46 @@ class IDS:
             time=data["currenttime"]
         else:
             toPredict=[]
-
-            
-            
             time=data[0]
-            toPredict.append(data)
-            darecta=np.array(toPredict, dtype=object)
+            
+            
             
             #if trainingClasses[0].typeOfFeatures =="entropy":
                #Feature=darecta[:,2:-2]
             #   pass
             if trainingClasses[0].typeOfFeatures == "fields":
-                Feature=darecta[:,2:18]
-                attaks=[data[-1]]
+                
                 label=self.setIsAttack(data[-1])
+                attaks=[data[-1]]
+                toPredict.append(data)
+                darecta=np.array(toPredict, dtype=object)
+                #Feature=np.array(darecta[:,2:18])
+                Feature=darecta[:,2:18]
+               
             elif trainingClasses[0].typeOfFeatures == "entropy":
                 attaks=data[-2]
                 label=self.setIsAttack(data[-2][0])
+                toPredict.append(data)
+                darecta=np.array(toPredict, dtype=object)
                 Feature=darecta[:,2:-2]
             else:
-                Feature=darecta[:,2:-2]
                 attaks=[data[-1]]
                 label=self.setIsAttack(data[-1])
+                toPredict.append(data)
+                darecta=np.array(toPredict, dtype=object)
+                Feature=darecta[:,2:-2]
+                #print(Feature)
+                #darecta=np.array(toPredict, dtype=np.float32)
+                #Feature=np.array(darecta[:,2:-2])
+
+               
             #Feature=darecta[:,2:-2]
             #labels=darecta[:,-1]
             self.x+=1
             toSave=trainingClasses[0].detect(Feature,label)
             #toSave=["RandomForest",1,labels[0]]
         toSave+=[attaks] +[time] 
-        #print(toSave)
+        
         self.saveDataToCollect(toSave,trainingClasses[2])
 
     def detect(self):
@@ -276,8 +288,10 @@ class IDS:
                     if trainingClasses[0].typeOfFeatures == typeOfFeature:
                         if len(readfile)==0:
                             readfile=self.readFromTraningfiles(trainingClasses[0].filepathOfInput)
-                        dataSet=np.array(readfile,dtype=np.float32)
+                        #dataSet=np.array(readfile,dtype=np.float32)
+                        dataSet=np.array(readfile,dtype=object)
                         labels=dataSet[:,-1]
+                        labels=labels.astype('int') 
                         trainingClasses[0].trainWithinput(dataSet,labels)
 
     def train(self):
@@ -390,9 +404,12 @@ class IDS:
                                     #print(sys.getsizeof(rec1))
                                     #print("object"+ str(sys.getsizeof(np.array(rec1[0:-2], dtype=object))))
                                     #print("float"+ str(sys.getsizeof(np.array(rec1[0:-2], dtype=np.float32))))
+                                    #labelsfeildsAndCombind.append(np.int8(self.setIsAttack(rec1[-1])))
                                     labelsfeildsAndCombind.append(np.int8(self.setIsAttack(rec1[-1])))
                                     #feildsAndCombind.append(np.array(rec1, dtype=object))
-                                    feildsAndCombind.append(np.array(rec1[0:-2], dtype=np.float32))
+                                    #feildsAndCombind.append(np.array(rec1[2:-2], dtype=np.float32))
+                                    feildsAndCombind.append(np.array(rec1[2:-2],  dtype=object))
+                                    #feildsAndCombind.append(rec1[0:-2]+[rec1[-1]])
                             if "threshold" in self.active:
                                 keyfilesave =keyfile+"threshold"
                                 self.saveDataTofile(self.dicOftraningfiletosave[keyfilesave],self.dicOfSlidingWindow[keyfile].getcurrentvaules(),"threshold") 
@@ -433,7 +450,9 @@ class IDS:
                             for r in toadd:
                                 #feildsAndCombind.append(r[0:-2]+[r[-1]])
                                 labelsfeildsAndCombind.append(np.int8(self.setIsAttack(r[-1])))
-                                feildsAndCombind.append(np.array(rec1[0:-2], dtype=np.float32))
+                                #feildsAndCombind.append(np.array(rec1[0:-2], dtype=np.float32))
+                                feildsAndCombind.append(np.array(rec1[2:-2], dtype=object))
+                                
                                 #feildsAndCombind.append(np.array(r[0:-2]+[r[-1]], dtype=object))
                                 #self.saveDataTofile(self.dicOftraningfiletosave[keyfilesave],r[0:-2]+[r[-1]],"combined")    
                     else:
@@ -565,7 +584,7 @@ class IDS:
 #a1.appendTraingData()
 #a1.makeTraingData()
 #a1.train()
-
+"""
 RFF=RandomforestDetection("fields","data/Classifiers/train1600RandomForestfields.pkl","")
 RFE=RandomforestDetection("entropy","data/Classifiers/train1600RandomForestentropy.pkl","")
 RFC=RandomforestDetection("combined","data/Classifiers/train1600RandomForestcombined.pkl","")
@@ -581,7 +600,7 @@ TH=Threshold("threshold","","")
 KMF=Kmeans("fields","","")
 KME=Kmeans("entropy","","")
 KMC=Kmeans("combined","","")
-"""
+
 listofsmaplingrates =["1600"] #TODO add the new sampling rates
 listoffilestrain=[]
 listoffilesdetect=[]
@@ -591,11 +610,14 @@ for smaplingrates in listofsmaplingrates:
 
 #a1=IDS([RFF,RFE,RFC,TH,KMF,KME,KMC],listoffilestrain)
 a1=IDS([RFE,TH,KMF,KME,KMC],listoffilestrain)
+#a1=IDS([RFF,KMC],listoffilestrain)
+#a1=IDS([RFE,TH,KMF,KME,KMC],[["/media/sf_share/data/DiffrentSamplingRates/train/train12800"]])
 a1.makeAndTrainAtsameTime()
 #a1.makeTraingData()#TODO make a fucntion that can make and train at the same time, this will remove traning files before the next once are created
 #a1.train()
 #a1.removeTrainingFiles()
 a1.addNewFiles(listoffilesdetect)
+#a1.addNewFiles([["/media/sf_share/data/DiffrentSamplingRates/detect/detect12800"]])
 a1.detect()
 
 #KMFC=Kmeans("fields","data/Classifiers/train1600KMeansfields.pkl","")

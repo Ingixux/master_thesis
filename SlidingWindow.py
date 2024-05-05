@@ -330,7 +330,7 @@ class SlidingWindow:
             for rec in self.aggregate_window["vaules"][-1]["currentRecs"]:
                 #int(rec.nhip),
                 
-                arrayToAdd.append([int(rec.sip), int(rec.dip), int(rec.sport), int(rec.dport), int(rec.protocol), int(rec.packets), int(rec.bytes), 
+                arrayToAdd.append([rec.stime, rec.etime,int(rec.sip), int(rec.dip), int(rec.sport), int(rec.dport), int(rec.protocol), int(rec.packets), int(rec.bytes), 
                                     int(rec.tcpflags.fin), int(rec.tcpflags.syn), int(rec.tcpflags.rst), int(rec.tcpflags.psh), int(rec.tcpflags.ack), 
                                     int(rec.tcpflags.urg), int(rec.tcpflags.ece), int(rec.tcpflags.cwr), rec.duration/datetime.timedelta(milliseconds=1),#index 18
                                     totalFlows,entropySip,entropyRateSip,entropyDip,entropyRateDip,entropyPacketsize,
@@ -343,7 +343,7 @@ class SlidingWindow:
             for window in self.aggregate_window["vaules"]:
                 for rec in window["currentRecs"]:
                     #rec.stime, rec.etime,int(rec.nhip),
-                    arrayToAdd.append([ int(rec.sip), int(rec.dip), int(rec.sport), int(rec.dport), int(rec.protocol), int(rec.packets), int(rec.bytes), 
+                    arrayToAdd.append([rec.stime, rec.etime, int(rec.sip), int(rec.dip), int(rec.sport), int(rec.dport), int(rec.protocol), int(rec.packets), int(rec.bytes), 
                                         int(rec.tcpflags.fin), int(rec.tcpflags.syn), int(rec.tcpflags.rst), int(rec.tcpflags.psh), int(rec.tcpflags.ack), 
                                         int(rec.tcpflags.urg), int(rec.tcpflags.ece), int(rec.tcpflags.cwr), rec.duration/datetime.timedelta(milliseconds=1),#index 18
                                         entropySip,entropyRateSip,entropyDip,entropyRateDip,entropyPacketsize,

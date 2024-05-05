@@ -36,13 +36,15 @@ class RandomforestDetection:
 
     def trainWithinput(self,trainingSet,labels):
         #dataSet=np.array(trainingSet)
-        dataSet=np.array(trainingSet,dtype=np.float32)
+        #dataSet=np.array(trainingSet,dtype=np.float32)
+        dataSet=np.array(trainingSet)
         if self.typeOfFeatures== "fields":
             Features=dataSet[:,:16]
         elif self.typeOfFeatures== "entropy":
             Features=dataSet[:,:-1]
         else:
-            Features=dataSet[:,:-2]
+            #Features=dataSet[:,:-2]
+            Features=dataSet[:,:]
         #Features=dataSet[:,2:-1]
         #labels=dataSet[:,-1]
         #print(Features)
@@ -76,16 +78,13 @@ class RandomforestDetection:
             
             #trainingSet=np.load(fileOfFeatures, allow_pickle=True)
             #trainingSet=np.load(fileOfFeatures, allow_pickle=True)
-        #print(trainingSet)
-        #print(x)
         dataSet=np.array(trainingSet)
         #Features=dataSet[:,:-1]
         Features=dataSet[:,:-1]
         labels=dataSet[:,-1]
         #print(Features)
         labels=labels.astype('int') 
-        #print(Features)
-        #print(labels)
+
         self.clf=self.clf.fit(Features,labels)
         self.saveClassifier()
 
