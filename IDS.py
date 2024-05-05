@@ -7,6 +7,7 @@ from Kmeans import Kmeans
 from silk import *
 import datetime
 from SlidingWindow import SlidingWindow
+import sys
 #import copy
 
 class IDS:
@@ -214,18 +215,23 @@ class IDS:
                 pass
         return trainingSet
 
-    def trainwithkeyfile(self,keyfile):
-
+    def trainwithkeyfile(self,keyfile,feildsAndCombind,labelsfeildsAndCombind):
         for trainingClasses in self.dicOfFileOutput.values():
             if trainingClasses[1] ==keyfile:
-                if trainingClasses[0].typeOfFeatures == "threshold":
+                if trainingClasses[0].typeOfFeatures == "fields":
+                    trainingClasses[0].trainWithinput(feildsAndCombind,labelsfeildsAndCombind)
+                elif trainingClasses[0].typeOfFeatures == "combined":
+                    trainingClasses[0].trainWithinput(feildsAndCombind,labelsfeildsAndCombind)
+                elif trainingClasses[0].typeOfFeatures == "threshold":
                     trainingClasses[0].train()
-        self.starttraing(keyfile,"fields")
-        self.removeTrainingFilesWithKeyfile(keyfile,"fields")
+
+        
+        #self.starttraing(keyfile,"fields")
+        #self.removeTrainingFilesWithKeyfile(keyfile,"fields")
         self.starttraing(keyfile,"entropy")
         self.removeTrainingFilesWithKeyfile(keyfile,"entropy")
-        self.starttraing(keyfile,"combined")
-        self.removeTrainingFilesWithKeyfile(keyfile,"combined")
+        #self.starttraing(keyfile,"combined")
+        #self.removeTrainingFilesWithKeyfile(keyfile,"combined")
 
 
     def removeTrainingFilesWithKeyfile(self,keyfile,typeOfFeature):
@@ -248,7 +254,9 @@ class IDS:
                     if trainingClasses[0].typeOfFeatures == typeOfFeature:
                         if len(readfile)==0:
                             readfile=self.readFromTraningfiles(trainingClasses[0].filepathOfInput)
-                        trainingClasses[0].trainWithinput(readfile)
+                        dataSet=np.array(readfile,dtype=np.float32)
+                        labels=dataSet[:,-1]
+                        trainingClasses[0].trainWithinput(dataSet,labels)
 
     def train(self):
         for trainingClasses in self.dicOfFileOutput.values():
@@ -307,6 +315,10 @@ class IDS:
     def getDataFromSilkFile(self,detectortrain,alsotrain):
         for fileCollection in self.listOfPathToSilkFiles:
             keyfile =fileCollection[0]
+            feildsAndCombind=[]
+            labelsfeildsAndCombind=[]
+            #entropy=[]
+            #Threshold={}
             for file in fileCollection:
                 infile = silkfile_open(file, READ)
                 #self.setDataToZero()
@@ -317,6 +329,14 @@ class IDS:
 
                 #TODO also maby just read each file once also when traning
                 for rec in infile:
+                    #if sys.getsizeof(feildsAndCombind)/1000000000>4:
+                    #    print(sys.getsizeof(feildsAndCombind)/1000000000)
+                    
+                    #if len(feildsAndCombind)!=0:
+                    #    print(sys.getsizeof(feildsAndCombind[0]))    
+                    #if len(labelsfeildsAndCombind)!=0:
+                    #    print(sys.getsizeof(labelsfeildsAndCombind))
+                    #print(sys.getsizeof(labelsfeildsAndCombind[0]))
                     slidingWindowVaules=[]
                     if keyfile in self.dicOfSlidingWindow.keys():
                         slidingWindowVaules =self.dicOfSlidingWindow[keyfile].addNewRec(rec)
@@ -324,23 +344,31 @@ class IDS:
                     datafields=[]
                     dataEntrpy=[]
                     datacombind=[]
-                    if "fields" in self.active:
+                    if "combined" not in self.active:
+                    #if "fields" in self.active:
                         datafields= self.createNetlfowFeilds(rec)
                     if "entropy" in self.active or "combined" in self.active or "threshold" in self.active:
                         dataEntrpy, datacombind= self.createNetlfowEntropy(slidingWindowVaules,keyfile)
                     if detectortrain=="train":
                         if len(datafields)>0:
                             keyfilesave =keyfile+"fields"
-                            self.saveDataTofile(self.dicOftraningfiletosave[keyfilesave],datafields,"fields")
+                            #self.saveDataTofile(self.dicOftraningfiletosave[keyfilesave],datafields,"fields")
                         if len(dataEntrpy)>0:
                             if "entropy" in self.active:
                                 keyfilesave =keyfile+"entropy"
                                 for rec1 in dataEntrpy:
                                     self.saveDataTofile(self.dicOftraningfiletosave[keyfilesave],rec1,"entropy")
                             if "combined" in self.active:
-                                keyfilesave = keyfile+"combined"
+                                #keyfilesave = keyfile+"combined"
                                 for rec1 in datacombind:
-                                    self.saveDataTofile(self.dicOftraningfiletosave[keyfilesave],rec1,"combined")
+                                #    self.saveDataTofile(self.dicOftraningfiletosave[keyfilesave],rec1,"combined")
+                                    
+                                    #feildsAndCombind.append(rec1)
+                                    #print(sys.getsizeof(rec1))
+                                    #print(sys.getsizeof(np.array(rec1, dtype=object)))
+                                    labelsfeildsAndCombind.append(np.int8(self.setIsAttack(rec1[-1])))
+                                    #feildsAndCombind.append(np.array(rec1, dtype=object))
+                                    feildsAndCombind.append(np.array(rec1[0:-2], dtype=np.float32))
                             if "threshold" in self.active:
                                 keyfilesave =keyfile+"threshold"
                                 self.saveDataTofile(self.dicOftraningfiletosave[keyfilesave],self.dicOfSlidingWindow[keyfile].getcurrentvaules(),"threshold") 
@@ -370,9 +398,13 @@ class IDS:
                             keyfilesave =keyfile+"entropy"
                             self.saveDataTofile(self.dicOftraningfiletosave[keyfilesave],toadd[0][0:2]+toadd[0][19:-2]+[toadd[0][-2]],"entropy")
                         if "combined" in self.active and len(toadd) !=0:
-                            keyfilesave = keyfile+"combined"
+                            #keyfilesave = keyfile+"combined"
                             for r in toadd:
-                                self.saveDataTofile(self.dicOftraningfiletosave[keyfilesave],r[0:-2]+[r[-1]],"combined")    
+                                #feildsAndCombind.append(r[0:-2]+[r[-1]])
+                                labelsfeildsAndCombind.append(np.int8(self.setIsAttack(r[-1])))
+                                feildsAndCombind.append(np.array(rec1[0:-2], dtype=np.float32))
+                                #feildsAndCombind.append(np.array(r[0:-2]+[r[-1]], dtype=object))
+                                #self.saveDataTofile(self.dicOftraningfiletosave[keyfilesave],r[0:-2]+[r[-1]],"combined")    
                     else:
                         for trainingClasses in self.dicOfFileOutput.values():  
                             if trainingClasses[1]==keyfile:
@@ -389,7 +421,7 @@ class IDS:
                 #print(self.dicOfSlidingWindow[keyfile].x)
                 self.dicOfSlidingWindow[keyfile] = SlidingWindow(self.standertimes[0],self.standertimes[1],self.standertimes[2],False)
             if alsotrain:
-                self.trainwithkeyfile(keyfile)
+                self.trainwithkeyfile(keyfile,feildsAndCombind,labelsfeildsAndCombind)
 
 
     #def setDataToZero(self):
@@ -402,8 +434,9 @@ class IDS:
         #                    int(rec.tcpflags.urg), int(rec.tcpflags.ece), int(rec.tcpflags.cwr), rec.duration/datetime.timedelta(milliseconds=1)]
         #for x in (0,len(li)):
         #    data.append(li[x])
-        data=[rec.stime, rec.etime, int(rec.sip), int(rec.dip), rec.sport, rec.dport, rec.protocol, rec.packets, rec.bytes, 
-                            int(rec.tcpflags.fin), int(rec.tcpflags.syn), int(rec.tcpflags.rst), int(rec.tcpflags.psh), int(rec.tcpflags.ack),int(rec.nhip), 
+        #rec.stime, rec.etime, 
+        data=[int(rec.sip), int(rec.dip), rec.sport, rec.dport, rec.protocol, rec.packets, rec.bytes, int(rec.nhip),
+                            int(rec.tcpflags.fin), int(rec.tcpflags.syn), int(rec.tcpflags.rst), int(rec.tcpflags.psh), int(rec.tcpflags.ack), 
                             int(rec.tcpflags.urg), int(rec.tcpflags.ece), int(rec.tcpflags.cwr), rec.duration/datetime.timedelta(milliseconds=1), 
                             rec.sensor_id]
         return data
@@ -449,6 +482,9 @@ class IDS:
                 for temor in toadd:
                     if len(temor)!=0 and temor!="window":
                         for r in temor:
+                            #datacombind.append(r[0:-2]+[r[-1]])
+                            
+                            #datacombind.append(r[0:7]+np.array(r[8:16], dtype=np.int8)+r[2:-2]+[r[-1]])
                             datacombind.append(r[0:-2]+[r[-1]])
         return dataEntrpy, datacombind
         
@@ -494,20 +530,24 @@ class IDS:
 #a1.appendTraingData()
 #a1.makeTraingData()
 #a1.train()
+"""
+RFF=RandomforestDetection("fields","","")
+RFE=RandomforestDetection("entropy","","")
+RFC=RandomforestDetection("combined","","")
+TH=Threshold("threshold","","")
+KMF=Kmeans("fields","","")
+KME=Kmeans("entropy","","")
+KMC=Kmeans("combined","","")
 
-#KMF=Kmeans("fields","","")
-#TH=Threshold("threshold","","")
-#RFE=RandomforestDetection("entropy","","")
+listofsmaplingrates =["1600"] #TODO add the new sampling rates
+listoffilestrain=[]
+listoffilesdetect=[]
+for smaplingrates in listofsmaplingrates:
+    listoffilestrain.append(["data/DiffrentSamplingRates/train/train"+smaplingrates])
+    listoffilesdetect.append(["data/DiffrentSamplingRates/detect/detect"+smaplingrates])
 
-#listofsmaplingrates =["800","1600"] #TODO add the new sampling rates
-#listoffilestrain=[]
-#listoffilesdetect=[]
-#for smaplingrates in listofsmaplingrates:
-#    listoffilestrain.append(["data/DiffrentSamplingRates/train/train"+smaplingrates])
-#    listoffilesdetect.append(["data/DiffrentSamplingRates/detect/detect"+smaplingrates])
-
-#a1=IDS([RFE,TH,KMF,KMC],listoffilestrain)
-#a1.makeAndTrainAtsameTime()
+a1=IDS([RFE,RFE,RFC,TH,KMF,KME,KMC],listoffilestrain)
+a1.makeAndTrainAtsameTime()
 #a1.makeTraingData()#TODO make a fucntion that can make and train at the same time, this will remove traning files before the next once are created
 #a1.train()
 #a1.removeTrainingFiles()
@@ -522,3 +562,4 @@ class IDS:
 #a1=IDS([KMFC],[["data/DiffrentSamplingRates/detect/detect1600"]])
 #a1=IDS([RFEC,THC,KMFC,KMCC],[["data/DiffrentSamplingRates/detect/detect800"]])
 #a1.detect()
+"""
