@@ -8,7 +8,8 @@ class RandomforestDetection:
     def __init__(self,typeOfFeatures,filepathOfClassifier ="",filepathOfInput=""):
         self.checkTypeOfFeatures(typeOfFeatures)
         self.setname()
-        self.clf = RandomForestClassifier(n_estimators = 100)
+        #self.clf = RandomForestClassifier(n_estimators = 100)
+        self.clf = None
         self.filepathOfClassifier= filepathOfClassifier
         self.filepathOfInput=filepathOfInput
         if filepathOfClassifier !="":
@@ -32,17 +33,24 @@ class RandomforestDetection:
         return [self.clf.predict(arrayToDetect)[0],isattack]
         #return ["RandomForest",self.clf.predict(arrayToDetect)[0],isattack]
 
-    def trainWithinput(self,trainingSet):
-        dataSet=np.array(trainingSet)
-        Features=dataSet[:,2:-1]
-        labels=dataSet[:,-1]
+    def trainWithinput(self,trainingSet,labels):
+        #dataSet=np.array(trainingSet)
+        dataSet=np.array(trainingSet,dtype=np.float32)
+        if self.typeOfFeatures== "fields":
+            Features=dataSet[:,:19]
+        else:
+            Features=dataSet[:,:-1]
+        #Features=dataSet[:,2:-1]
+        #labels=dataSet[:,-1]
         #print(Features)
-        labels=labels.astype('int') 
+        #labels=labels.astype('int') 
         #print(Features)
         #print(labels)
         #print(Features)
+        self.clf = RandomForestClassifier(n_estimators = 100)
         self.clf=self.clf.fit(Features,labels)
         self.saveClassifier()
+        self.clf=None
 
     def train(self):
         if self.filepathOfInput =="" or type(self.filepathOfInput)!=str:
@@ -68,7 +76,8 @@ class RandomforestDetection:
         #print(trainingSet)
         #print(x)
         dataSet=np.array(trainingSet)
-        Features=dataSet[:,2:-1]
+        Features=dataSet[:,:-1]
+        #Features=dataSet[:,2:-1]
         labels=dataSet[:,-1]
         #print(Features)
         labels=labels.astype('int') 

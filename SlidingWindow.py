@@ -1,7 +1,7 @@
 import datetime
 import numpy as np
 import copy
-
+import sys
 class SlidingWindow:
     def __init__(self,sliding_window_interval,aggregate_window_duration,comparison_window_interval,limited):
         self.sliding_window_interval =sliding_window_interval
@@ -147,8 +147,6 @@ class SlidingWindow:
                 return True
 
     def doCalculation(self,end): 
-        
-        #TODO
         totalpackets=0#self.aggregate_window["vaules"][-1]["packets"]
         totalsourceIP=0 
         totaldestinationIP=0 
@@ -330,11 +328,11 @@ class SlidingWindow:
         #print(self.aggregate_window["vaules"][0]["currentRecs"])
         if end==False:
             for rec in self.aggregate_window["vaules"][-1]["currentRecs"]:
-                #
+                #int(rec.nhip),
                 
-                arrayToAdd.append([rec.stime, rec.etime, int(rec.sip), int(rec.dip), rec.sport, rec.dport, rec.protocol, rec.packets, rec.bytes, 
+                arrayToAdd.append([int(rec.sip), int(rec.dip), int(rec.sport), int(rec.dport), int(rec.protocol), int(rec.packets), int(rec.bytes), 
                                     int(rec.tcpflags.fin), int(rec.tcpflags.syn), int(rec.tcpflags.rst), int(rec.tcpflags.psh), int(rec.tcpflags.ack), 
-                                    int(rec.tcpflags.urg), int(rec.tcpflags.ece), int(rec.tcpflags.cwr), rec.duration/datetime.timedelta(milliseconds=1), int(rec.nhip),#index 18
+                                    int(rec.tcpflags.urg), int(rec.tcpflags.ece), int(rec.tcpflags.cwr), rec.duration/datetime.timedelta(milliseconds=1),#index 18
                                     totalFlows,entropySip,entropyRateSip,entropyDip,entropyRateDip,entropyPacketsize,
                                     entropyRatePacketsize,entropyBiflow,entropyRateBiflow,totalicmp,totalicmprate,
                                     totalBytes,totalpackets,#31
@@ -344,14 +342,14 @@ class SlidingWindow:
         else:
             for window in self.aggregate_window["vaules"]:
                 for rec in window["currentRecs"]:
-                    arrayToAdd.append([rec.stime, rec.etime, int(rec.sip), int(rec.dip), rec.sport, rec.dport, rec.protocol, rec.packets, rec.bytes, 
+                    #rec.stime, rec.etime,int(rec.nhip),
+                    arrayToAdd.append([ int(rec.sip), int(rec.dip), int(rec.sport), int(rec.dport), int(rec.protocol), int(rec.packets), int(rec.bytes), 
                                         int(rec.tcpflags.fin), int(rec.tcpflags.syn), int(rec.tcpflags.rst), int(rec.tcpflags.psh), int(rec.tcpflags.ack), 
-                                        int(rec.tcpflags.urg), int(rec.tcpflags.ece), int(rec.tcpflags.cwr), rec.duration/datetime.timedelta(milliseconds=1), int(rec.nhip),#index 18
-                                        totalFlows,entropySip,entropyRateSip,entropyDip,entropyRateDip,entropyPacketsize,
-                                        entropyRatePacketsize,entropyBiflow,entropyRateBiflow,totalicmp,totalicmprate,
-                                        totalBytes,totalpackets,#31
+                                        int(rec.tcpflags.urg), int(rec.tcpflags.ece), int(rec.tcpflags.cwr), rec.duration/datetime.timedelta(milliseconds=1),#index 18
+                                        entropySip,entropyRateSip,entropyDip,entropyRateDip,entropyPacketsize,
+                                        entropyRatePacketsize,entropyBiflow,entropyRateBiflow,totalicmprate,#31
                                         entropyBiflowSyn,entropySipSyn,entropyDipSyn,
-                                        countBiflow,HigstNumberOfSyn,HigstNumberOfURGPSHFIN,totalicmpDUnreachable,thereisOneAttack,
+                                        countBiflow,HigstNumberOfSyn,HigstNumberOfURGPSHFIN,totalicmpDUnreachable,totalicmp,totalBytes,totalpackets,totalFlows,thereisOneAttack,
                                         rec.sensor_id])
             
 

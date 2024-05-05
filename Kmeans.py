@@ -8,7 +8,7 @@ class Kmeans:
     def __init__(self,typeOfFeatures,filepathOfClassifier ="",filepathOfInput=""):
         self.checkTypeOfFeatures(typeOfFeatures)
         self.setname()
-        self.clf = KMeans(n_clusters = 2)
+        self.clf =None
         self.x=0
         
         self.filepathOfInput=filepathOfInput
@@ -46,10 +46,22 @@ class Kmeans:
     #        os.remove(file)
     #    self.filepathOfInput=
     
-    def trainWithinput(self,trainingSet):
-        dataSet=np.array(trainingSet)
+    def trainWithinput(self,trainingSet,labels):
+        #print(trainingSet)
+        #dataSet=np.array(trainingSet)
+        dataSet=np.array(trainingSet,dtype=np.float32)
+        #for x in dataSet:
+        #    print(x)
         #print(trainingSet[:,2:])
-        Features=dataSet[:,2:-1]
+        #Features=dataSet[:,2:-1]
+        #print(dataSet[-1])
+        if self.typeOfFeatures== "fields":
+            #print(dataSet[:])
+            Features=dataSet[:,:19]
+            #Features=trainingSet[:,:19]
+        else:
+            Features=dataSet[:,:]
+            #Features=trainingSet[:,:-1]
         #labels=trainingSet[:,-1]
 
         #labels=labels.astype('int') 
@@ -57,9 +69,11 @@ class Kmeans:
         #print(labels)
         #print(Features)
         #self.clf=self.clf.fit(Features,labels)
+        self.clf = KMeans(n_clusters = 2)
         self.clf=self.clf.fit(Features)
-        self.makeattackcluster(dataSet)
+        self.makeattackcluster(Features,labels)
         self.saveClassifier()
+        self.clf=None
 
     def train(self):
     #def train(self,typeOfFeatures):
@@ -90,17 +104,20 @@ class Kmeans:
             #trainingSet=np.load(fileOfFeatures, allow_pickle=True)
         dataSet=np.array(trainingSet)
         #print(trainingSet[:,2:])
-        Features=dataSet[:,2:-1]
-        #labels=trainingSet[:,-1]
+        Features=dataSet[:,:-1]
+        #Features=dataSet[:,2:-1]
+        labels=trainingSet[:,-1]
 
         #labels=labels.astype('int') 
         #print(Features)
         #print(labels)
         #print(Features)
         #self.clf=self.clf.fit(Features,labels)
+        self.clf = KMeans(n_clusters = 2)
         self.clf=self.clf.fit(Features)
-        self.makeattackcluster(dataSet)
+        self.makeattackcluster(Features,labels)
         self.saveClassifier()
+        self.clf = 0
 
     def loadClassfication(self):
         self.clf= pickle.load(open(self.filepathOfClassifier, 'rb')) 
@@ -110,11 +127,17 @@ class Kmeans:
         pickle.dump(self.clf, open(self.filepathOfClassifier, 'wb'))
         pickle.dump(self.flip, open(self.filepathOfClassifierflip, 'wb'))
 
-    def makeattackcluster(self,dataset):
+    def makeattackcluster(self,Features,lables):
+        #if self.typeOfFeatures== "fields":
+            #print(dataSet[:])
+        #    Features=dataset[:,:19]
+            #Features=trainingSet[:,:19]
+        #else:
+        #    Features=dataset[:,:-1]
         #print(dataset)
-        Features=dataset[:,2:-1]
+        #Features=dataset[:,2:-1]
         predictions=self.clf.predict(Features)
-        lables=dataset[:,-1]
+        #lables=dataset[:,-1]
         correct=0
         for x in range(0,len(lables)):
             if lables[x]==predictions[x]:
