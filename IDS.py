@@ -181,8 +181,8 @@ class IDS:
         else:
             toPredict=[]
 
-            label=self.setIsAttack(data[-1])
-            attaks=[data[-1]]
+            
+            
             time=data[0]
             toPredict.append(data)
             darecta=np.array(toPredict, dtype=object)
@@ -192,8 +192,16 @@ class IDS:
             #   pass
             if trainingClasses[0].typeOfFeatures == "fields":
                 Feature=darecta[:,2:18]
+                attaks=[data[-1]]
+                label=self.setIsAttack(data[-1])
+            elif trainingClasses[0].typeOfFeatures == "entropy":
+                attaks=data[-2]
+                label=self.setIsAttack(data[-2][0])
+                Feature=darecta[:,2:-2]
             else:
                 Feature=darecta[:,2:-2]
+                attaks=[data[-1]]
+                label=self.setIsAttack(data[-1])
             #Feature=darecta[:,2:-2]
             #labels=darecta[:,-1]
             self.x+=1
@@ -303,6 +311,7 @@ class IDS:
             savedata=np.array(data, dtype=object)
         else:
             data[-1]=self.setIsAttack(data[-1])
+
             savedata=np.array(data, dtype=object)
         #print(savedata)
         #savedata=np.array(data, dtype=object)
@@ -316,7 +325,7 @@ class IDS:
         #if rec.sensor=="isAttack": #TODO why does this not work
         #    isAttackFlow=1
         #if rec.sensor_id==3:
-        if sensor_id in [32531,32532,32533,32534,32535,32536,32537,32538]:
+        if int(sensor_id) in [32531,32532,32533,32534,32535,32536,32537,32538]:
             isAttackFlow=1
         return isAttackFlow
 
@@ -371,7 +380,6 @@ class IDS:
                             if "entropy" in self.active:
                                 keyfilesave =keyfile+"entropy"
                                 for rec1 in dataEntrpy:
-                                    
                                     self.saveDataTofile(self.dicOftraningfiletosave[keyfilesave],rec1[2:-2]+[rec1[-1]],"entropy")
                             if "combined" in self.active:
                                 #keyfilesave = keyfile+"combined"
@@ -399,7 +407,7 @@ class IDS:
                                             self.doDetectionOnData(rec1,trainingClasses)
                                 elif len(dataEntrpy)>0:
                                     if trainingClasses[0].typeOfFeatures =="entropy":
-                                        print(dataEntrpy)
+                                        #print(dataEntrpy)
                                         for rec1 in dataEntrpy:
                                             self.doDetectionOnData(rec1,trainingClasses)
                                     elif trainingClasses[0].typeOfFeatures =="combined":
@@ -418,7 +426,8 @@ class IDS:
                         if "entropy" in self.active and len(toadd) !=0:
                             keyfilesave =keyfile+"entropy"
                             #self.saveDataTofile(self.dicOftraningfiletosave[keyfilesave],toadd[0][0:2]+toadd[0][18:-2]+[toadd[0][-2]],"entropy")
-                            self.saveDataTofile(self.dicOftraningfiletosave[keyfilesave],toadd[0][18:-2]+[toadd[0][-2]],"entropy")
+                            self.saveDataTofile(self.dicOftraningfiletosave[keyfilesave],toadd[0][18:-2]+[toadd[0][-2][0]],"entropy")
+
                         if "combined" in self.active and len(toadd) !=0:
                             #keyfilesave = keyfile+"combined"
                             for r in toadd:
@@ -435,10 +444,12 @@ class IDS:
                                 elif len(toadd) !=0:
                                     #print(len(toadd))
                                     if trainingClasses[0].typeOfFeatures =="entropy":
-                                        self.doDetectionOnData(toadd[0][0:2]+toadd[0][18:-2]+[toadd[0][-2]],trainingClasses)
+                                        self.doDetectionOnData(toadd[0][0:2]+toadd[0][18:],trainingClasses)
+                                        #self.doDetectionOnData(toadd[0][0:2]+toadd[0][18:-2]+[toadd[0][-2]],trainingClasses)
                                     elif trainingClasses[0].typeOfFeatures =="combined":
                                         for r in toadd:
-                                            self.doDetectionOnData(r[0:-2]+[r[-1]],trainingClasses)
+                                            #self.doDetectionOnData(r[0:-2]+[r[-1]],trainingClasses)
+                                            self.doDetectionOnData(r,trainingClasses)
             if keyfile in self.dicOfSlidingWindow.keys():
                 #print(self.dicOfSlidingWindow[keyfile].x)
                 self.dicOfSlidingWindow[keyfile] = SlidingWindow(self.standertimes[0],self.standertimes[1],self.standertimes[2],False)
@@ -578,8 +589,9 @@ for smaplingrates in listofsmaplingrates:
     listoffilestrain.append(["data/DiffrentSamplingRates/train/train"+smaplingrates])
     listoffilesdetect.append(["data/DiffrentSamplingRates/detect/detect"+smaplingrates])
 
-a1=IDS([RFF,RFE,RFC,TH,KMF,KME,KMC],listoffilestrain)
-#a1.makeAndTrainAtsameTime()
+#a1=IDS([RFF,RFE,RFC,TH,KMF,KME,KMC],listoffilestrain)
+a1=IDS([RFE,TH,KMF,KME,KMC],listoffilestrain)
+a1.makeAndTrainAtsameTime()
 #a1.makeTraingData()#TODO make a fucntion that can make and train at the same time, this will remove traning files before the next once are created
 #a1.train()
 #a1.removeTrainingFiles()
