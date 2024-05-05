@@ -410,7 +410,8 @@ class IDS:
                                     labelsfeildsAndCombind.append(np.int8(self.setIsAttack(rec1[-1])))
                                     #feildsAndCombind.append(np.array(rec1, dtype=object))
                                     #feildsAndCombind.append(np.array(rec1[2:-2], dtype=np.float32))
-                                    
+                                    #TODO IDE Have a list of tuples 
+                                    #TODO Having to list one for combind and one for feilds, the combind is the only the missing parts from feilds
                                     
                                     #feildsAndCombind.append(np.array(rec1[2:-2],  dtype=object))
                                     #print(sys.getsizeof(np.array(rec1[2:-2],  dtype=np.float32)))
