@@ -36,8 +36,7 @@ class Kmeans:
         self.name =self.classifier +self.typeOfFeatures
 
     def detect(self,arrayToDetect,isattack):
-        
-        prediction=self.findattackcluster(self.clf.predict(arrayToDetect)[0])
+        prediction=self.findattackcluster(self.clf.predict(np.array(arrayToDetect, dtype=np.float32))[0])
         return [prediction,isattack]
         #return ["KMeans",prediction,isattack]
     
@@ -57,10 +56,12 @@ class Kmeans:
         #print(dataSet[-1])
         if self.typeOfFeatures== "fields":
             #print(dataSet[:])
-            Features=dataSet[:,:19]
+            Features=dataSet[:,:16]
             #Features=trainingSet[:,:19]
+        elif self.typeOfFeatures== "entropy":
+            Features=dataSet[:,:-1]
         else:
-            Features=dataSet[:,:]
+            Features=dataSet[:,:-2]
             #Features=trainingSet[:,:-1]
         #labels=trainingSet[:,-1]
 
@@ -104,8 +105,8 @@ class Kmeans:
             #trainingSet=np.load(fileOfFeatures, allow_pickle=True)
         dataSet=np.array(trainingSet)
         #print(trainingSet[:,2:])
+        #Features=dataSet[:,:-1]
         Features=dataSet[:,:-1]
-        #Features=dataSet[:,2:-1]
         labels=trainingSet[:,-1]
 
         #labels=labels.astype('int') 
@@ -163,8 +164,8 @@ class Kmeans:
             return prediction
         
     def makecopy(self):
-        kmeans = Kmeans(self.typeOfFeatures)
-        kmeans.filepathOfClassifier =self.filepathOfClassifier
+        kmeans = Kmeans(self.typeOfFeatures,filepathOfClassifier=self.filepathOfClassifier)
+        #kmeans.filepathOfClassifier =self.filepathOfClassifier
         kmeans.filepathOfClassifierflip =self.filepathOfClassifierflip
         kmeans.filepathOfInput = self.filepathOfInput
         kmeans.clf =self.clf 

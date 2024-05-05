@@ -114,8 +114,8 @@ class Threshold:
         #TODO save the threashold thrashold
     
     def makecopy(self):
-        threshold = Threshold(self.typeOfFeatures)
-        threshold.filepathOfClassifier =self.filepathOfClassifier
+        threshold = Threshold(self.typeOfFeatures, filepathOfClassifier=self.filepathOfClassifier)
+        #threshold.filepathOfClassifier =self.filepathOfClassifier
         threshold.filepathOfInput = self.filepathOfInput
         threshold.threshold =self.threshold
         return threshold

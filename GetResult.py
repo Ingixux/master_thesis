@@ -4,10 +4,10 @@ import numpy as np
 
 trainingSet=[]
 x=0
-with open("data/Classifiers/result/detect800RandomForestentropy.npy", "rb") as fileOfFeatures:
-#with open("data/Classifiers/result/detect800KMeanscombined.npy", "rb") as fileOfFeatures:
-#with open("data/Classifiers/result/detect800KMeansfields.npy", "rb") as fileOfFeatures:
-#with open("data/Classifiers/result/detect800threshold.npy", "rb") as fileOfFeatures:
+with open("data/Classifiers/result/detect1600RandomForestentropy.npy", "rb") as fileOfFeatures:
+#with open("data/Classifiers/result/detect1600KMeanscombined.npy", "rb") as fileOfFeatures:
+#with open("data/Classifiers/result/detect1600KMeansfields.npy", "rb") as fileOfFeatures:
+#with open("data/Classifiers/result/detect1600threshold.npy", "rb") as fileOfFeatures:
     try:
         while True:
             #print(trainingSet)

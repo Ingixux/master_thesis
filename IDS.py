@@ -61,11 +61,20 @@ class IDS:
         if not self.dicOfFileOutput:
             self.makeDicOfFileOutput()
 
-    def addNewFiles(self, listOfPathToSilkFiles):
+    def addNewFiles(self, listOfPathToSilkFiles): 
         self.listOfPathToSilkFiles=listOfPathToSilkFiles
         self.dicOfFileOutput ={}
         self.dicOfSlidingWindow ={}
         self.makeDicOfFileOutput()
+        for trainingClasses in self.dicOfFileOutput.values():
+            test=trainingClasses[1].split("/")[-1]
+            if "train" in test:
+                samplingrate=test.split("train")[-1]
+            else:
+                samplingrate=test.split("detect")[-1]
+            #print(samplingrate)
+            trainingClasses[0].setFilepathOfClassifier("data/Classifiers/train"+samplingrate+trainingClasses[0].name+".pkl")
+            
 
     def removeTrainingFiles(self):
         for trainingClasses in self.dicOfFileOutput.values():
@@ -163,7 +172,6 @@ class IDS:
             self.closeFiles(trainingClasses[2])
 
     def doDetectionOnData(self,data,trainingClasses):
-        
         toSave=[]
         if trainingClasses[0].typeOfFeatures =="threshold":
             data["isAtttack"]=self.setIsAttack(data["isAtttack"][0])
@@ -172,17 +180,21 @@ class IDS:
             time=data["currenttime"]
         else:
             toPredict=[]
-            if trainingClasses[0].typeOfFeatures =="entropy":
-                label=self.setIsAttack(data[-1][0])
-                attaks=data[-1]
-            else:
-                label=self.setIsAttack(data[-1])
-                attaks=[data[-1]]
+
+            label=self.setIsAttack(data[-1])
+            attaks=[data[-1]]
             time=data[0]
             toPredict.append(data)
             darecta=np.array(toPredict, dtype=object)
-
-            Feature=darecta[:,2:-1]
+            
+            #if trainingClasses[0].typeOfFeatures =="entropy":
+               #Feature=darecta[:,2:-2]
+            #   pass
+            if trainingClasses[0].typeOfFeatures == "fields":
+                Feature=darecta[:,2:18]
+            else:
+                Feature=darecta[:,2:-2]
+            #Feature=darecta[:,2:-2]
             #labels=darecta[:,-1]
             self.x+=1
             toSave=trainingClasses[0].detect(Feature,label)
@@ -193,6 +205,8 @@ class IDS:
 
     def detect(self):
         self.createfilesForResult()
+        for trainingClasses in self.dicOfFileOutput.values():
+            trainingClasses[0].loadClassfication()
         self.getDataFromSilkFile("detect",False)
         for trainingClasses in self.dicOfFileOutput.values():
             self.closeFiles(trainingClasses[2])
@@ -288,7 +302,7 @@ class IDS:
             data[-1]=self.setIsAttack(data[-1])
             savedata=np.array(data, dtype=object)
         else:
-            data[-1]=self.setIsAttack(data[-1][0])
+            data[-1]=self.setIsAttack(data[-1])
             savedata=np.array(data, dtype=object)
         #print(savedata)
         #savedata=np.array(data, dtype=object)
@@ -357,7 +371,8 @@ class IDS:
                             if "entropy" in self.active:
                                 keyfilesave =keyfile+"entropy"
                                 for rec1 in dataEntrpy:
-                                    self.saveDataTofile(self.dicOftraningfiletosave[keyfilesave],rec1,"entropy")
+                                    
+                                    self.saveDataTofile(self.dicOftraningfiletosave[keyfilesave],rec1[2:-2]+[rec1[-1]],"entropy")
                             if "combined" in self.active:
                                 #keyfilesave = keyfile+"combined"
                                 for rec1 in datacombind:
@@ -365,7 +380,8 @@ class IDS:
                                     
                                     #feildsAndCombind.append(rec1)
                                     #print(sys.getsizeof(rec1))
-                                    #print(sys.getsizeof(np.array(rec1, dtype=object)))
+                                    #print("object"+ str(sys.getsizeof(np.array(rec1[0:-2], dtype=object))))
+                                    #print("float"+ str(sys.getsizeof(np.array(rec1[0:-2], dtype=np.float32))))
                                     labelsfeildsAndCombind.append(np.int8(self.setIsAttack(rec1[-1])))
                                     #feildsAndCombind.append(np.array(rec1, dtype=object))
                                     feildsAndCombind.append(np.array(rec1[0:-2], dtype=np.float32))
@@ -376,9 +392,14 @@ class IDS:
                         for trainingClasses in self.dicOfFileOutput.values():
                             if trainingClasses[1]==keyfile:
                                 if trainingClasses[0].typeOfFeatures =="fields":
-                                    self.doDetectionOnData(datafields,trainingClasses)
+                                    if len(datafields)>0:
+                                        self.doDetectionOnData(datafields,trainingClasses)
+                                    else:
+                                        for rec1 in datacombind:
+                                            self.doDetectionOnData(rec1,trainingClasses)
                                 elif len(dataEntrpy)>0:
                                     if trainingClasses[0].typeOfFeatures =="entropy":
+                                        print(dataEntrpy)
                                         for rec1 in dataEntrpy:
                                             self.doDetectionOnData(rec1,trainingClasses)
                                     elif trainingClasses[0].typeOfFeatures =="combined":
@@ -396,7 +417,8 @@ class IDS:
                             self.saveDataTofile(self.dicOftraningfiletosave[keyfilesave],self.dicOfSlidingWindow[keyfile].getcurrentvaules(),"threshold")
                         if "entropy" in self.active and len(toadd) !=0:
                             keyfilesave =keyfile+"entropy"
-                            self.saveDataTofile(self.dicOftraningfiletosave[keyfilesave],toadd[0][0:2]+toadd[0][19:-2]+[toadd[0][-2]],"entropy")
+                            #self.saveDataTofile(self.dicOftraningfiletosave[keyfilesave],toadd[0][0:2]+toadd[0][18:-2]+[toadd[0][-2]],"entropy")
+                            self.saveDataTofile(self.dicOftraningfiletosave[keyfilesave],toadd[0][18:-2]+[toadd[0][-2]],"entropy")
                         if "combined" in self.active and len(toadd) !=0:
                             #keyfilesave = keyfile+"combined"
                             for r in toadd:
@@ -413,7 +435,7 @@ class IDS:
                                 elif len(toadd) !=0:
                                     #print(len(toadd))
                                     if trainingClasses[0].typeOfFeatures =="entropy":
-                                        self.doDetectionOnData(toadd[0][0:2]+toadd[0][19:-2]+[toadd[0][-2]],trainingClasses)
+                                        self.doDetectionOnData(toadd[0][0:2]+toadd[0][18:-2]+[toadd[0][-2]],trainingClasses)
                                     elif trainingClasses[0].typeOfFeatures =="combined":
                                         for r in toadd:
                                             self.doDetectionOnData(r[0:-2]+[r[-1]],trainingClasses)
@@ -478,14 +500,16 @@ class IDS:
                                 pass
                         else:
                             #data.append(toadd[x+1][0][0:2]+toadd[x+1][0][19:32]+[toadd[x+1][0][-2]])
-                            dataEntrpy.append(toadd[x+1][0][0:2]+toadd[x+1][0][19:-2]+[toadd[x+1][0][-2]])
+                            #dataEntrpy.append(toadd[x+1][0][0:2]+toadd[x+1][0][19:-2]+[toadd[x+1][0][-2]])
+                            dataEntrpy.append(toadd[x+1][0][0:2]+toadd[x+1][0][18:])
                 for temor in toadd:
                     if len(temor)!=0 and temor!="window":
                         for r in temor:
                             #datacombind.append(r[0:-2]+[r[-1]])
                             
                             #datacombind.append(r[0:7]+np.array(r[8:16], dtype=np.int8)+r[2:-2]+[r[-1]])
-                            datacombind.append(r[0:-2]+[r[-1]])
+                            #datacombind.append(r[0:-2]+[r[-1]])
+                            datacombind.append(r)
         return dataEntrpy, datacombind
         
 
@@ -530,6 +554,14 @@ class IDS:
 #a1.appendTraingData()
 #a1.makeTraingData()
 #a1.train()
+
+RFF=RandomforestDetection("fields","data/Classifiers/train1600RandomForestfields.pkl","")
+RFE=RandomforestDetection("entropy","data/Classifiers/train1600RandomForestentropy.pkl","")
+RFC=RandomforestDetection("combined","data/Classifiers/train1600RandomForestcombined.pkl","")
+TH=Threshold("threshold","data/Classifiers/train1600threshold.pkl","")
+KMF=Kmeans("fields","data/Classifiers/train1600KMeansfields.pkl","")
+KME=Kmeans("entropy","data/Classifiers/train1600KMeansentropy.pkl","")
+KMC=Kmeans("combined","data/Classifiers/train1600KMeanscombined.pkl","")
 """
 RFF=RandomforestDetection("fields","","")
 RFE=RandomforestDetection("entropy","","")
@@ -538,7 +570,7 @@ TH=Threshold("threshold","","")
 KMF=Kmeans("fields","","")
 KME=Kmeans("entropy","","")
 KMC=Kmeans("combined","","")
-
+"""
 listofsmaplingrates =["1600"] #TODO add the new sampling rates
 listoffilestrain=[]
 listoffilesdetect=[]
@@ -546,13 +578,13 @@ for smaplingrates in listofsmaplingrates:
     listoffilestrain.append(["data/DiffrentSamplingRates/train/train"+smaplingrates])
     listoffilesdetect.append(["data/DiffrentSamplingRates/detect/detect"+smaplingrates])
 
-a1=IDS([RFE,RFE,RFC,TH,KMF,KME,KMC],listoffilestrain)
-a1.makeAndTrainAtsameTime()
+a1=IDS([RFF,RFE,RFC,TH,KMF,KME,KMC],listoffilestrain)
+#a1.makeAndTrainAtsameTime()
 #a1.makeTraingData()#TODO make a fucntion that can make and train at the same time, this will remove traning files before the next once are created
 #a1.train()
 #a1.removeTrainingFiles()
-#a1.addNewFiles(listoffilesdetect)
-#a1.detect()
+a1.addNewFiles(listoffilesdetect)
+a1.detect()
 
 #KMFC=Kmeans("fields","data/Classifiers/train1600KMeansfields.pkl","")
 #KMCC=Kmeans("combined","data/Classifiers/train1600KMeanscombined.pkl","")
@@ -562,4 +594,3 @@ a1.makeAndTrainAtsameTime()
 #a1=IDS([KMFC],[["data/DiffrentSamplingRates/detect/detect1600"]])
 #a1=IDS([RFEC,THC,KMFC,KMCC],[["data/DiffrentSamplingRates/detect/detect800"]])
 #a1.detect()
-"""

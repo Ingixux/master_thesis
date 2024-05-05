@@ -12,8 +12,8 @@ class RandomforestDetection:
         self.clf = None
         self.filepathOfClassifier= filepathOfClassifier
         self.filepathOfInput=filepathOfInput
-        if filepathOfClassifier !="":
-            self.loadClassfication()
+        #if filepathOfClassifier !="":
+        #    self.loadClassfication()
 
 
     def setFilepathOfClassifier(self, path):
@@ -30,6 +30,7 @@ class RandomforestDetection:
         self.name =self.classifier +self.typeOfFeatures
 
     def detect(self,arrayToDetect,isattack):
+        #print(arrayToDetect)
         return [self.clf.predict(arrayToDetect)[0],isattack]
         #return ["RandomForest",self.clf.predict(arrayToDetect)[0],isattack]
 
@@ -37,9 +38,11 @@ class RandomforestDetection:
         #dataSet=np.array(trainingSet)
         dataSet=np.array(trainingSet,dtype=np.float32)
         if self.typeOfFeatures== "fields":
-            Features=dataSet[:,:19]
-        else:
+            Features=dataSet[:,:16]
+        elif self.typeOfFeatures== "entropy":
             Features=dataSet[:,:-1]
+        else:
+            Features=dataSet[:,:-2]
         #Features=dataSet[:,2:-1]
         #labels=dataSet[:,-1]
         #print(Features)
@@ -76,14 +79,13 @@ class RandomforestDetection:
         #print(trainingSet)
         #print(x)
         dataSet=np.array(trainingSet)
+        #Features=dataSet[:,:-1]
         Features=dataSet[:,:-1]
-        #Features=dataSet[:,2:-1]
         labels=dataSet[:,-1]
         #print(Features)
         labels=labels.astype('int') 
         #print(Features)
         #print(labels)
-        #print(Features)
         self.clf=self.clf.fit(Features,labels)
         self.saveClassifier()
 
@@ -94,8 +96,8 @@ class RandomforestDetection:
         pickle.dump(self.clf, open(self.filepathOfClassifier, 'wb'))
     
     def makecopy(self):
-        randomforestDetection = RandomforestDetection(self.typeOfFeatures)
-        randomforestDetection.filepathOfClassifier =self.filepathOfClassifier
+        randomforestDetection = RandomforestDetection(self.typeOfFeatures,filepathOfClassifier=self.filepathOfClassifier)
+        #randomforestDetection.filepathOfClassifier =self.filepathOfClassifier
         randomforestDetection.filepathOfInput = self.filepathOfInput
         randomforestDetection.clf =self.clf 
         return randomforestDetection
