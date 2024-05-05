@@ -37,12 +37,15 @@ class RandomforestDetection:
     def trainWithinput(self,trainingSet,labels):
         #dataSet=np.array(trainingSet)
         #dataSet=np.array(trainingSet,dtype=np.float32)
-        dataSet=np.array(trainingSet)
+        #dataSet=np.array(trainingSet)
         if self.typeOfFeatures== "fields":
+            dataSet=np.array(trainingSet,dtype=np.float32)
             Features=dataSet[:,:16]
         elif self.typeOfFeatures== "entropy":
+            dataSet=np.array(trainingSet,dtype=object)
             Features=dataSet[:,:-1]
         else:
+            dataSet=np.array(trainingSet,dtype=np.float32)
             #Features=dataSet[:,:-2]
             Features=dataSet[:,:]
         #Features=dataSet[:,2:-1]

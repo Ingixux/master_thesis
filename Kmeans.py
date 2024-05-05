@@ -50,7 +50,10 @@ class Kmeans:
         #print(trainingSet)
         #dataSet=np.array(trainingSet)
         #dataSet=np.array(trainingSet,dtype=np.float32)
-        dataSet=np.array(trainingSet,dtype=object)
+
+        #dataSet=np.array(trainingSet,dtype=object)
+        
+        
         #for x in dataSet:
         #    print(x)
         #print(trainingSet[:,2:])
@@ -58,12 +61,15 @@ class Kmeans:
         #print(dataSet[-1])
         if self.typeOfFeatures== "fields":
             #print(dataSet[:])
+            dataSet=np.array(trainingSet,dtype=np.float32)
             Features=dataSet[:,:16]
             #print(Features)
             #Features=trainingSet[:,:19]
         elif self.typeOfFeatures== "entropy":
+            dataSet=np.array(trainingSet,dtype=object)
             Features=dataSet[:,:-1]
         else:
+            dataSet=np.array(trainingSet,dtype=np.float32)
             Features=dataSet[:,:]
             #Features=dataSet[:,:-2]
             #print(Features)

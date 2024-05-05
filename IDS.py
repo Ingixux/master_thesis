@@ -194,8 +194,8 @@ class IDS:
                 attaks=[data[-1]]
                 toPredict.append(data)
                 darecta=np.array(toPredict, dtype=object)
-                #Feature=np.array(darecta[:,2:18])
-                Feature=darecta[:,2:18]
+                Feature=np.array(darecta[:,2:18],dtype=np.float32)
+                #Feature=darecta[:,2:18]
                
             elif trainingClasses[0].typeOfFeatures == "entropy":
                 attaks=data[-2]
@@ -208,7 +208,9 @@ class IDS:
                 label=self.setIsAttack(data[-1])
                 toPredict.append(data)
                 darecta=np.array(toPredict, dtype=object)
+                #darecta=np.array(toPredict, dtype=object)
                 Feature=darecta[:,2:-2]
+                Feature=np.array(darecta[:,2:-2],dtype=np.float32)
                 #print(Feature)
                 #darecta=np.array(toPredict, dtype=np.float32)
                 #Feature=np.array(darecta[:,2:-2])
@@ -408,7 +410,14 @@ class IDS:
                                     labelsfeildsAndCombind.append(np.int8(self.setIsAttack(rec1[-1])))
                                     #feildsAndCombind.append(np.array(rec1, dtype=object))
                                     #feildsAndCombind.append(np.array(rec1[2:-2], dtype=np.float32))
-                                    feildsAndCombind.append(np.array(rec1[2:-2],  dtype=object))
+                                    
+                                    
+                                    #feildsAndCombind.append(np.array(rec1[2:-2],  dtype=object))
+                                    #print(sys.getsizeof(np.array(rec1[2:-2],  dtype=np.float32)))
+                                    #print(sys.getsizeof(np.array(rec1[2:-2],  dtype=object)))
+                                    feildsAndCombind.append(np.array(rec1[2:-2],  dtype=np.float32))
+                                    
+                                    
                                     #feildsAndCombind.append(rec1[0:-2]+[rec1[-1]])
                             if "threshold" in self.active:
                                 keyfilesave =keyfile+"threshold"
@@ -592,7 +601,7 @@ TH=Threshold("threshold","data/Classifiers/train1600threshold.pkl","")
 KMF=Kmeans("fields","data/Classifiers/train1600KMeansfields.pkl","")
 KME=Kmeans("entropy","data/Classifiers/train1600KMeansentropy.pkl","")
 KMC=Kmeans("combined","data/Classifiers/train1600KMeanscombined.pkl","")
-"""
+
 RFF=RandomforestDetection("fields","","")
 RFE=RandomforestDetection("entropy","","")
 RFC=RandomforestDetection("combined","","")
@@ -609,15 +618,16 @@ for smaplingrates in listofsmaplingrates:
     listoffilesdetect.append(["data/DiffrentSamplingRates/detect/detect"+smaplingrates])
 
 #a1=IDS([RFF,RFE,RFC,TH,KMF,KME,KMC],listoffilestrain)
-a1=IDS([RFE,TH,KMF,KME,KMC],listoffilestrain)
+#a1=IDS([RFE,TH,KMF,KME,KMC],listoffilestrain)
+a1=IDS([RFE,TH,KMF,KME,KMC],[["/media/sf_share/data/DiffrentSamplingRates/train/train100"]])
 #a1=IDS([RFF,KMC],listoffilestrain)
 #a1=IDS([RFE,TH,KMF,KME,KMC],[["/media/sf_share/data/DiffrentSamplingRates/train/train12800"]])
 a1.makeAndTrainAtsameTime()
 #a1.makeTraingData()#TODO make a fucntion that can make and train at the same time, this will remove traning files before the next once are created
 #a1.train()
 #a1.removeTrainingFiles()
-a1.addNewFiles(listoffilesdetect)
-#a1.addNewFiles([["/media/sf_share/data/DiffrentSamplingRates/detect/detect12800"]])
+#a1.addNewFiles(listoffilesdetect)
+a1.addNewFiles([["/media/sf_share/data/DiffrentSamplingRates/detect/detect100"]])
 a1.detect()
 
 #KMFC=Kmeans("fields","data/Classifiers/train1600KMeansfields.pkl","")
@@ -628,3 +638,4 @@ a1.detect()
 #a1=IDS([KMFC],[["data/DiffrentSamplingRates/detect/detect1600"]])
 #a1=IDS([RFEC,THC,KMFC,KMCC],[["data/DiffrentSamplingRates/detect/detect800"]])
 #a1.detect()
+"""

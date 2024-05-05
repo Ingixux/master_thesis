@@ -12,8 +12,8 @@ from Kmeans import Kmeans
 print(datetime.datetime.now())
 
 startoffile="/media/sf_share/" #TODO this needs to fit with Sikt
-#systemid="oslo"
-systemid="eplemost"
+systemid="oslo"
+#systemid="eplemost"
 inorout="out"
 
 #TODO these needs to fit with the dates I want
