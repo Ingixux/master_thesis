@@ -15,7 +15,7 @@ class Threshold:
                                            "totalBytes":0,"totalpackets":0,"totalicmp":0,"totalicmprate":0}
         self.filepathOfClassifier= filepathOfClassifier
         self.filepathOfInput=filepathOfInput
-        self.r =6
+        self.r =3
         #self.r =1
         if filepathOfClassifier !="":
             self.loadClassfication()
