@@ -620,7 +620,7 @@ for smaplingrates in listofsmaplingrates:
 
 #a1=IDS([RFF,RFE,RFC,TH,KMF,KME,KMC],listoffilestrain)
 #a1=IDS([RFE,TH,KMF,KME,KMC],listoffilestrain)
-a1=IDS([RFE,TH,KMF,KME,KMC],[["/media/sf_share/data/DiffrentSamplingRates/train/train100"]])
+a1=IDS([RFE,RFF,RFC,TH,KMF,KME,KMC],[["/media/sf_share/data/DiffrentSamplingRates/train/train12800"]])
 #a1=IDS([RFF,KMC],listoffilestrain)
 #a1=IDS([RFE,TH,KMF,KME,KMC],[["/media/sf_share/data/DiffrentSamplingRates/train/train12800"]])
 a1.makeAndTrainAtsameTime()
@@ -628,7 +628,7 @@ a1.makeAndTrainAtsameTime()
 #a1.train()
 #a1.removeTrainingFiles()
 #a1.addNewFiles(listoffilesdetect)
-a1.addNewFiles([["/media/sf_share/data/DiffrentSamplingRates/detect/detect100"]])
+a1.addNewFiles([["/media/sf_share/data/DiffrentSamplingRates/detect/detect12800"]])
 a1.detect()
 
 #KMFC=Kmeans("fields","data/Classifiers/train1600KMeansfields.pkl","")
