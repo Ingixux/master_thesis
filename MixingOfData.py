@@ -93,7 +93,7 @@ class MixingOfData:
         for chaningOfSamplingRate in self.dicOfFileOutput.values():
             #namOupFile= inputFile1.split("/")[-1] 
             #TODO This doesn't handle chaningOfSamplingRate with same samplingrate
-            pathToFile ="/media/sf_share/data/DiffrentSamplingRates/"+outputTraniOrDetect+"/"+outputTraniOrDetect+str(chaningOfSamplingRate[0].maxpackets)
+            pathToFile ="data/DiffrentSamplingRates/"+outputTraniOrDetect+"/"+outputTraniOrDetect+str(chaningOfSamplingRate[0].maxpackets)
             #pathToFile ="data/DiffrentSamplingRates/"+outputTraniOrDetect+"/"+outputTraniOrDetect+str(chaningOfSamplingRate[0].maxpackets)
             if os.path.isfile(pathToFile):
                 os.remove(pathToFile)
