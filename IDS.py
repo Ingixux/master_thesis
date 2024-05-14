@@ -175,9 +175,9 @@ class IDS:
         toSave=[]
         #print(data)
         if trainingClasses[0].typeOfFeatures =="threshold":
+            attaks=data["isAtttack"]
             data["isAtttack"]=self.setIsAttack(data["isAtttack"][0])
             toSave=trainingClasses[0].detect(data,data["isAtttack"])
-            attaks=data["isAtttack"]
             time=data["currenttime"]
         else:
             toPredict=[]
