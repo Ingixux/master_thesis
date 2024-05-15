@@ -114,7 +114,7 @@ class IDS:
                     else:
                         trainingClasses[2]=open("data/Classifiers/result/"+nameoffile+trainingClasses[0].name+".npy", "wb")
                 if trainingClasses[0].name=="threshold" and self.fileAggregatedData ==None:
-                    self.fileAggregatedData=open("data/Classifiers/result/fileAggregatedData.npy", "wb")
+                    self.fileAggregatedData=open("data/Classifiers/result/"+nameoffile+"fileAggregatedData.npy", "wb")
 
         
     def createfilesToSaveTo(self):
