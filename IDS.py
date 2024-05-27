@@ -469,6 +469,7 @@ class IDS:
                         for trainingClasses in self.dicOfFileOutput.values():  
                             if trainingClasses[1]==keyfile:
                                 if trainingClasses[0].typeOfFeatures =="threshold":
+                                    self.doDetectionOnData(self.dicOfSlidingWindow[keyfile].findThreasholds(True),trainingClasses)
                                     self.saveAggregatedDatTofile(self.dicOfSlidingWindow[keyfile].getcurrentvaules()) 
                                 elif len(toadd) !=0:
                                     #print(len(toadd))

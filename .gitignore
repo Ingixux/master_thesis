@@ -4,6 +4,7 @@ data/SilkFilesFromSikt/*
 data/MixDatasets/*
 data/DiffrentSamplingRates/detect/*
 data/DiffrentSamplingRates/train/*
+data/result/*
 transferfiles.py
 copingTomachine.py
 readfile.py
