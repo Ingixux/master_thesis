@@ -49,7 +49,7 @@ class IDS:
         This saves the result of the cassifiing, in the format:
             name of method used, prediction result, label, which attack are present, time of the record
     """
-    def __init__(self, listOfTrainingClasses,listOfPathToSilkFiles,standertimes=[120,600,1200]):#standertimes=[3,15,30]
+    def __init__(self, listOfTrainingClasses,listOfPathToSilkFiles,standertimes=[1200,6000,12000]):#standertimes=[3,15,30]
         self.x=0
         self.listOfPathToSilkFiles=listOfPathToSilkFiles
         self.listOfTrainingClasses=listOfTrainingClasses
@@ -444,42 +444,42 @@ class IDS:
                                         self.doDetectionOnData(self.dicOfSlidingWindow[keyfile].findThreasholds(False),trainingClasses)
                                         self.saveAggregatedDatTofile(self.dicOfSlidingWindow[keyfile].getcurrentvaules())                               
                 infile.close()                       
-                if "entropy" in self.active or "combined" in self.active or "threshold" in self.active:
-                    toadd=self.dicOfSlidingWindow[keyfile].doCalculation(True)
-                    if detectortrain=="train":
-                        if "threshold" in self.active:
-                            keyfilesave =keyfile+"threshold"
-                            self.saveDataTofile(self.dicOftraningfiletosave[keyfilesave],self.dicOfSlidingWindow[keyfile].getcurrentvaules(),"threshold")
-                        if "entropy" in self.active and len(toadd) !=0:
-                            keyfilesave =keyfile+"entropy"
-                            #self.saveDataTofile(self.dicOftraningfiletosave[keyfilesave],toadd[0][0:2]+toadd[0][18:-2]+[toadd[0][-2]],"entropy")
-                            self.saveDataTofile(self.dicOftraningfiletosave[keyfilesave],toadd[0][18:-2]+[toadd[0][-2][0]],"entropy")
+            if "entropy" in self.active or "combined" in self.active or "threshold" in self.active:
+                toadd=self.dicOfSlidingWindow[keyfile].doCalculation(True)
+                if detectortrain=="train":
+                    if "threshold" in self.active:
+                        keyfilesave =keyfile+"threshold"
+                        self.saveDataTofile(self.dicOftraningfiletosave[keyfilesave],self.dicOfSlidingWindow[keyfile].getcurrentvaules(),"threshold")
+                    if "entropy" in self.active and len(toadd) !=0:
+                        keyfilesave =keyfile+"entropy"
+                        #self.saveDataTofile(self.dicOftraningfiletosave[keyfilesave],toadd[0][0:2]+toadd[0][18:-2]+[toadd[0][-2]],"entropy")
+                        self.saveDataTofile(self.dicOftraningfiletosave[keyfilesave],toadd[0][18:-2]+[toadd[0][-2][0]],"entropy")
 
-                        if "combined" in self.active and len(toadd) !=0:
-                            #keyfilesave = keyfile+"combined"
-                            for r in toadd:
-                                #feildsAndCombind.append(r[0:-2]+[r[-1]])
-                                labelsfeildsAndCombind.append(np.int8(self.setIsAttack(r[-1])))
-                                #feildsAndCombind.append(np.array(rec1[0:-2], dtype=np.float32))
-                                feildsAndCombind.append(np.array(rec1[2:-2], dtype=object))
-                                
-                                #feildsAndCombind.append(np.array(r[0:-2]+[r[-1]], dtype=object))
-                                #self.saveDataTofile(self.dicOftraningfiletosave[keyfilesave],r[0:-2]+[r[-1]],"combined")    
-                    else:
-                        for trainingClasses in self.dicOfFileOutput.values():  
-                            if trainingClasses[1]==keyfile:
-                                if trainingClasses[0].typeOfFeatures =="threshold":
-                                    self.doDetectionOnData(self.dicOfSlidingWindow[keyfile].findThreasholds(True),trainingClasses)
-                                    self.saveAggregatedDatTofile(self.dicOfSlidingWindow[keyfile].getcurrentvaules()) 
-                                elif len(toadd) !=0:
-                                    #print(len(toadd))
-                                    if trainingClasses[0].typeOfFeatures =="entropy":
-                                        self.doDetectionOnData(toadd[0][0:2]+toadd[0][18:],trainingClasses)
-                                        #self.doDetectionOnData(toadd[0][0:2]+toadd[0][18:-2]+[toadd[0][-2]],trainingClasses)
-                                    elif trainingClasses[0].typeOfFeatures =="combined":
-                                        for r in toadd:
-                                            #self.doDetectionOnData(r[0:-2]+[r[-1]],trainingClasses)
-                                            self.doDetectionOnData(r,trainingClasses)
+                    if "combined" in self.active and len(toadd) !=0:
+                        #keyfilesave = keyfile+"combined"
+                        for r in toadd:
+                            #feildsAndCombind.append(r[0:-2]+[r[-1]])
+                            labelsfeildsAndCombind.append(np.int8(self.setIsAttack(r[-1])))
+                            #feildsAndCombind.append(np.array(rec1[0:-2], dtype=np.float32))
+                            feildsAndCombind.append(np.array(rec1[2:-2], dtype=object))
+                            
+                            #feildsAndCombind.append(np.array(r[0:-2]+[r[-1]], dtype=object))
+                            #self.saveDataTofile(self.dicOftraningfiletosave[keyfilesave],r[0:-2]+[r[-1]],"combined")    
+                else:
+                    for trainingClasses in self.dicOfFileOutput.values():  
+                        if trainingClasses[1]==keyfile:
+                            if trainingClasses[0].typeOfFeatures =="threshold":
+                                self.doDetectionOnData(self.dicOfSlidingWindow[keyfile].findThreasholds(True),trainingClasses)
+                                self.saveAggregatedDatTofile(self.dicOfSlidingWindow[keyfile].getcurrentvaules()) 
+                            elif len(toadd) !=0:
+                                #print(len(toadd))
+                                if trainingClasses[0].typeOfFeatures =="entropy":
+                                    self.doDetectionOnData(toadd[0][0:2]+toadd[0][18:],trainingClasses)
+                                    #self.doDetectionOnData(toadd[0][0:2]+toadd[0][18:-2]+[toadd[0][-2]],trainingClasses)
+                                elif trainingClasses[0].typeOfFeatures =="combined":
+                                    for r in toadd:
+                                        #self.doDetectionOnData(r[0:-2]+[r[-1]],trainingClasses)
+                                        self.doDetectionOnData(r,trainingClasses)
             if keyfile in self.dicOfSlidingWindow.keys():
                 #print(self.dicOfSlidingWindow[keyfile].x)
                 self.dicOfSlidingWindow[keyfile] = SlidingWindow(self.standertimes[0],self.standertimes[1],self.standertimes[2],False)

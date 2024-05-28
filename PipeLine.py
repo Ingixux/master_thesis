@@ -253,7 +253,7 @@ listofattackfilesdetect=["data/ModifiedAttackFiles/slowread40","data/ModifiedAtt
 start=Folderpathstructure(inorout,systemid,trafficpatternStart[0],trafficpatternStart[1],trafficpatternStart[2],startoffile)
 end=Folderpathstructure(inorout,systemid,traningDaysEnd[0],traningDaysEnd[1],traningDaysEnd[2],startoffile)
 ff=FindFiles(start,end)
-MD = MixingOfData(listSamplingratesToMake,listofattackfilestrain,ff.findallfiles(),[sa1,sa2],"train")
+MDtrain = MixingOfData(listSamplingratesToMake,listofattackfilestrain,ff.findallfiles(),[sa1,sa2],"train")
 print("Traning mixed")
 print(datetime.datetime.now())
 #detect
@@ -261,19 +261,19 @@ start=Folderpathstructure(inorout,systemid,detectDaysStart[0],detectDaysStart[1]
 end=Folderpathstructure(inorout,systemid,detectDaysEnd[0],detectDaysEnd[1],detectDaysEnd[2],startoffile)
 ff=FindFiles(start,end)
 
-MD = MixingOfData(listSamplingratesToMake,listofattackfilesdetect,ff.findallfiles(),[sa1,sa2],"detect")
+MDdetect = MixingOfData(listSamplingratesToMake,listofattackfilesdetect,ff.findallfiles(),[sa1,sa2],"detect")
 
 print("detecting mixed")
 
 print(datetime.datetime.now())
 
-RFF=RandomforestDetection("fields","","")
-RFE=RandomforestDetection("entropy","","")
-RFC=RandomforestDetection("combined","","")
-TH=Threshold("threshold","","")
-KMF=Kmeans("fields","","")
-KME=Kmeans("entropy","","")
-KMC=Kmeans("combined","","")
+RFf=RandomforestDetection("fields","","")
+RFe=RandomforestDetection("entropy","","")
+RFc=RandomforestDetection("combined","","")
+Th=Threshold("threshold","","")
+KMf=Kmeans("fields","","")
+KMe=Kmeans("entropy","","")
+KMc=Kmeans("combined","","")
 
 listoffilestrain=[]
 listoffilesdetect=[]
@@ -281,7 +281,7 @@ for smaplingrates in listSamplingratesToMake:
     listoffilestrain.append([startoffile+"data/DiffrentSamplingRates/train/train"+str(smaplingrates.maxpackets)])
     listoffilesdetect.append([startoffile+"data/DiffrentSamplingRates/detect/detect"+str(smaplingrates.maxpackets)])
 
-a1=IDS([RFF,RFE,RFC,TH,KMF,KME,KMC],listoffilestrain)
+a1=IDS([RFf,RFe,RFc,Th,KMf,KMe,KMc],listoffilestrain)
 
 
 
