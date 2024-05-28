@@ -11,7 +11,7 @@ from Kmeans import Kmeans
 
 print(datetime.datetime.now())
 
-startoffile="/media/sf_share/" #TODO this needs to fit with Sikt
+startoffile="~/ingebret-dump/" #TODO this needs to fit with Sikt
 systemid="oslo"
 #systemid="eplemost"
 inorout="out"
@@ -33,8 +33,13 @@ start=Folderpathstructure(inorout,systemid,trafficpatternStart[0],trafficpattern
 end=Folderpathstructure(inorout,systemid,trafficpatternEnd[0],trafficpatternEnd[1],trafficpatternEnd[2],startoffile)
 
 ff=FindFiles(start,end)
-GT=GetTrafficPattern(ff.findallfiles())
-choseDip, choseSip=GT.movetroughthefiles(500,320,32)
+
+filetrain=["~/ingebret-dump/oslo/out/2024/02/19/all","~/ingebret-dump/oslo/out/2024/02/20/all"]
+filedetect=["~/ingebret-dump/oslo/out/2024/02/26/all","~/ingebret-dump/oslo/out/2024/02/27/all"]
+#GT=GetTrafficPattern(ff.findallfiles())
+GT=GetTrafficPattern(filetrain)
+
+choseDip, choseSip=GT.movetroughthefiles(320,100,32)
 nexthopip ={}
 for ip in choseDip:
     nexthopip[ip]=GT.getnexthopip("destinationIP",choseDip)
@@ -234,8 +239,6 @@ listSamplingratesToMake=[]
 for samplingrate in samplingratesToMake:
     listSamplingratesToMake.append(SamplingRate(samplingrate))
 
-
-
 listofattackfilestrain=["data/ModifiedAttackFiles/slowread30","data/ModifiedAttackFiles/udpflood10","data/ModifiedAttackFiles/pingflood10",
     "data/ModifiedAttackFiles/slowloris30","data/ModifiedAttackFiles/udpflood30","data/ModifiedAttackFiles/xmas30",
     "data/ModifiedAttackFiles/blacknurse30","data/ModifiedAttackFiles/slowread10","data/ModifiedAttackFiles/ruby10",
@@ -253,7 +256,8 @@ listofattackfilesdetect=["data/ModifiedAttackFiles/slowread40","data/ModifiedAtt
 start=Folderpathstructure(inorout,systemid,trafficpatternStart[0],trafficpatternStart[1],trafficpatternStart[2],startoffile)
 end=Folderpathstructure(inorout,systemid,traningDaysEnd[0],traningDaysEnd[1],traningDaysEnd[2],startoffile)
 ff=FindFiles(start,end)
-MDtrain = MixingOfData(listSamplingratesToMake,listofattackfilestrain,ff.findallfiles(),[sa1,sa2],"train")
+#MDtrain = MixingOfData(listSamplingratesToMake,listofattackfilestrain,ff.findallfiles(),[sa1,sa2],"train")
+MDtrain = MixingOfData(listSamplingratesToMake,listofattackfilestrain,filetrain,[sa1,sa2],"train")
 print("Traning mixed")
 print(datetime.datetime.now())
 #detect
@@ -261,7 +265,8 @@ start=Folderpathstructure(inorout,systemid,detectDaysStart[0],detectDaysStart[1]
 end=Folderpathstructure(inorout,systemid,detectDaysEnd[0],detectDaysEnd[1],detectDaysEnd[2],startoffile)
 ff=FindFiles(start,end)
 
-MDdetect = MixingOfData(listSamplingratesToMake,listofattackfilesdetect,ff.findallfiles(),[sa1,sa2],"detect")
+#MDdetect = MixingOfData(listSamplingratesToMake,listofattackfilesdetect,ff.findallfiles(),[sa1,sa2],"detect")
+MDdetect = MixingOfData(listSamplingratesToMake,listofattackfilesdetect,filedetect,[sa1,sa2],"detect")
 
 print("detecting mixed")
 
