@@ -1,9 +1,15 @@
 data/GenratedAttacks/*
-data/ModifiedAttackFiles/*
+!data/GenratedAttacks/.gitignore
 data/SilkFilesFromSikt/*
-data/MixDatasets/*
+!data/SilkFilesFromSikt/.gitignore
 data/DiffrentSamplingRates/detect/*
+!data/DiffrentSamplingRates/detect/.gitignore
 data/DiffrentSamplingRates/train/*
+!data/DiffrentSamplingRates/train/.gitignore
+data/Classifiers/*
+!data/Classifiers/result/.gitignore
+data/ModifiedAttackFiles/*
+!data/ModifiedAttackFiles/.gitignore
 transferfiles.py
 copingTomachine.py
 keyklassier.pem
