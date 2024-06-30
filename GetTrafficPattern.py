@@ -97,13 +97,14 @@ class GetTrafficPattern:
         if numberOfSetsSips>=len(listIPS):
             choseIps=listIPS
         else:
-            while len(choseIps) <numberOfSetsSips:
-                tempIp=self.selectDip(listIPS)
-                if tempIp not in choseIps:
-                    choseIps.append(tempIp)
-                    for ips in listIPS:
-                        if tempIp == ips[1]:
-                            listIPS.remove(ips)
+            choseIps=listIPS[0:numberOfSetsSips]
+            #while len(choseIps) <numberOfSetsSips:
+            #    tempIp=self.selectDip(listIPS)
+            #    if tempIp not in choseIps:
+            #        choseIps.append(tempIp)
+            #        for ips in listIPS:
+            #            if tempIp == ips[1]:
+            #                listIPS.remove(ips)
         return choseIps 
 
     def selectDip(self,listofip):

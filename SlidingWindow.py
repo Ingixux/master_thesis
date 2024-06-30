@@ -19,7 +19,7 @@ class SlidingWindow:
                                            "entropyBiflowSyn":0,"entropySipSyn":0,"entropyDipSyn":0,"entropyBiflow":0,"entropyRateBiflow":0,
                                            "HigstNumberOfSyn":0,"HigstNumberOfURGPSHFIN":0,"countBiflow":0,"totalicmpDUnreachable":0,
                                            "totalBytes":0,"totalpackets":0,"totalicmp":0,"totalicmprate":0,"isAtttack":[0],"totalflows":0}
-        self.aggregate_window={"currentTime":0,"earlistTime":0,"interval":datetime.timedelta(microseconds=aggregate_window_duration*50000),"vaules":[]}
+        self.aggregate_window={"currentTime":0,"earlistTime":0,"interval":datetime.timedelta(microseconds=sliding_window_interval*50000),"vaules":[]}
         #self.comparison_window={"currentTime":0,"currentRecs":[],"earlistTime":0,"interval":comparison_window_interval,"vaules":[]}
         #TODO compare the current vaule to the avgarge of the diffrent vaules, that is in the comparison_window
         self.comparison_window={"vaules":[],"interval":datetime.timedelta(microseconds=comparison_window_interval*50000)}

@@ -282,42 +282,42 @@ def readandgetresultthreshold(file):
                         if element[1]==1:
                             threshold[key[0]]["Attackcorrect"]+=1
                             if element[2][0] == 32533:
-                                threshold[key[0]]["attacks"]["slowread"]["Attackcorrect"]+=1
+                                threshold[key[0]]["slowread"]["Attackcorrect"]+=1
                             elif element[2][0] == 32534:
-                                threshold[key[0]]["attacks"]["slowloris"]["Attackcorrect"]+=1
+                                threshold[key[0]]["slowloris"]["Attackcorrect"]+=1
                             elif element[2][0] == 32535:
-                                threshold[key[0]]["attacks"]["ruby"]["Attackcorrect"]+=1
+                                threshold[key[0]]["ruby"]["Attackcorrect"]+=1
                             elif element[2][0] == 32531:
-                                threshold[key[0]]["attacks"]["pingflood"]["Attackcorrect"]+=1
+                                threshold[key[0]]["pingflood"]["Attackcorrect"]+=1
                             elif element[2][0] == 32532:
-                                threshold[key[0]]["attacks"]["blacknurse"]["Attackcorrect"]+=1
+                                threshold[key[0]]["blacknurse"]["Attackcorrect"]+=1
                             elif element[2][0] == 32536:
-                                threshold[key[0]]["attacks"]["xmas"]["Attackcorrect"]+=1
+                                threshold[key[0]]["xmas"]["Attackcorrect"]+=1
                             elif element[2][0] == 32537:
-                                threshold[key[0]]["attacks"]["udpflood"]["Attackcorrect"]+=1
+                                threshold[key[0]]["udpflood"]["Attackcorrect"]+=1
                             elif element[2][0] == 32538:
-                                threshold[key[0]]["attacks"]["synflood"]["Attackcorrect"]+=1
+                                threshold[key[0]]["synflood"]["Attackcorrect"]+=1
                         else:
                             threshold[key[0]]["normalcorrect"]+=1
                     else:
                         if element[1]==1:
                             threshold[key[0]]["Attackwrong"]+=1
                             if element[2][0] == 32533:
-                                threshold[key[0]]["attacks"]["slowread"]["Attackwrong"]+=1
+                                threshold[key[0]]["slowread"]["Attackwrong"]+=1
                             elif element[2][0] == 32534:
-                                threshold[key[0]]["attacks"]["slowloris"]["Attackwrong"]+=1
+                                threshold[key[0]]["slowloris"]["Attackwrong"]+=1
                             elif element[2][0] == 32535:
-                                threshold[key[0]]["attacks"]["ruby"]["Attackwrong"]+=1
+                                threshold[key[0]]["ruby"]["Attackwrong"]+=1
                             elif element[2][0] == 32531:
-                                threshold[key[0]]["attacks"]["pingflood"]["Attackwrong"]+=1
+                                threshold[key[0]]["pingflood"]["Attackwrong"]+=1
                             elif element[2][0] == 32532:
-                                threshold[key[0]]["attacks"]["blacknurse"]["Attackwrong"]+=1
+                                threshold[key[0]]["blacknurse"]["Attackwrong"]+=1
                             elif element[2][0] == 32536:
-                                threshold[key[0]]["attacks"]["xmas"]["Attackwrong"]+=1
+                                threshold[key[0]]["xmas"]["Attackwrong"]+=1
                             elif element[2][0] == 32537:
-                                threshold[key[0]]["attacks"]["udpflood"]["Attackwrong"]+=1
+                                threshold[key[0]]["udpflood"]["Attackwrong"]+=1
                             elif element[2][0] == 32538:
-                                threshold[key[0]]["attacks"]["synflood"]["Attackwrong"]+=1
+                                threshold[key[0]]["synflood"]["Attackwrong"]+=1
                         else:
                             threshold[key[0]]["normalwrong"]+=1
         except (pickle.UnpicklingError, EOFError): #TODO This is not optimal, entropy and fleids create diffrent EOFError
@@ -341,7 +341,6 @@ def readandgetresultthreshold(file):
             print()
         
 
-
 def readresult(file):
     total=0
     trainingSet=[]
@@ -356,20 +355,21 @@ def readresult(file):
             pass
     dataSet=np.array(trainingSet)
     return dataSet, total
-sampings=[100,400,800,1600,3200,6400,12800]
-#sampings=[100]
+    
+
+#sampings=[100,400,800,1600,3200,6400,12800]
+#sampings=[800,1600,3200,6400,12800]
+sampings=[1600]
 filesnormal=[]
 filethreshold=[]
-metods=["KMeansentropy", "KMeanscombined","KMeansfields", "RandomForestentropy", "RandomForestcombined","RandomForestfields", "threshold"]
+#metods=["KMeansentropy", "KMeanscombined","KMeansfields", "RandomForestentropy", "RandomForestcombined","RandomForestfields", "threshold"]
 #metods=["KMeansentropy", "KMeanscombined","KMeansfields", "RandomForestentropy", "RandomForestcombined","RandomForestfields"]
+#metods=["KMeansentropy","threshold"]
+metods=["KMeanscombined","KMeansentropy","threshold","RandomForestentropy","RandomForestcombined"]
 #metods=["KMeansentropy"]
-#metods=["threshold","RandomForestentropy","KMeansentropy"]
 #startfile="E:\master/data/result/detect"
-#startfile="data/Classifiers/result/detect"
-startfile="/home/ingix/Documents/master_thesis-ReadyTORUN/data/Classifiers/result/detect"
-#savefolder="/media/sf_share/data/result/"
-savefolder="/home/ingix/Documents/master_thesis-ReadyTORUN/data/result/"
-
+startfile="E:\share\data\Classifiers\\result\\detect"
+savefolder="E:\master\\"
 
 result={}
 for rate in sampings:
@@ -387,13 +387,12 @@ for file in filesnormal:
 for filetre in filethreshold:
     #result.append([readandgetresultthreshold(filetre[0],file[1],file[2]),file[1],file[2]])
     result[str(filetre[2])][filetre[1]]=readandgetresultthreshold(filetre[0])
-with open(savefolder+"resultdel1.csv", 'w', newline='') as myfile:
+with open(savefolder+"resultnr2.csv", 'w', newline='') as myfile:
     wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
     for rate in result.keys():
         for metod, methodresult in result[rate].items():
             if metod == "threshold":
                 for thresholdmetod, vaule in methodresult.items():
-
                     row=[rate,thresholdmetod,"total",vaule["Attackcorrect"],vaule["normalcorrect"],vaule["Attackwrong"],vaule["normalwrong"]]
                     wr.writerow(row)
                     row=[] 
